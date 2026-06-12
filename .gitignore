@@ -1,0 +1,50 @@
+# Dependencies
+node_modules/
+mobile/node_modules/
+
+# Build outputs
+backend/target/
+mobile/android/build/
+mobile/android/.gradle/
+mobile/ios/build/
+mobile/ios/Pods/
+mobile/ios/DerivedData/
+
+# Android local files
+mobile/android/local.properties
+mobile/android/app/google-services.json
+mobile/ios/GoogleService-Info.plist
+
+# Environment / secrets
+*.env
+.env.*
+backend/src/main/resources/application-prod.yml
+backend/src/main/resources/firebase-service-account.json
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Coverage
+coverage/
+
+# Temp
+.claude/
+*.pptx
+*.pdf
+
+# Gradle
+.gradle/

@@ -1,0 +1,67 @@
+package com.ooumitra.controller;
+
+import com.ooumitra.entity.User;
+import com.ooumitra.enums.Language;
+import com.ooumitra.repository.UserRepository;
+import com.ooumitra.util.ApiResponse;
+import com.ooumitra.util.SecurityUtils;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/users")
+@RequiredArgsConstructor
+@Tag(name = "User Profile")
+public class UserController {
+
+    private final UserRepository userRepo;
+
+    @GetMapping("/profile")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getProfile() {
+        User user = SecurityUtils.currentUser();
+        return ResponseEntity.ok(ApiResponse.ok(Map.of(
+                "id", user.getId(),
+                "firstName", user.getFirstName(),
+                "lastName", user.getLastName(),
+                "mobileNumber", user.getMobileNumber(),
+                "email", user.getEmail() != null ? user.getEmail() : "",
+                "gender", user.getGender() != null ? user.getGender() : "",
+                "role", user.getRole().name(),
+                "language", user.getLanguage().name(),
+                "profilePhotoUrl", user.getProfilePhotoUrl() != null ? user.getProfilePhotoUrl() : "",
+                "village", user.getVillage() != null ? user.getVillage() : ""
+        )));
+    }
+
+    @PutMapping("/profile")
+    public ResponseEntity<ApiResponse<Void>> updateProfile(@RequestBody Map<String, String> body) {
+        User user = SecurityUtils.currentUser();
+        if (body.containsKey("firstName")) user.setFirstName(body.get("firstName"));
+        if (body.containsKey("lastName")) user.setLastName(body.get("lastName"));
+        if (body.containsKey("email")) user.setEmail(body.get("email"));
+        if (body.containsKey("gender")) user.setGender(body.get("gender"));
+        if (body.containsKey("village")) user.setVillage(body.get("village"));
+        userRepo.save(user);
+        return ResponseEntity.ok(ApiResponse.ok("Profile updated"));
+    }
+
+    @PatchMapping("/fcm-token")
+    public ResponseEntity<ApiResponse<Void>> updateFcmToken(@RequestBody Map<String, String> body) {
+        User user = SecurityUtils.currentUser();
+        user.setFcmToken(body.get("fcmToken"));
+        userRepo.save(user);
+        return ResponseEntity.ok(ApiResponse.ok("FCM token updated"));
+    }
+
+    @PatchMapping("/language")
+    public ResponseEntity<ApiResponse<Void>> updateLanguage(@RequestBody Map<String, String> body) {
+        User user = SecurityUtils.currentUser();
+        user.setLanguage(Language.valueOf(body.get("language")));
+        userRepo.save(user);
+        return ResponseEntity.ok(ApiResponse.ok("Language updated"));
+    }
+}

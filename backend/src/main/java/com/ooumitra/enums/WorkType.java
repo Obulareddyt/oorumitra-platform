@@ -1,0 +1,18 @@
+package com.ooumitra.enums;
+
+public enum WorkType {
+    HARVESTING,
+    PLANTING,
+    CONSTRUCTION,
+    MASON_WORK,
+    PAINTING,
+    PLUMBING,
+    ELECTRICAL,
+    CARPENTER,
+    BOREWELL_WORK,
+    ROAD_WORK,
+    CLEANING,
+    LOADING_UNLOADING,
+    AGRICULTURE_WORK,
+    OTHERS
+}

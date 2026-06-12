@@ -1,0 +1,48 @@
+package com.ooumitra.controller;
+
+import com.ooumitra.dto.request.LoginRequest;
+import com.ooumitra.dto.request.OtpRequest;
+import com.ooumitra.dto.request.RegisterRequest;
+import com.ooumitra.dto.response.AuthResponse;
+import com.ooumitra.service.AuthService;
+import com.ooumitra.util.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/auth")
+@RequiredArgsConstructor
+@Tag(name = "Authentication")
+public class AuthController {
+
+    private final AuthService authService;
+
+    @PostMapping("/send-otp")
+    @Operation(summary = "Send OTP to mobile number")
+    public ResponseEntity<ApiResponse<Void>> sendOtp(@Valid @RequestBody OtpRequest req) {
+        authService.sendOtp(req.getMobileNumber());
+        return ResponseEntity.ok(ApiResponse.ok("OTP sent successfully"));
+    }
+
+    @PostMapping("/register")
+    @Operation(summary = "Register new user with OTP verification")
+    public ResponseEntity<ApiResponse<AuthResponse>> register(@Valid @RequestBody RegisterRequest req) {
+        return ResponseEntity.ok(ApiResponse.ok(authService.register(req)));
+    }
+
+    @PostMapping("/login")
+    @Operation(summary = "Login with OTP")
+    public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest req) {
+        return ResponseEntity.ok(ApiResponse.ok(authService.loginWithOtp(req.getMobileNumber(), req.getOtp())));
+    }
+
+    @PostMapping("/refresh")
+    @Operation(summary = "Refresh access token")
+    public ResponseEntity<ApiResponse<AuthResponse>> refresh(@RequestParam String refreshToken) {
+        return ResponseEntity.ok(ApiResponse.ok(authService.refreshToken(refreshToken)));
+    }
+}
