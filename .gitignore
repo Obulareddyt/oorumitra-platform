@@ -13,7 +13,9 @@ mobile/ios/DerivedData/
 # Android local files
 mobile/android/local.properties
 mobile/android/app/google-services.json
+mobile/android/app/release.keystore
 mobile/ios/GoogleService-Info.plist
+# debug.keystore is intentionally committed (not secret)
 
 # Environment / secrets
 *.env
