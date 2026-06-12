@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OoruMitra icon foreground: white village-house silhouette
+  108x108dp canvas with 18dp safe zone on all sides (72dp visible)
+  House: roof triangle + body + arched door + two windows + sun dot
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Sun / location dot above house -->
+    <path
+        android:fillColor="#B9F6CA"
+        android:pathData="M54,26 m-7,0 a7,7,0,1,0,14,0 a7,7,0,1,0,-14,0" />
+
+    <!-- Roof (triangle) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,38 L22,60 L86,60 Z" />
+
+    <!-- House body -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M28,60 L28,86 L80,86 L80,60 Z" />
+
+    <!-- Door (arched, green) -->
+    <path
+        android:fillColor="#1B5E20"
+        android:pathData="M46,86 L46,72 Q54,66 62,72 L62,86 Z" />
+
+    <!-- Left window -->
+    <path
+        android:fillColor="#1B5E20"
+        android:pathData="M33,65 L33,76 L43,76 L43,65 Z" />
+
+    <!-- Right window -->
+    <path
+        android:fillColor="#1B5E20"
+        android:pathData="M65,65 L65,76 L75,76 L75,65 Z" />
+
+</vector>
