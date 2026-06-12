@@ -1,0 +1,58 @@
+databases:
+  - name: oorumitra-db
+    databaseName: oorumitra
+    user: oorumitra
+    plan: free
+
+services:
+  - type: web
+    name: oorumitra-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    healthCheckPath: /actuator/health
+    envVars:
+      # Database — Render injects jdbcConnectionString automatically
+      - key: DB_URL
+        fromDatabase:
+          name: oorumitra-db
+          property: jdbcConnectionString
+      - key: DB_USERNAME
+        fromDatabase:
+          name: oorumitra-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: oorumitra-db
+          property: password
+
+      # JWT — auto-generated secure secret
+      - key: JWT_SECRET
+        generateValue: true
+
+      # OTP — set these in the Render dashboard after deploy
+      - key: MSG91_AUTH_KEY
+        sync: false
+      - key: MSG91_TEMPLATE_ID
+        sync: false
+
+      # Google Maps
+      - key: GOOGLE_MAPS_API_KEY
+        sync: false
+
+      # AWS S3
+      - key: AWS_ACCESS_KEY
+        sync: false
+      - key: AWS_SECRET_KEY
+        sync: false
+      - key: AWS_REGION
+        value: ap-south-1
+      - key: AWS_BUCKET
+        value: ooumitra-media
+      - key: AWS_CDN_URL
+        sync: false
+
+      # Firebase FCM — paste the entire service-account JSON as a single-line string
+      - key: FIREBASE_SERVICE_ACCOUNT_JSON
+        sync: false
