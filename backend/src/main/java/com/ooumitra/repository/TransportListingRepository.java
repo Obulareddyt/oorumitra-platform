@@ -23,13 +23,14 @@ public interface TransportListingRepository extends JpaRepository<TransportListi
     Page<TransportListing> findByVehicleTypeAndIsActiveTrue(TransportVehicleType vehicleType, Pageable pageable);
 
     @Query(value = """
-            SELECT t.*, (6371 * acos(cos(radians(:lat)) * cos(radians(t.latitude))
-                * cos(radians(t.longitude) - radians(:lng)) + sin(radians(:lat))
-                * sin(radians(t.latitude)))) AS distance
-            FROM transport_listings t
+            SELECT * FROM transport_listings t
             WHERE t.is_active = true AND t.latitude IS NOT NULL
-            HAVING distance <= :radiusKm
-            ORDER BY distance
+              AND (6371 * acos(cos(radians(:lat)) * cos(radians(t.latitude))
+                * cos(radians(t.longitude) - radians(:lng)) + sin(radians(:lat))
+                * sin(radians(t.latitude)))) <= :radiusKm
+            ORDER BY (6371 * acos(cos(radians(:lat)) * cos(radians(t.latitude))
+                * cos(radians(t.longitude) - radians(:lng)) + sin(radians(:lat))
+                * sin(radians(t.latitude))))
             """, nativeQuery = true)
     List<TransportListing> findNearby(@Param("lat") double lat, @Param("lng") double lng,
                                       @Param("radiusKm") double radiusKm, Pageable pageable);

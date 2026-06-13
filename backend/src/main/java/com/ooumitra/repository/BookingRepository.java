@@ -16,6 +16,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     Page<Booking> findByUserIdAndStatus(Long userId, BookingStatus status, Pageable pageable);
 
-    @Query("SELECT COUNT(b) FROM Booking b WHERE b.userId = :userId AND b.status = 'COMPLETED'")
+    @Query("SELECT COUNT(b) FROM Booking b WHERE b.user.id = :userId AND b.status = com.ooumitra.enums.BookingStatus.COMPLETED")
     long countCompletedByUser(@Param("userId") Long userId);
 }

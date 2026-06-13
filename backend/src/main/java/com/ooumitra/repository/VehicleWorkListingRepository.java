@@ -23,13 +23,14 @@ public interface VehicleWorkListingRepository extends JpaRepository<VehicleWorkL
     Page<VehicleWorkListing> findByVehicleTypeAndIsActiveTrue(VehicleWorkType vehicleType, Pageable pageable);
 
     @Query(value = """
-            SELECT v.*, (6371 * acos(cos(radians(:lat)) * cos(radians(v.latitude))
-                * cos(radians(v.longitude) - radians(:lng)) + sin(radians(:lat))
-                * sin(radians(v.latitude)))) AS distance
-            FROM vehicle_work_listings v
+            SELECT * FROM vehicle_work_listings v
             WHERE v.is_active = true AND v.latitude IS NOT NULL
-            HAVING distance <= :radiusKm
-            ORDER BY distance
+              AND (6371 * acos(cos(radians(:lat)) * cos(radians(v.latitude))
+                * cos(radians(v.longitude) - radians(:lng)) + sin(radians(:lat))
+                * sin(radians(v.latitude)))) <= :radiusKm
+            ORDER BY (6371 * acos(cos(radians(:lat)) * cos(radians(v.latitude))
+                * cos(radians(v.longitude) - radians(:lng)) + sin(radians(:lat))
+                * sin(radians(v.latitude))))
             """, nativeQuery = true)
     List<VehicleWorkListing> findNearby(@Param("lat") double lat, @Param("lng") double lng,
                                         @Param("radiusKm") double radiusKm, Pageable pageable);
