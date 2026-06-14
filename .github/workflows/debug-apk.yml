@@ -37,7 +37,7 @@ jobs:
         run: |
           sed -i 's/\r//' gradlew
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+          bash gradlew assembleDebug --no-daemon
 
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
