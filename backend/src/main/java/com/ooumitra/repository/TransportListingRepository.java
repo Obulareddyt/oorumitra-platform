@@ -1,6 +1,7 @@
 package com.ooumitra.repository;
 
 import com.ooumitra.entity.TransportListing;
+import com.ooumitra.enums.ApprovalStatus;
 import com.ooumitra.enums.TransportVehicleType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,9 +23,16 @@ public interface TransportListingRepository extends JpaRepository<TransportListi
 
     Page<TransportListing> findByVehicleTypeAndIsActiveTrue(TransportVehicleType vehicleType, Pageable pageable);
 
+    List<TransportListing> findByApprovalStatus(ApprovalStatus approvalStatus);
+
+    Page<TransportListing> findByIsActiveTrueAndApprovalStatus(ApprovalStatus approvalStatus, Pageable pageable);
+
+    Page<TransportListing> findByVehicleTypeAndIsActiveTrueAndApprovalStatus(
+            TransportVehicleType vehicleType, ApprovalStatus approvalStatus, Pageable pageable);
+
     @Query(value = """
             SELECT * FROM transport_listings t
-            WHERE t.is_active = true AND t.latitude IS NOT NULL
+            WHERE t.is_active = true AND t.approval_status = 'APPROVED' AND t.latitude IS NOT NULL
               AND (6371 * acos(cos(radians(:lat)) * cos(radians(t.latitude))
                 * cos(radians(t.longitude) - radians(:lng)) + sin(radians(:lat))
                 * sin(radians(t.latitude)))) <= :radiusKm

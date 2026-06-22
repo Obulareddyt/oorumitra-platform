@@ -1,6 +1,7 @@
 package com.ooumitra.repository;
 
 import com.ooumitra.entity.VehicleWorkListing;
+import com.ooumitra.enums.ApprovalStatus;
 import com.ooumitra.enums.VehicleWorkType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,9 +23,16 @@ public interface VehicleWorkListingRepository extends JpaRepository<VehicleWorkL
 
     Page<VehicleWorkListing> findByVehicleTypeAndIsActiveTrue(VehicleWorkType vehicleType, Pageable pageable);
 
+    List<VehicleWorkListing> findByApprovalStatus(ApprovalStatus approvalStatus);
+
+    Page<VehicleWorkListing> findByIsActiveTrueAndApprovalStatus(ApprovalStatus approvalStatus, Pageable pageable);
+
+    Page<VehicleWorkListing> findByVehicleTypeAndIsActiveTrueAndApprovalStatus(
+            VehicleWorkType vehicleType, ApprovalStatus approvalStatus, Pageable pageable);
+
     @Query(value = """
             SELECT * FROM vehicle_work_listings v
-            WHERE v.is_active = true AND v.latitude IS NOT NULL
+            WHERE v.is_active = true AND v.approval_status = 'APPROVED' AND v.latitude IS NOT NULL
               AND (6371 * acos(cos(radians(:lat)) * cos(radians(v.latitude))
                 * cos(radians(v.longitude) - radians(:lng)) + sin(radians(:lat))
                 * sin(radians(v.latitude)))) <= :radiusKm

@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext'
 import Navbar from './components/Navbar'
 import Home from './pages/Home'
 import Login from './pages/Login'
+import Register from './pages/Register'
 import Products from './pages/Products'
 import Workers from './pages/Workers'
 import Transport from './pages/Transport'
@@ -10,6 +11,7 @@ import VehicleWork from './pages/VehicleWork'
 import Emergency from './pages/Emergency'
 import Bookings from './pages/Bookings'
 import Profile from './pages/Profile'
+import Admin from './pages/Admin'
 
 function Layout({ children }) {
   return (
@@ -32,6 +34,7 @@ export default function App() {
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route
             path="/*"
             element={
@@ -45,6 +48,7 @@ export default function App() {
                   <Route path="/emergency" element={<Emergency />} />
                   <Route path="/bookings" element={<Bookings />} />
                   <Route path="/profile" element={<Profile />} />
+                  <Route path="/admin" element={<Admin />} />
                 </Routes>
               </Layout>
             }

@@ -1,6 +1,7 @@
 package com.ooumitra.dto.response;
 
 import com.ooumitra.entity.Product;
+import com.ooumitra.enums.ApprovalStatus;
 import com.ooumitra.enums.ProductCategory;
 import lombok.Builder;
 import lombok.Data;
@@ -28,6 +29,7 @@ public class ProductResponse {
     private List<String> imageUrls;
     private BigDecimal averageRating;
     private Integer ratingCount;
+    private ApprovalStatus approvalStatus;
     private Instant createdAt;
 
     public static ProductResponse from(Product p) {
@@ -41,6 +43,7 @@ public class ProductResponse {
                 .availability(p.getAvailability()).description(p.getDescription())
                 .imageUrls(p.getImageUrls())
                 .averageRating(p.getAverageRating()).ratingCount(p.getRatingCount())
+                .approvalStatus(p.getApprovalStatus())
                 .createdAt(p.getCreatedAt()).build();
     }
 }

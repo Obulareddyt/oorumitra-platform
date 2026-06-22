@@ -1,6 +1,7 @@
 package com.ooumitra.dto.response;
 
 import com.ooumitra.entity.WorkerListing;
+import com.ooumitra.enums.ApprovalStatus;
 import com.ooumitra.enums.PriceType;
 import com.ooumitra.enums.WorkType;
 import lombok.Builder;
@@ -25,6 +26,7 @@ public class WorkerListingResponse {
     private BigDecimal longitude;
     private BigDecimal averageRating;
     private Integer ratingCount;
+    private ApprovalStatus approvalStatus;
     private Instant createdAt;
 
     public static WorkerListingResponse from(WorkerListing w) {
@@ -36,6 +38,7 @@ public class WorkerListingResponse {
                 .amount(w.getAmount()).workType(w.getWorkType())
                 .latitude(w.getLatitude()).longitude(w.getLongitude())
                 .averageRating(w.getAverageRating()).ratingCount(w.getRatingCount())
+                .approvalStatus(w.getApprovalStatus())
                 .createdAt(w.getCreatedAt()).build();
     }
 }

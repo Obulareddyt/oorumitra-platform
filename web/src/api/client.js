@@ -19,6 +19,7 @@ api.interceptors.response.use(
 export const authApi = {
   sendOtp: (mobileNumber) => api.post('/auth/send-otp', { mobileNumber }),
   login: (mobileNumber, otp) => api.post('/auth/login', { mobileNumber, otp }),
+  register: (data) => api.post('/auth/register', data),
 }
 
 export const productsApi = {
@@ -71,6 +72,18 @@ export const userApi = {
 
 export const emergencyApi = {
   getServices: () => api.get('/emergency/services'),
+}
+
+export const adminApi = {
+  getPending: () => api.get('/admin/pending'),
+  approveProduct: (id) => api.post(`/admin/products/${id}/approve`),
+  rejectProduct: (id) => api.post(`/admin/products/${id}/reject`),
+  approveWorker: (id) => api.post(`/admin/workers/${id}/approve`),
+  rejectWorker: (id) => api.post(`/admin/workers/${id}/reject`),
+  approveTransport: (id) => api.post(`/admin/transport/${id}/approve`),
+  rejectTransport: (id) => api.post(`/admin/transport/${id}/reject`),
+  approveVehicleWork: (id) => api.post(`/admin/vehicle-work/${id}/approve`),
+  rejectVehicleWork: (id) => api.post(`/admin/vehicle-work/${id}/reject`),
 }
 
 export default api

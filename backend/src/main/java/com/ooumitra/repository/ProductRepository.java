@@ -1,6 +1,7 @@
 package com.ooumitra.repository;
 
 import com.ooumitra.entity.Product;
+import com.ooumitra.enums.ApprovalStatus;
 import com.ooumitra.enums.ProductCategory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,9 +23,16 @@ public interface ProductRepository extends JpaRepository<Product, Long>,
 
     Page<Product> findByCategoryAndIsActiveTrue(ProductCategory category, Pageable pageable);
 
+    List<Product> findByApprovalStatus(ApprovalStatus approvalStatus);
+
+    Page<Product> findByIsActiveTrueAndApprovalStatus(ApprovalStatus approvalStatus, Pageable pageable);
+
+    Page<Product> findByCategoryAndIsActiveTrueAndApprovalStatus(
+            ProductCategory category, ApprovalStatus approvalStatus, Pageable pageable);
+
     @Query(value = """
             SELECT * FROM products p
-            WHERE p.is_active = true AND p.latitude IS NOT NULL
+            WHERE p.is_active = true AND p.approval_status = 'APPROVED' AND p.latitude IS NOT NULL
               AND (6371 * acos(cos(radians(:lat)) * cos(radians(p.latitude))
                 * cos(radians(p.longitude) - radians(:lng)) + sin(radians(:lat))
                 * sin(radians(p.latitude)))) <= :radiusKm

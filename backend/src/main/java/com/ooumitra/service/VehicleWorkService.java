@@ -5,6 +5,7 @@ import com.ooumitra.dto.response.PagedResponse;
 import com.ooumitra.dto.response.VehicleWorkResponse;
 import com.ooumitra.entity.User;
 import com.ooumitra.entity.VehicleWorkListing;
+import com.ooumitra.enums.ApprovalStatus;
 import com.ooumitra.enums.VehicleWorkType;
 import com.ooumitra.exception.OoruMitraException;
 import com.ooumitra.repository.VehicleWorkListingRepository;
@@ -37,8 +38,8 @@ public class VehicleWorkService {
         Sort sort = resolveSort(sortBy);
         PageRequest pageReq = PageRequest.of(page, size, sort);
         Page<VehicleWorkListing> result = vehicleType != null
-                ? repo.findByVehicleTypeAndIsActiveTrue(vehicleType, pageReq)
-                : repo.findByIsActiveTrue(pageReq);
+                ? repo.findByVehicleTypeAndIsActiveTrueAndApprovalStatus(vehicleType, ApprovalStatus.APPROVED, pageReq)
+                : repo.findByIsActiveTrueAndApprovalStatus(ApprovalStatus.APPROVED, pageReq);
         var content = result.getContent().stream().map(VehicleWorkResponse::from).toList();
         return new PagedResponse<>(content, result.getTotalElements(), result.getTotalPages(), page, size);
     }
@@ -53,7 +54,7 @@ public class VehicleWorkService {
     @Transactional(readOnly = true)
     public VehicleWorkResponse getById(Long id) {
         return VehicleWorkResponse.from(repo.findById(id)
-                .filter(VehicleWorkListing::isActive)
+                .filter(v -> v.isActive() && v.getApprovalStatus() == ApprovalStatus.APPROVED)
                 .orElseThrow(() -> OoruMitraException.notFound("Vehicle work listing")));
     }
 

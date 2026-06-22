@@ -68,6 +68,15 @@ export default function Navbar() {
                     >
                       My Bookings
                     </Link>
+                    {user?.role === 'ADMIN' && (
+                      <Link
+                        to="/admin"
+                        onClick={() => setMenuOpen(false)}
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      >
+                        Admin Panel
+                      </Link>
+                    )}
                     <hr className="my-1 border-gray-100" />
                     <button
                       onClick={handleLogout}
@@ -103,7 +112,7 @@ export default function Navbar() {
               ['/transport', 'Transport'],
               ['/vehicle-work', 'Vehicle Work'],
               ['/emergency', 'Emergency'],
-              ...(isLoggedIn ? [['/profile', 'My Profile'], ['/bookings', 'My Bookings']] : []),
+              ...(isLoggedIn ? [['/profile', 'My Profile'], ['/bookings', 'My Bookings'], ...(user?.role === 'ADMIN' ? [['/admin', 'Admin Panel']] : [])] : []),
             ].map(([to, label]) => (
               <NavLink
                 key={to}

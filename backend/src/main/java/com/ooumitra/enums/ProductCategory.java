@@ -4,5 +4,8 @@ public enum ProductCategory {
     AGRICULTURE,
     HARDWARE,
     LIVESTOCK,
-    VEHICLES
+    VEHICLES,
+    SEEDS,
+    FRUITS,
+    FLOWERS
 }

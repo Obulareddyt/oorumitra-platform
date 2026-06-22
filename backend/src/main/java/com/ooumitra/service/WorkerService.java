@@ -5,6 +5,7 @@ import com.ooumitra.dto.response.PagedResponse;
 import com.ooumitra.dto.response.WorkerListingResponse;
 import com.ooumitra.entity.User;
 import com.ooumitra.entity.WorkerListing;
+import com.ooumitra.enums.ApprovalStatus;
 import com.ooumitra.enums.WorkType;
 import com.ooumitra.exception.OoruMitraException;
 import com.ooumitra.repository.WorkerListingRepository;
@@ -42,9 +43,9 @@ public class WorkerService {
 
         Page<WorkerListing> result;
         if (workType != null) {
-            result = workerRepo.findByWorkTypeAndIsActiveTrue(workType, pageReq);
+            result = workerRepo.findByWorkTypeAndIsActiveTrueAndApprovalStatus(workType, ApprovalStatus.APPROVED, pageReq);
         } else {
-            result = workerRepo.findByIsActiveTrue(pageReq);
+            result = workerRepo.findByIsActiveTrueAndApprovalStatus(ApprovalStatus.APPROVED, pageReq);
         }
 
         var filtered = result.getContent().stream()
@@ -67,7 +68,7 @@ public class WorkerService {
     @Transactional(readOnly = true)
     public WorkerListingResponse getById(Long id) {
         return WorkerListingResponse.from(workerRepo.findById(id)
-                .filter(WorkerListing::isActive)
+                .filter(w -> w.isActive() && w.getApprovalStatus() == ApprovalStatus.APPROVED)
                 .orElseThrow(() -> OoruMitraException.notFound("Worker listing")));
     }
 

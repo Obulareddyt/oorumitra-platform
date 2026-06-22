@@ -1,5 +1,6 @@
 package com.ooumitra.entity;
 
+import com.ooumitra.enums.ApprovalStatus;
 import com.ooumitra.enums.PriceType;
 import com.ooumitra.enums.WorkType;
 import jakarta.persistence.*;
@@ -71,6 +72,11 @@ public class WorkerListing {
     @Column(name = "is_active", nullable = false)
     @Builder.Default
     private boolean isActive = true;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "approval_status", nullable = false, length = 20)
+    @Builder.Default
+    private ApprovalStatus approvalStatus = ApprovalStatus.PENDING;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

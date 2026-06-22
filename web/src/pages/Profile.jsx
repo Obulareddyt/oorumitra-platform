@@ -96,9 +96,9 @@ export default function Profile() {
               <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
               <select className="input" value={form.gender || ''} onChange={(e) => setForm({ ...form, gender: e.target.value })}>
                 <option value="">Select</option>
-                <option value="MALE">Male</option>
-                <option value="FEMALE">Female</option>
-                <option value="OTHER">Other</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
               </select>
             </div>
             {error && <p className="text-red-600 text-sm">{error}</p>}

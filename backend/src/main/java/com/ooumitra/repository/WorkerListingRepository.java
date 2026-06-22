@@ -1,6 +1,7 @@
 package com.ooumitra.repository;
 
 import com.ooumitra.entity.WorkerListing;
+import com.ooumitra.enums.ApprovalStatus;
 import com.ooumitra.enums.WorkType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,9 +23,16 @@ public interface WorkerListingRepository extends JpaRepository<WorkerListing, Lo
 
     Page<WorkerListing> findByWorkTypeAndIsActiveTrue(WorkType workType, Pageable pageable);
 
+    List<WorkerListing> findByApprovalStatus(ApprovalStatus approvalStatus);
+
+    Page<WorkerListing> findByIsActiveTrueAndApprovalStatus(ApprovalStatus approvalStatus, Pageable pageable);
+
+    Page<WorkerListing> findByWorkTypeAndIsActiveTrueAndApprovalStatus(
+            WorkType workType, ApprovalStatus approvalStatus, Pageable pageable);
+
     @Query(value = """
             SELECT * FROM worker_listings w
-            WHERE w.is_active = true
+            WHERE w.is_active = true AND w.approval_status = 'APPROVED'
               AND w.latitude IS NOT NULL
               AND (6371 * acos(cos(radians(:lat)) * cos(radians(w.latitude))
                 * cos(radians(w.longitude) - radians(:lng)) + sin(radians(:lat))

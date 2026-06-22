@@ -117,6 +117,7 @@ public class DevDataInitializer implements CommandLineRunner {
                 .latitude(new BigDecimal("14.6819")).longitude(new BigDecimal("77.6006"))
                 .availability("In stock").description("Fresh harvest Sona Masuri rice. Stored in dry conditions. 50 kg bags available.")
                 .averageRating(new BigDecimal("4.5")).ratingCount(12)
+                .approvalStatus(ApprovalStatus.APPROVED)
                 .build(),
 
             Product.builder()
@@ -129,6 +130,7 @@ public class DevDataInitializer implements CommandLineRunner {
                 .latitude(new BigDecimal("15.8281")).longitude(new BigDecimal("78.0373"))
                 .availability("Available now").description("High quality Teja variety red chilli. Dry, clean, no moisture.")
                 .averageRating(new BigDecimal("4.2")).ratingCount(8)
+                .approvalStatus(ApprovalStatus.APPROVED)
                 .build(),
 
             Product.builder()
@@ -141,6 +143,7 @@ public class DevDataInitializer implements CommandLineRunner {
                 .latitude(new BigDecimal("14.4426")).longitude(new BigDecimal("79.9865"))
                 .availability("For sale").description("Used Mahindra 575 DI, 2018 model. 1200 hours run. Good condition, all papers clear.")
                 .averageRating(new BigDecimal("4.0")).ratingCount(3)
+                .approvalStatus(ApprovalStatus.APPROVED)
                 .build(),
 
             Product.builder()
@@ -153,6 +156,7 @@ public class DevDataInitializer implements CommandLineRunner {
                 .latitude(new BigDecimal("16.3067")).longitude(new BigDecimal("80.4365"))
                 .availability("Available").description("Murrah buffalo, 5 years old, gives 12 litres/day. Healthy, vaccinated, good temperament.")
                 .averageRating(new BigDecimal("4.8")).ratingCount(5)
+                .approvalStatus(ApprovalStatus.APPROVED)
                 .build(),
 
             Product.builder()
@@ -165,6 +169,7 @@ public class DevDataInitializer implements CommandLineRunner {
                 .latitude(new BigDecimal("17.9784")).longitude(new BigDecimal("79.5941"))
                 .availability("In stock (3 units)").description("Battery-powered 16L knapsack sprayer. 2 years warranty. Good for pesticide application.")
                 .averageRating(new BigDecimal("4.3")).ratingCount(17)
+                .approvalStatus(ApprovalStatus.APPROVED)
                 .build(),
 
             Product.builder()
@@ -176,6 +181,7 @@ public class DevDataInitializer implements CommandLineRunner {
                 .negotiable(false).location("Headquarters")
                 .availability("Available").description("Certified groundnut seeds, high germination rate. Suitable for kharif season.")
                 .averageRating(new BigDecimal("4.6")).ratingCount(22)
+                .approvalStatus(ApprovalStatus.APPROVED)
                 .build(),
 
             Product.builder()
@@ -188,6 +194,7 @@ public class DevDataInitializer implements CommandLineRunner {
                 .latitude(new BigDecimal("14.6819")).longitude(new BigDecimal("77.6006"))
                 .availability("Available").description("Desi Gir cow, 4 years old, 8 litres/day A2 milk. Fully vaccinated, healthy.")
                 .averageRating(new BigDecimal("4.7")).ratingCount(9)
+                .approvalStatus(ApprovalStatus.APPROVED)
                 .build(),
 
             Product.builder()
@@ -200,6 +207,167 @@ public class DevDataInitializer implements CommandLineRunner {
                 .latitude(new BigDecimal("15.8281")).longitude(new BigDecimal("78.0373"))
                 .availability("Per kg basis").description("MS angle iron and channels, 6 metre lengths. Used in shed and gate construction. ₹280/kg.")
                 .averageRating(BigDecimal.ZERO).ratingCount(0)
+                .approvalStatus(ApprovalStatus.APPROVED)
+                .build(),
+
+            // ── Seeds ──
+            Product.builder()
+                .user(users.get(0))
+                .productName("Paddy Seeds (BPT-5204) — 40 kg bag")
+                .category(ProductCategory.SEEDS)
+                .subCategory("Cereal Seeds").ownerName("Ramu Reddy")
+                .mobileNumber("9111111111").amount(new BigDecimal("1450"))
+                .negotiable(true).location("Anantapur, AP")
+                .latitude(new BigDecimal("14.6819")).longitude(new BigDecimal("77.6006"))
+                .availability("In stock").description("Certified BPT-5204 paddy seeds, high yield variety, 95% germination rate.")
+                .averageRating(new BigDecimal("4.4")).ratingCount(15)
+                .approvalStatus(ApprovalStatus.APPROVED)
+                .build(),
+
+            Product.builder()
+                .user(users.get(2))
+                .productName("Maize Hybrid Seeds — 10 kg bag")
+                .category(ProductCategory.SEEDS)
+                .subCategory("Cereal Seeds").ownerName("Venkat Rao")
+                .mobileNumber("9333333333").amount(new BigDecimal("1100"))
+                .negotiable(false).location("Nellore, AP")
+                .latitude(new BigDecimal("14.4426")).longitude(new BigDecimal("79.9865"))
+                .availability("Available").description("High-yield hybrid maize seeds, drought tolerant, suitable for rabi and kharif.")
+                .averageRating(new BigDecimal("4.3")).ratingCount(11)
+                .approvalStatus(ApprovalStatus.APPROVED)
+                .build(),
+
+            Product.builder()
+                .user(users.get(3))
+                .productName("Cotton (Bt) Seeds — 475g packet")
+                .category(ProductCategory.SEEDS)
+                .subCategory("Cash Crop Seeds").ownerName("Sujatha Kumari")
+                .mobileNumber("9444444444").amount(new BigDecimal("850"))
+                .negotiable(false).location("Guntur, AP")
+                .latitude(new BigDecimal("16.3067")).longitude(new BigDecimal("80.4365"))
+                .availability("In stock").description("Bt cotton hybrid seeds, bollworm resistant, good for irrigated black soil.")
+                .averageRating(new BigDecimal("4.5")).ratingCount(19)
+                .approvalStatus(ApprovalStatus.APPROVED)
+                .build(),
+
+            Product.builder()
+                .user(users.get(4))
+                .productName("Bajra (Pearl Millet) Seeds — 5 kg")
+                .category(ProductCategory.SEEDS)
+                .subCategory("Millet Seeds").ownerName("Mallesh Goud")
+                .mobileNumber("9555555555").amount(new BigDecimal("450"))
+                .negotiable(true).location("Warangal, TS")
+                .latitude(new BigDecimal("17.9784")).longitude(new BigDecimal("79.5941"))
+                .availability("Available").description("Improved Bajra hybrid seeds, suited for low-rainfall dryland farming.")
+                .averageRating(new BigDecimal("4.1")).ratingCount(6)
+                .approvalStatus(ApprovalStatus.APPROVED)
+                .build(),
+
+            // ── Fruits ──
+            Product.builder()
+                .user(users.get(2))
+                .productName("Banganapalli Mango — Premium Crate (10kg)")
+                .category(ProductCategory.FRUITS)
+                .subCategory("Mango").ownerName("Venkat Rao")
+                .mobileNumber("9333333333").amount(new BigDecimal("900"))
+                .negotiable(true).location("Nellore, AP")
+                .latitude(new BigDecimal("14.4426")).longitude(new BigDecimal("79.9865"))
+                .availability("Seasonal (Apr–Jun)").description("Farm-fresh Banganapalli mangoes, naturally ripened, sweet and fiber-free.")
+                .averageRating(new BigDecimal("4.7")).ratingCount(28)
+                .approvalStatus(ApprovalStatus.APPROVED)
+                .build(),
+
+            Product.builder()
+                .user(users.get(0))
+                .productName("Banana (Karpuravalli) — per dozen")
+                .category(ProductCategory.FRUITS)
+                .subCategory("Banana").ownerName("Ramu Reddy")
+                .mobileNumber("9111111111").amount(new BigDecimal("60"))
+                .negotiable(false).location("Anantapur, AP")
+                .latitude(new BigDecimal("14.6819")).longitude(new BigDecimal("77.6006"))
+                .availability("Daily fresh").description("Karpuravalli bananas, naturally grown, ideal for daily consumption.")
+                .averageRating(new BigDecimal("4.3")).ratingCount(14)
+                .approvalStatus(ApprovalStatus.APPROVED)
+                .build(),
+
+            Product.builder()
+                .user(users.get(1))
+                .productName("Lime / Lemon (Kagzi Nimbu) — per crate")
+                .category(ProductCategory.FRUITS)
+                .subCategory("Citrus").ownerName("Lakshmi Devi")
+                .mobileNumber("9222222222").amount(new BigDecimal("700"))
+                .negotiable(true).location("Kurnool, AP")
+                .latitude(new BigDecimal("15.8281")).longitude(new BigDecimal("78.0373"))
+                .availability("In stock").description("Juicy Kagzi Nimbu limes, high juice content, sold by the crate (approx 20kg).")
+                .averageRating(new BigDecimal("4.4")).ratingCount(10)
+                .approvalStatus(ApprovalStatus.APPROVED)
+                .build(),
+
+            Product.builder()
+                .user(users.get(3))
+                .productName("Papaya (Taiwan Red) — per dozen")
+                .category(ProductCategory.FRUITS)
+                .subCategory("Papaya").ownerName("Sujatha Kumari")
+                .mobileNumber("9444444444").amount(new BigDecimal("250"))
+                .negotiable(false).location("Guntur, AP")
+                .latitude(new BigDecimal("16.3067")).longitude(new BigDecimal("80.4365"))
+                .availability("Seasonal").description("Taiwan Red papaya, sweet pulp, farm fresh and naturally ripened.")
+                .averageRating(new BigDecimal("4.2")).ratingCount(7)
+                .approvalStatus(ApprovalStatus.APPROVED)
+                .build(),
+
+            // ── Flowers ──
+            Product.builder()
+                .user(users.get(1))
+                .productName("Rose Flowers — per kg")
+                .category(ProductCategory.FLOWERS)
+                .subCategory("Rose").ownerName("Lakshmi Devi")
+                .mobileNumber("9222222222").amount(new BigDecimal("120"))
+                .negotiable(false).location("Kurnool, AP")
+                .latitude(new BigDecimal("15.8281")).longitude(new BigDecimal("78.0373"))
+                .availability("Daily fresh").description("Fresh-cut rose flowers, ideal for garlands, decoration and bouquets.")
+                .averageRating(new BigDecimal("4.5")).ratingCount(13)
+                .approvalStatus(ApprovalStatus.APPROVED)
+                .build(),
+
+            Product.builder()
+                .user(users.get(4))
+                .productName("Marigold Flowers (Banthi) — per kg")
+                .category(ProductCategory.FLOWERS)
+                .subCategory("Marigold").ownerName("Mallesh Goud")
+                .mobileNumber("9555555555").amount(new BigDecimal("60"))
+                .negotiable(false).location("Warangal, TS")
+                .latitude(new BigDecimal("17.9784")).longitude(new BigDecimal("79.5941"))
+                .availability("Daily fresh").description("Fresh marigold flowers, ideal for festivals, pooja and decoration. Bulk orders available.")
+                .averageRating(new BigDecimal("4.2")).ratingCount(10)
+                .approvalStatus(ApprovalStatus.APPROVED)
+                .build(),
+
+            Product.builder()
+                .user(users.get(0))
+                .productName("Jasmine Flowers (Malli) — per kg")
+                .category(ProductCategory.FLOWERS)
+                .subCategory("Jasmine").ownerName("Ramu Reddy")
+                .mobileNumber("9111111111").amount(new BigDecimal("400"))
+                .negotiable(true).location("Anantapur, AP")
+                .latitude(new BigDecimal("14.6819")).longitude(new BigDecimal("77.6006"))
+                .availability("Seasonal, daily fresh").description("Fragrant Malli jasmine, hand-picked daily, popular for garlands and pooja.")
+                .averageRating(new BigDecimal("4.6")).ratingCount(16)
+                .approvalStatus(ApprovalStatus.APPROVED)
+                .build(),
+
+            // ── Pending example (awaiting admin approval) ──
+            Product.builder()
+                .user(users.get(2))
+                .productName("Sapota (Chikoo) — per dozen")
+                .category(ProductCategory.FRUITS)
+                .subCategory("Sapota").ownerName("Venkat Rao")
+                .mobileNumber("9333333333").amount(new BigDecimal("180"))
+                .negotiable(true).location("Nellore, AP")
+                .latitude(new BigDecimal("14.4426")).longitude(new BigDecimal("79.9865"))
+                .availability("Seasonal").description("Sweet sapota, freshly harvested, awaiting admin approval before going live.")
+                .averageRating(BigDecimal.ZERO).ratingCount(0)
+                .approvalStatus(ApprovalStatus.PENDING)
                 .build()
         ));
     }
@@ -218,6 +386,7 @@ public class DevDataInitializer implements CommandLineRunner {
                 .amount(new BigDecimal("2500")).workType(WorkType.HARVESTING)
                 .latitude(new BigDecimal("14.6819")).longitude(new BigDecimal("77.6006"))
                 .averageRating(new BigDecimal("4.6")).ratingCount(18)
+                .approvalStatus(ApprovalStatus.APPROVED)
                 .build(),
 
             WorkerListing.builder()
@@ -228,6 +397,7 @@ public class DevDataInitializer implements CommandLineRunner {
                 .amount(new BigDecimal("350")).workType(WorkType.CONSTRUCTION)
                 .latitude(new BigDecimal("15.8281")).longitude(new BigDecimal("78.0373"))
                 .averageRating(new BigDecimal("4.3")).ratingCount(11)
+                .approvalStatus(ApprovalStatus.APPROVED)
                 .build(),
 
             WorkerListing.builder()
@@ -238,6 +408,7 @@ public class DevDataInitializer implements CommandLineRunner {
                 .amount(new BigDecimal("500")).workType(WorkType.ELECTRICAL)
                 .latitude(new BigDecimal("14.4426")).longitude(new BigDecimal("79.9865"))
                 .averageRating(new BigDecimal("4.8")).ratingCount(34)
+                .approvalStatus(ApprovalStatus.APPROVED)
                 .build(),
 
             WorkerListing.builder()
@@ -248,6 +419,7 @@ public class DevDataInitializer implements CommandLineRunner {
                 .amount(new BigDecimal("1800")).workType(WorkType.PLANTING)
                 .latitude(new BigDecimal("16.3067")).longitude(new BigDecimal("80.4365"))
                 .averageRating(new BigDecimal("4.4")).ratingCount(7)
+                .approvalStatus(ApprovalStatus.APPROVED)
                 .build(),
 
             WorkerListing.builder()
@@ -258,6 +430,7 @@ public class DevDataInitializer implements CommandLineRunner {
                 .amount(new BigDecimal("400")).workType(WorkType.PAINTING)
                 .latitude(new BigDecimal("17.9784")).longitude(new BigDecimal("79.5941"))
                 .averageRating(new BigDecimal("4.1")).ratingCount(6)
+                .approvalStatus(ApprovalStatus.APPROVED)
                 .build(),
 
             WorkerListing.builder()
@@ -267,6 +440,19 @@ public class DevDataInitializer implements CommandLineRunner {
                 .availableWorkers(10).priceType(PriceType.HOUR)
                 .amount(new BigDecimal("250")).workType(WorkType.LOADING_UNLOADING)
                 .averageRating(new BigDecimal("4.0")).ratingCount(4)
+                .approvalStatus(ApprovalStatus.APPROVED)
+                .build(),
+
+            // ── Pending example (awaiting admin approval) ──
+            WorkerListing.builder()
+                .user(users.get(0))
+                .groupName("Anantapur Mason Group").ownerName("Ramu Reddy")
+                .mobileNumber("9111111111").village("Anantapur")
+                .availableWorkers(6).priceType(PriceType.HOUR)
+                .amount(new BigDecimal("450")).workType(WorkType.MASON_WORK)
+                .latitude(new BigDecimal("14.6819")).longitude(new BigDecimal("77.6006"))
+                .averageRating(BigDecimal.ZERO).ratingCount(0)
+                .approvalStatus(ApprovalStatus.PENDING)
                 .build()
         ));
     }
@@ -285,6 +471,7 @@ public class DevDataInitializer implements CommandLineRunner {
                 .negotiable(true).availability("Mon–Sat, 6AM–6PM")
                 .latitude(new BigDecimal("14.6819")).longitude(new BigDecimal("77.6006"))
                 .averageRating(new BigDecimal("4.5")).ratingCount(14)
+                .approvalStatus(ApprovalStatus.APPROVED)
                 .build(),
 
             TransportListing.builder()
@@ -295,6 +482,7 @@ public class DevDataInitializer implements CommandLineRunner {
                 .negotiable(false).availability("Available 24/7")
                 .latitude(new BigDecimal("15.8281")).longitude(new BigDecimal("78.0373"))
                 .averageRating(new BigDecimal("4.2")).ratingCount(9)
+                .approvalStatus(ApprovalStatus.APPROVED)
                 .build(),
 
             TransportListing.builder()
@@ -306,6 +494,7 @@ public class DevDataInitializer implements CommandLineRunner {
                 .negotiable(true).availability("Mon–Sat, 7AM–8PM")
                 .latitude(new BigDecimal("14.4426")).longitude(new BigDecimal("79.9865"))
                 .averageRating(new BigDecimal("4.7")).ratingCount(21)
+                .approvalStatus(ApprovalStatus.APPROVED)
                 .build(),
 
             TransportListing.builder()
@@ -316,6 +505,7 @@ public class DevDataInitializer implements CommandLineRunner {
                 .negotiable(false).availability("6AM–9PM daily")
                 .latitude(new BigDecimal("16.3067")).longitude(new BigDecimal("80.4365"))
                 .averageRating(new BigDecimal("4.0")).ratingCount(5)
+                .approvalStatus(ApprovalStatus.APPROVED)
                 .build(),
 
             TransportListing.builder()
@@ -327,6 +517,19 @@ public class DevDataInitializer implements CommandLineRunner {
                 .negotiable(true).availability("Available on call")
                 .latitude(new BigDecimal("17.9784")).longitude(new BigDecimal("79.5941"))
                 .averageRating(BigDecimal.ZERO).ratingCount(0)
+                .approvalStatus(ApprovalStatus.APPROVED)
+                .build(),
+
+            // ── Pending example (awaiting admin approval) ──
+            TransportListing.builder()
+                .user(users.get(1))
+                .vehicleType(TransportVehicleType.BUS)
+                .ownerName("Lakshmi Devi").mobileNumber("9222222222")
+                .ratePerKm(new BigDecimal("20")).weightCapacity("40 seater")
+                .negotiable(true).availability("On request")
+                .latitude(new BigDecimal("15.8281")).longitude(new BigDecimal("78.0373"))
+                .averageRating(BigDecimal.ZERO).ratingCount(0)
+                .approvalStatus(ApprovalStatus.PENDING)
                 .build()
         ));
     }
@@ -346,6 +549,7 @@ public class DevDataInitializer implements CommandLineRunner {
                 .availableUntil(LocalDate.now().plusMonths(2))
                 .latitude(new BigDecimal("14.6819")).longitude(new BigDecimal("77.6006"))
                 .averageRating(new BigDecimal("4.6")).ratingCount(19)
+                .approvalStatus(ApprovalStatus.APPROVED)
                 .build(),
 
             VehicleWorkListing.builder()
@@ -357,6 +561,7 @@ public class DevDataInitializer implements CommandLineRunner {
                 .availableUntil(LocalDate.now().plusWeeks(6))
                 .latitude(new BigDecimal("15.8281")).longitude(new BigDecimal("78.0373"))
                 .averageRating(new BigDecimal("4.8")).ratingCount(27)
+                .approvalStatus(ApprovalStatus.APPROVED)
                 .build(),
 
             VehicleWorkListing.builder()
@@ -367,6 +572,7 @@ public class DevDataInitializer implements CommandLineRunner {
                 .village("Nellore").availableStatus(true)
                 .latitude(new BigDecimal("14.4426")).longitude(new BigDecimal("79.9865"))
                 .averageRating(new BigDecimal("4.5")).ratingCount(11)
+                .approvalStatus(ApprovalStatus.APPROVED)
                 .build(),
 
             VehicleWorkListing.builder()
@@ -378,6 +584,7 @@ public class DevDataInitializer implements CommandLineRunner {
                 .availableUntil(LocalDate.now().plusWeeks(2))
                 .latitude(new BigDecimal("16.3067")).longitude(new BigDecimal("80.4365"))
                 .averageRating(new BigDecimal("4.3")).ratingCount(8)
+                .approvalStatus(ApprovalStatus.APPROVED)
                 .build(),
 
             VehicleWorkListing.builder()
@@ -389,6 +596,20 @@ public class DevDataInitializer implements CommandLineRunner {
                 .availableUntil(LocalDate.now().plusMonths(3))
                 .latitude(new BigDecimal("17.9784")).longitude(new BigDecimal("79.5941"))
                 .averageRating(new BigDecimal("4.1")).ratingCount(6)
+                .approvalStatus(ApprovalStatus.APPROVED)
+                .build(),
+
+            // ── Pending example (awaiting admin approval) ──
+            VehicleWorkListing.builder()
+                .user(users.get(2))
+                .vehicleType(VehicleWorkType.EXCAVATOR)
+                .ownerName("Venkat Rao").mobileNumber("9333333333")
+                .pricePerAcre(new BigDecimal("900")).pricePerHour(new BigDecimal("450"))
+                .village("Nellore").availableStatus(true)
+                .availableUntil(LocalDate.now().plusMonths(1))
+                .latitude(new BigDecimal("14.4426")).longitude(new BigDecimal("79.9865"))
+                .averageRating(BigDecimal.ZERO).ratingCount(0)
+                .approvalStatus(ApprovalStatus.PENDING)
                 .build()
         ));
     }

@@ -4,13 +4,16 @@ import { PageSpinner } from '../components/Spinner'
 import EmptyState from '../components/EmptyState'
 import BookingModal from '../components/BookingModal'
 
-const CATEGORIES = ['ALL', 'AGRICULTURE', 'HARDWARE', 'LIVESTOCK', 'VEHICLES']
+const CATEGORIES = ['ALL', 'AGRICULTURE', 'HARDWARE', 'LIVESTOCK', 'VEHICLES', 'SEEDS', 'FRUITS', 'FLOWERS']
 
 const categoryColor = {
   AGRICULTURE: 'bg-green-100 text-green-700',
   HARDWARE: 'bg-blue-100 text-blue-700',
   LIVESTOCK: 'bg-amber-100 text-amber-700',
   VEHICLES: 'bg-purple-100 text-purple-700',
+  SEEDS: 'bg-lime-100 text-lime-700',
+  FRUITS: 'bg-orange-100 text-orange-700',
+  FLOWERS: 'bg-pink-100 text-pink-700',
 }
 
 export default function Products() {

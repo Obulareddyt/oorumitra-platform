@@ -1,6 +1,7 @@
 package com.ooumitra.dto.response;
 
 import com.ooumitra.entity.VehicleWorkListing;
+import com.ooumitra.enums.ApprovalStatus;
 import com.ooumitra.enums.VehicleWorkType;
 import lombok.Builder;
 import lombok.Data;
@@ -25,6 +26,7 @@ public class VehicleWorkResponse {
     private BigDecimal longitude;
     private BigDecimal averageRating;
     private Integer ratingCount;
+    private ApprovalStatus approvalStatus;
     private Instant createdAt;
 
     public static VehicleWorkResponse from(VehicleWorkListing v) {
@@ -36,6 +38,7 @@ public class VehicleWorkResponse {
                 .availableStatus(v.isAvailableStatus()).availableUntil(v.getAvailableUntil())
                 .latitude(v.getLatitude()).longitude(v.getLongitude())
                 .averageRating(v.getAverageRating()).ratingCount(v.getRatingCount())
+                .approvalStatus(v.getApprovalStatus())
                 .createdAt(v.getCreatedAt()).build();
     }
 }

@@ -5,6 +5,7 @@ import com.ooumitra.dto.response.PagedResponse;
 import com.ooumitra.dto.response.ProductResponse;
 import com.ooumitra.entity.Product;
 import com.ooumitra.entity.User;
+import com.ooumitra.enums.ApprovalStatus;
 import com.ooumitra.enums.ProductCategory;
 import com.ooumitra.exception.OoruMitraException;
 import com.ooumitra.repository.ProductRepository;
@@ -43,8 +44,8 @@ public class ProductService {
         PageRequest pageReq = PageRequest.of(page, size, sort);
 
         Page<Product> result = (category != null)
-                ? productRepo.findByCategoryAndIsActiveTrue(category, pageReq)
-                : productRepo.findByIsActiveTrue(pageReq);
+                ? productRepo.findByCategoryAndIsActiveTrueAndApprovalStatus(category, ApprovalStatus.APPROVED, pageReq)
+                : productRepo.findByIsActiveTrueAndApprovalStatus(ApprovalStatus.APPROVED, pageReq);
 
         var content = result.getContent().stream()
                 .filter(p -> negotiable == null || p.isNegotiable() == negotiable)
@@ -63,7 +64,7 @@ public class ProductService {
     @Transactional(readOnly = true)
     public ProductResponse getById(Long id) {
         return ProductResponse.from(productRepo.findById(id)
-                .filter(Product::isActive)
+                .filter(p -> p.isActive() && p.getApprovalStatus() == ApprovalStatus.APPROVED)
                 .orElseThrow(() -> OoruMitraException.notFound("Product")));
     }
 

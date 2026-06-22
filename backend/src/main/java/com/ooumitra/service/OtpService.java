@@ -6,6 +6,7 @@ import com.ooumitra.repository.OtpVerificationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,7 @@ public class OtpService {
 
     private final OtpVerificationRepository otpRepo;
     private final WebClient.Builder webClientBuilder;
+    private final Environment environment;
 
     @Value("${msg91.auth-key}")
     private String authKey;
@@ -52,6 +54,10 @@ public class OtpService {
                 .expiresAt(Instant.now().plus(otpExpiryMinutes, ChronoUnit.MINUTES))
                 .build();
         otpRepo.save(otpEntity);
+
+        if (java.util.Arrays.asList(environment.getActiveProfiles()).contains("dev")) {
+            log.info("[DEV] OTP for {}: {}", mobileNumber, otp);
+        }
 
         sendViaMSG91(mobileNumber, otp);
     }

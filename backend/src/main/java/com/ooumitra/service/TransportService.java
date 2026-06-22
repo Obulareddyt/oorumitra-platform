@@ -5,6 +5,7 @@ import com.ooumitra.dto.response.PagedResponse;
 import com.ooumitra.dto.response.TransportResponse;
 import com.ooumitra.entity.TransportListing;
 import com.ooumitra.entity.User;
+import com.ooumitra.enums.ApprovalStatus;
 import com.ooumitra.enums.TransportVehicleType;
 import com.ooumitra.exception.OoruMitraException;
 import com.ooumitra.repository.TransportListingRepository;
@@ -37,8 +38,8 @@ public class TransportService {
         Sort sort = resolveSort(sortBy);
         PageRequest pageReq = PageRequest.of(page, size, sort);
         Page<TransportListing> result = vehicleType != null
-                ? repo.findByVehicleTypeAndIsActiveTrue(vehicleType, pageReq)
-                : repo.findByIsActiveTrue(pageReq);
+                ? repo.findByVehicleTypeAndIsActiveTrueAndApprovalStatus(vehicleType, ApprovalStatus.APPROVED, pageReq)
+                : repo.findByIsActiveTrueAndApprovalStatus(ApprovalStatus.APPROVED, pageReq);
         var content = result.getContent().stream().map(TransportResponse::from).toList();
         return new PagedResponse<>(content, result.getTotalElements(), result.getTotalPages(), page, size);
     }
@@ -53,7 +54,7 @@ public class TransportService {
     @Transactional(readOnly = true)
     public TransportResponse getById(Long id) {
         return TransportResponse.from(repo.findById(id)
-                .filter(TransportListing::isActive)
+                .filter(t -> t.isActive() && t.getApprovalStatus() == ApprovalStatus.APPROVED)
                 .orElseThrow(() -> OoruMitraException.notFound("Transport listing")));
     }
 

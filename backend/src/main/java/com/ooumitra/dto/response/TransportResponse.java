@@ -1,6 +1,7 @@
 package com.ooumitra.dto.response;
 
 import com.ooumitra.entity.TransportListing;
+import com.ooumitra.enums.ApprovalStatus;
 import com.ooumitra.enums.TransportVehicleType;
 import lombok.Builder;
 import lombok.Data;
@@ -24,6 +25,7 @@ public class TransportResponse {
     private BigDecimal longitude;
     private BigDecimal averageRating;
     private Integer ratingCount;
+    private ApprovalStatus approvalStatus;
     private Instant createdAt;
 
     public static TransportResponse from(TransportListing t) {
@@ -35,6 +37,7 @@ public class TransportResponse {
                 .negotiable(t.isNegotiable()).availability(t.getAvailability())
                 .latitude(t.getLatitude()).longitude(t.getLongitude())
                 .averageRating(t.getAverageRating()).ratingCount(t.getRatingCount())
+                .approvalStatus(t.getApprovalStatus())
                 .createdAt(t.getCreatedAt()).build();
     }
 }
