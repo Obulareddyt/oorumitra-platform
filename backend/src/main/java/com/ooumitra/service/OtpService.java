@@ -55,8 +55,10 @@ public class OtpService {
                 .build();
         otpRepo.save(otpEntity);
 
-        if (java.util.Arrays.asList(environment.getActiveProfiles()).contains("dev")) {
-            log.info("[DEV] OTP for {}: {}", mobileNumber, otp);
+        boolean devProfile = java.util.Arrays.asList(environment.getActiveProfiles()).contains("dev");
+        boolean msg91Unconfigured = "your-msg91-auth-key".equals(authKey);
+        if (devProfile || msg91Unconfigured) {
+            log.info("[OTP-FALLBACK] No SMS provider configured — OTP for {}: {}", mobileNumber, otp);
         }
 
         sendViaMSG91(mobileNumber, otp);
