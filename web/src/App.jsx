@@ -12,6 +12,7 @@ import Emergency from './pages/Emergency'
 import Bookings from './pages/Bookings'
 import Profile from './pages/Profile'
 import Admin from './pages/Admin'
+import Sell from './pages/Sell'
 
 function Layout({ children }) {
   return (
@@ -49,6 +50,7 @@ export default function App() {
                   <Route path="/bookings" element={<Bookings />} />
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/admin" element={<Admin />} />
+                  <Route path="/sell" element={<Sell />} />
                 </Routes>
               </Layout>
             }

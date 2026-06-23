@@ -98,8 +98,41 @@ that's the link to share with friends. Valid HTTPS is automatic.
 
 **Note:** the URL changes every time the tunnel restarts. It's a free "quick
 tunnel" with no uptime guarantee — fine for casual testing, not for anything
-long-lived. If you need a stable URL across restarts, create a named
-Cloudflare Tunnel instead (requires a free Cloudflare account).
+long-lived.
+
+## Stable URL via a named tunnel (recommended once you have a domain)
+
+Quick tunnels can drop and don't auto-recover with the same URL. If you own
+a domain, use a **named tunnel** instead — it survives restarts and
+reconnects automatically, giving friends one permanent link.
+
+### One-time setup
+
+1. Add your domain to a free Cloudflare account (dashboard → Add a Site →
+   Free plan), then update your domain's nameservers at your registrar to
+   the two Cloudflare gives you. Wait for the zone to show "Active" (can
+   take minutes to a few hours for nameserver propagation).
+2. Authenticate cloudflared with your account (opens a browser to
+   authorize):
+   ```powershell
+   cloudflared tunnel login
+   ```
+3. Create the named tunnel and route a subdomain to it:
+   ```powershell
+   cloudflared tunnel create oorumitra
+   cloudflared tunnel route dns oorumitra app.yourdomain.com
+   ```
+4. Fill in `deploy/cloudflared-config.yml` with the tunnel ID and
+   credentials file path printed by `tunnel create`, and your hostname.
+
+### Running it
+
+```powershell
+cloudflared tunnel --config deploy/cloudflared-config.yml run oorumitra
+```
+
+This replaces `start-tunnel.ps1` for long-term use — same backend/web setup,
+just a permanent hostname instead of a random one.
 
 ## Bootstrapping the first admin account
 

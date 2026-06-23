@@ -42,6 +42,9 @@ export default function Navbar() {
 
           {/* Right Actions */}
           <div className="flex items-center gap-3">
+            <Link to="/sell" className="btn-primary text-sm py-1.5 px-4 hidden sm:inline-block">
+              + Post Ad
+            </Link>
             {isLoggedIn ? (
               <div className="relative">
                 <button
@@ -107,6 +110,7 @@ export default function Navbar() {
         {menuOpen && (
           <div className="md:hidden border-t border-gray-100 py-3 flex flex-col gap-2 text-sm">
             {[
+              ['/sell', '+ Post Ad'],
               ['/products', 'Products'],
               ['/workers', 'Workers'],
               ['/transport', 'Transport'],
