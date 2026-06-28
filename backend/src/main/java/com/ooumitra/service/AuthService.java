@@ -8,6 +8,7 @@ import com.ooumitra.exception.OoruMitraException;
 import com.ooumitra.repository.UserRepository;
 import com.ooumitra.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +19,7 @@ public class AuthService {
     private final UserRepository userRepo;
     private final OtpService otpService;
     private final JwtUtil jwtUtil;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     @Transactional
     public void sendOtp(String mobileNumber) {
@@ -27,9 +29,13 @@ public class AuthService {
     @Transactional
     public AuthResponse register(RegisterRequest req) {
         if (userRepo.existsByMobileNumber(req.getMobileNumber())) {
-            throw OoruMitraException.conflict("Mobile number already registered");
+            throw OoruMitraException.conflict("This mobile number is already registered. Please sign in instead.");
         }
         otpService.verifyOtp(req.getMobileNumber(), req.getOtp());
+
+        String passwordHash = (req.getPassword() != null && !req.getPassword().isBlank())
+                ? passwordEncoder.encode(req.getPassword())
+                : null;
 
         User user = User.builder()
                 .firstName(req.getFirstName())
@@ -40,6 +46,9 @@ public class AuthService {
                 .role(Role.BUYER)
                 .isVerified(true)
                 .village(req.getVillage())
+                .username(req.getUsername())
+                .whatsappNumber(req.getWhatsappNumber())
+                .passwordHash(passwordHash)
                 .build();
         user = userRepo.save(user);
         return buildAuthResponse(user);
@@ -48,8 +57,24 @@ public class AuthService {
     @Transactional
     public AuthResponse loginWithOtp(String mobileNumber, String otp) {
         User user = userRepo.findByMobileNumber(mobileNumber)
-                .orElseThrow(() -> OoruMitraException.notFound("User"));
+                .orElseThrow(() -> OoruMitraException.notFound("This mobile number is not registered. Please create an account to continue. [Account]"));
         otpService.verifyOtp(mobileNumber, otp);
+        return buildAuthResponse(user);
+    }
+
+    @Transactional
+    public AuthResponse loginWithCredentials(String username, String password) {
+        // Allow login by username OR mobile number
+        User user = userRepo.findByUsername(username)
+                .or(() -> userRepo.findByMobileNumber(username))
+                .orElseThrow(() -> OoruMitraException.notFound("This account is not registered. Please create an account to continue. [Account]"));
+
+        if (user.getPasswordHash() == null) {
+            throw OoruMitraException.badRequest("This account was registered without a password. Please use OTP login instead.");
+        }
+        if (!passwordEncoder.matches(password, user.getPasswordHash())) {
+            throw OoruMitraException.badRequest("Incorrect password. Please try again.");
+        }
         return buildAuthResponse(user);
     }
 

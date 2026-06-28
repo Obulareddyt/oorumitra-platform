@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { productsApi } from '../api/client'
 import { PageSpinner } from '../components/Spinner'
 import EmptyState from '../components/EmptyState'
@@ -69,8 +70,10 @@ export default function Products() {
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {items.map((product) => (
-              <ProductCard key={product.id} product={product} onBook={() => setBooking(product)} />
+            {items.map((product, i) => (
+              <div key={product.id} className="animate-fadeInUp" style={{ animationDelay: `${Math.min(i, 8) * 0.05}s` }}>
+                <ProductCard product={product} onBook={() => setBooking(product)} />
+              </div>
             ))}
           </div>
           <Pagination page={page} totalPages={totalPages} onChange={setPage} />
@@ -89,8 +92,9 @@ export default function Products() {
 }
 
 function ProductCard({ product, onBook }) {
+  const navigate = useNavigate()
   return (
-    <div className="card flex flex-col">
+    <div className="card flex flex-col cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate(`/products/${product.id}`)}>
       {/* Image */}
       <div className="h-40 bg-gray-100 flex items-center justify-center text-4xl overflow-hidden">
         {product.imageUrls?.length > 0 ? (
@@ -116,10 +120,10 @@ function ProductCard({ product, onBook }) {
           <p className="text-xs text-amber-600 mb-2">⭐ {product.averageRating?.toFixed(1)} ({product.ratingCount})</p>
         )}
         <div className="mt-auto flex gap-2">
-          <a href={`tel:${product.mobileNumber}`} className="btn-outline text-xs py-1.5 flex-1 text-center">
+          <a href={`tel:${product.mobileNumber}`} onClick={e => e.stopPropagation()} className="btn-outline text-xs py-1.5 flex-1 text-center">
             📞 Call
           </a>
-          <button onClick={onBook} className="btn-primary text-xs py-1.5 flex-1">
+          <button onClick={e => { e.stopPropagation(); onBook() }} className="btn-primary text-xs py-1.5 flex-1">
             Book
           </button>
         </div>

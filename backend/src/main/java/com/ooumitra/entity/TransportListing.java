@@ -9,6 +9,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "transport_listings", indexes = {
@@ -53,11 +55,23 @@ public class TransportListing {
     @Column(name = "availability", length = 80)
     private String availability;
 
+    @Column(name = "village", length = 100)
+    private String village;
+
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
     @Column(name = "latitude", precision = 10, scale = 8)
     private BigDecimal latitude;
 
     @Column(name = "longitude", precision = 11, scale = 8)
     private BigDecimal longitude;
+
+    @ElementCollection
+    @CollectionTable(name = "transport_images", joinColumns = @JoinColumn(name = "transport_listing_id"))
+    @Column(name = "image_url")
+    @Builder.Default
+    private List<String> imageUrls = new ArrayList<>();
 
     @Column(name = "average_rating", precision = 3, scale = 2)
     @Builder.Default
@@ -75,6 +89,15 @@ public class TransportListing {
     @Column(name = "approval_status", nullable = false, length = 20)
     @Builder.Default
     private ApprovalStatus approvalStatus = ApprovalStatus.PENDING;
+
+    @Column(name = "admin_remarks", columnDefinition = "TEXT")
+    private String adminRemarks;
+
+    @Column(name = "decided_at")
+    private Instant decidedAt;
+
+    @Column(name = "decided_by", length = 100)
+    private String decidedBy;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

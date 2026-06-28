@@ -19,4 +19,6 @@ public class WorkerListingRequest {
     @NotNull private WorkType workType;
     private BigDecimal latitude;
     private BigDecimal longitude;
+    private String description;
+    private String whatsappNumber;
 }

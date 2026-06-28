@@ -9,9 +9,12 @@ import com.ooumitra.util.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -51,9 +54,11 @@ public class TransportController {
         return ResponseEntity.ok(ApiResponse.ok(transportService.getMyListings(page, size)));
     }
 
-    @PostMapping
-    public ResponseEntity<ApiResponse<TransportResponse>> create(@Valid @RequestBody TransportRequest req) {
-        return ResponseEntity.ok(ApiResponse.ok("Created", transportService.create(req)));
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<TransportResponse>> create(
+            @Valid @RequestPart("data") TransportRequest req,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images) throws IOException {
+        return ResponseEntity.ok(ApiResponse.ok("Created", transportService.create(req, images)));
     }
 
     @PutMapping("/{id}")

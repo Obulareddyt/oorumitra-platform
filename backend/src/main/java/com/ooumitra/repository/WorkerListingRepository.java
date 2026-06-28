@@ -25,6 +25,10 @@ public interface WorkerListingRepository extends JpaRepository<WorkerListing, Lo
 
     List<WorkerListing> findByApprovalStatus(ApprovalStatus approvalStatus);
 
+    Page<WorkerListing> findAllByApprovalStatus(ApprovalStatus approvalStatus, Pageable pageable);
+
+    long countByApprovalStatus(ApprovalStatus approvalStatus);
+
     Page<WorkerListing> findByIsActiveTrueAndApprovalStatus(ApprovalStatus approvalStatus, Pageable pageable);
 
     Page<WorkerListing> findByWorkTypeAndIsActiveTrueAndApprovalStatus(

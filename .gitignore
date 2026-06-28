@@ -5,6 +5,7 @@ mobile/node_modules/
 # Build outputs
 backend/target/
 web/dist/
+backend/uploads/
 mobile/android/build/
 mobile/android/.gradle/
 mobile/ios/build/
@@ -24,6 +25,7 @@ mobile/ios/GoogleService-Info.plist
 backend/src/main/resources/application-prod.yml
 backend/src/main/resources/firebase-service-account.json
 deploy/.jwt-secret
+deploy/.secrets
 
 # IDE
 .idea/

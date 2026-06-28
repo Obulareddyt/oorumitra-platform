@@ -9,6 +9,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 
 @Data @Builder
 public class WorkerListingResponse {
@@ -22,11 +23,16 @@ public class WorkerListingResponse {
     private PriceType priceType;
     private BigDecimal amount;
     private WorkType workType;
+    private String description;
     private BigDecimal latitude;
     private BigDecimal longitude;
+    private List<String> imageUrls;
     private BigDecimal averageRating;
     private Integer ratingCount;
     private ApprovalStatus approvalStatus;
+    private String adminRemarks;
+    private Instant decidedAt;
+    private String decidedBy;
     private Instant createdAt;
 
     public static WorkerListingResponse from(WorkerListing w) {
@@ -36,9 +42,14 @@ public class WorkerListingResponse {
                 .mobileNumber(w.getMobileNumber()).village(w.getVillage())
                 .availableWorkers(w.getAvailableWorkers()).priceType(w.getPriceType())
                 .amount(w.getAmount()).workType(w.getWorkType())
+                .description(w.getDescription())
                 .latitude(w.getLatitude()).longitude(w.getLongitude())
+                .imageUrls(w.getImageUrls())
                 .averageRating(w.getAverageRating()).ratingCount(w.getRatingCount())
                 .approvalStatus(w.getApprovalStatus())
+                .adminRemarks(w.getAdminRemarks())
+                .decidedAt(w.getDecidedAt())
+                .decidedBy(w.getDecidedBy())
                 .createdAt(w.getCreatedAt()).build();
     }
 }

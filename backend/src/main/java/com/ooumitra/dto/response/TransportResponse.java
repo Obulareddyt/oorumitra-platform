@@ -8,6 +8,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 
 @Data @Builder
 public class TransportResponse {
@@ -21,11 +22,17 @@ public class TransportResponse {
     private String weightCapacity;
     private boolean negotiable;
     private String availability;
+    private String village;
+    private String description;
     private BigDecimal latitude;
     private BigDecimal longitude;
+    private List<String> imageUrls;
     private BigDecimal averageRating;
     private Integer ratingCount;
     private ApprovalStatus approvalStatus;
+    private String adminRemarks;
+    private Instant decidedAt;
+    private String decidedBy;
     private Instant createdAt;
 
     public static TransportResponse from(TransportListing t) {
@@ -35,9 +42,14 @@ public class TransportResponse {
                 .mobileNumber(t.getMobileNumber()).ratePerKm(t.getRatePerKm())
                 .ratePerHour(t.getRatePerHour()).weightCapacity(t.getWeightCapacity())
                 .negotiable(t.isNegotiable()).availability(t.getAvailability())
+                .village(t.getVillage()).description(t.getDescription())
                 .latitude(t.getLatitude()).longitude(t.getLongitude())
+                .imageUrls(t.getImageUrls())
                 .averageRating(t.getAverageRating()).ratingCount(t.getRatingCount())
                 .approvalStatus(t.getApprovalStatus())
+                .adminRemarks(t.getAdminRemarks())
+                .decidedAt(t.getDecidedAt())
+                .decidedBy(t.getDecidedBy())
                 .createdAt(t.getCreatedAt()).build();
     }
 }

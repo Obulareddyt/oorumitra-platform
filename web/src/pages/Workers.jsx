@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { workersApi } from '../api/client'
 import { PageSpinner } from '../components/Spinner'
 import EmptyState from '../components/EmptyState'
@@ -70,8 +71,10 @@ export default function Workers() {
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {items.map((w) => (
-              <WorkerCard key={w.id} worker={w} onBook={() => setBooking(w)} />
+            {items.map((w, i) => (
+              <div key={w.id} className="animate-fadeInUp" style={{ animationDelay: `${Math.min(i, 8) * 0.05}s` }}>
+                <WorkerCard worker={w} onBook={() => setBooking(w)} />
+              </div>
             ))}
           </div>
           <Pagination page={page} totalPages={totalPages} onChange={setPage} />
@@ -86,31 +89,39 @@ export default function Workers() {
 }
 
 function WorkerCard({ worker, onBook }) {
+  const navigate = useNavigate()
   return (
-    <div className="card p-5 flex flex-col gap-3">
-      <div className="flex items-start gap-3">
-        <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-2xl shrink-0">
-          {workTypeIcon[worker.workType] ?? '👷'}
+    <div className="card flex flex-col cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate(`/workers/${worker.id}`)}>
+      {worker.imageUrls?.length > 0 && (
+        <div className="h-32 bg-gray-100 overflow-hidden">
+          <img src={worker.imageUrls[0]} alt="" className="w-full h-full object-cover" />
         </div>
-        <div className="flex-1 min-w-0">
-          <p className="font-semibold text-gray-800 leading-tight">{worker.groupName || worker.ownerName}</p>
-          <span className="badge bg-blue-100 text-blue-700 mt-1">{workTypeLabel(worker.workType)}</span>
-        </div>
-      </div>
-      <div className="text-sm text-gray-600 space-y-1">
-        <p>👤 {worker.ownerName} · {worker.availableWorkers} workers</p>
-        <p>📍 {worker.village || '—'}</p>
-        <p className="font-semibold text-gray-800">
-          ₹{worker.amount?.toLocaleString('en-IN')}
-          <span className="text-gray-400 font-normal ml-1 text-xs">/{worker.priceType?.toLowerCase()}</span>
-        </p>
-      </div>
-      {worker.averageRating > 0 && (
-        <p className="text-xs text-amber-600">⭐ {worker.averageRating?.toFixed(1)} ({worker.ratingCount} reviews)</p>
       )}
-      <div className="flex gap-2 mt-auto">
-        <a href={`tel:${worker.mobileNumber}`} className="btn-outline text-xs py-1.5 flex-1 text-center">📞 Call</a>
-        <button onClick={onBook} className="btn-primary text-xs py-1.5 flex-1">Book</button>
+      <div className="p-5 flex flex-col gap-3 flex-1">
+        <div className="flex items-start gap-3">
+          <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-2xl shrink-0">
+            {workTypeIcon[worker.workType] ?? '👷'}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-gray-800 leading-tight">{worker.groupName || worker.ownerName}</p>
+            <span className="badge bg-blue-100 text-blue-700 mt-1">{workTypeLabel(worker.workType)}</span>
+          </div>
+        </div>
+        <div className="text-sm text-gray-600 space-y-1">
+          <p>👤 {worker.ownerName} · {worker.availableWorkers} workers</p>
+          <p>📍 {worker.village || '—'}</p>
+          <p className="font-semibold text-gray-800">
+            ₹{worker.amount?.toLocaleString('en-IN')}
+            <span className="text-gray-400 font-normal ml-1 text-xs">/{worker.priceType?.toLowerCase()}</span>
+          </p>
+        </div>
+        {worker.averageRating > 0 && (
+          <p className="text-xs text-amber-600">⭐ {worker.averageRating?.toFixed(1)} ({worker.ratingCount} reviews)</p>
+        )}
+        <div className="flex gap-2 mt-auto">
+          <a href={`tel:${worker.mobileNumber}`} className="btn-outline text-xs py-1.5 flex-1 text-center">📞 Call</a>
+          <button onClick={onBook} className="btn-primary text-xs py-1.5 flex-1">Book</button>
+        </div>
       </div>
     </div>
   )

@@ -25,6 +25,10 @@ public interface VehicleWorkListingRepository extends JpaRepository<VehicleWorkL
 
     List<VehicleWorkListing> findByApprovalStatus(ApprovalStatus approvalStatus);
 
+    Page<VehicleWorkListing> findAllByApprovalStatus(ApprovalStatus approvalStatus, Pageable pageable);
+
+    long countByApprovalStatus(ApprovalStatus approvalStatus);
+
     Page<VehicleWorkListing> findByIsActiveTrueAndApprovalStatus(ApprovalStatus approvalStatus, Pageable pageable);
 
     Page<VehicleWorkListing> findByVehicleTypeAndIsActiveTrueAndApprovalStatus(

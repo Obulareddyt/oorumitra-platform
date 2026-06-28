@@ -1,47 +1,41 @@
-databases:
-  - name: oorumitra-db
-    databaseName: oorumitra
-    user: oorumitra
-    plan: free
-
 services:
+  # ── Backend (Docker) ─────────────────────────────────────────────────────────
   - type: web
-    name: oorumitra-backend
+    name: ooumitra-backend
     runtime: docker
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
-    plan: free
+    plan: starter
+    region: singapore
     healthCheckPath: /actuator/health
     envVars:
-      # Database — Render injects jdbcConnectionString automatically
+      # Hostinger MariaDB — fill in Render dashboard
       - key: DB_URL
-        fromDatabase:
-          name: oorumitra-db
-          property: jdbcConnectionString
+        value: "jdbc:mysql://in-mum-web679.main-hosting.eu:3306/u185240877_oorumitra?useSSL=true&allowPublicKeyRetrieval=true&serverTimezone=Asia/Kolkata&characterEncoding=UTF-8"
       - key: DB_USERNAME
-        fromDatabase:
-          name: oorumitra-db
-          property: user
+        sync: false
       - key: DB_PASSWORD
-        fromDatabase:
-          name: oorumitra-db
-          property: password
+        sync: false
 
       # JWT — auto-generated secure secret
       - key: JWT_SECRET
         generateValue: true
 
-      # OTP — set these in the Render dashboard after deploy
+      # MSG91 SMS
       - key: MSG91_AUTH_KEY
         sync: false
       - key: MSG91_TEMPLATE_ID
         sync: false
+      - key: MSG91_NOTIFICATION_TEMPLATE_ID
+        sync: false
+      - key: MSG91_SENDER_ID
+        value: OORMIT
 
-      # Google Maps
+      # Google Maps (server-side geocoding)
       - key: GOOGLE_MAPS_API_KEY
         sync: false
 
-      # AWS S3
+      # AWS S3 (image uploads)
       - key: AWS_ACCESS_KEY
         sync: false
       - key: AWS_SECRET_KEY
@@ -53,6 +47,22 @@ services:
       - key: AWS_CDN_URL
         sync: false
 
-      # Firebase FCM — paste the entire service-account JSON as a single-line string
-      - key: FIREBASE_SERVICE_ACCOUNT_JSON
+  # ── Web Frontend (Static Site) ───────────────────────────────────────────────
+  - type: web
+    name: ooumitra-web
+    runtime: static
+    rootDir: web
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    pullRequestPreviewsEnabled: false
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      # Google Maps (browser key)
+      - key: VITE_GOOGLE_MAPS_KEY
+        sync: false
+      # Set to https://ooumitra-backend.onrender.com/api after backend first deploys
+      - key: VITE_API_URL
         sync: false

@@ -19,4 +19,6 @@ public class VehicleWorkRequest {
     private LocalDate availableUntil;
     private BigDecimal latitude;
     private BigDecimal longitude;
+    private String description;
+    private String whatsappNumber;
 }

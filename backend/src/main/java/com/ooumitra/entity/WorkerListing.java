@@ -10,6 +10,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "worker_listings", indexes = {
@@ -61,6 +63,12 @@ public class WorkerListing {
     @Column(name = "longitude", precision = 11, scale = 8)
     private BigDecimal longitude;
 
+    @ElementCollection
+    @CollectionTable(name = "worker_images", joinColumns = @JoinColumn(name = "worker_listing_id"))
+    @Column(name = "image_url")
+    @Builder.Default
+    private List<String> imageUrls = new ArrayList<>();
+
     @Column(name = "average_rating", precision = 3, scale = 2)
     @Builder.Default
     private BigDecimal averageRating = BigDecimal.ZERO;
@@ -77,6 +85,18 @@ public class WorkerListing {
     @Column(name = "approval_status", nullable = false, length = 20)
     @Builder.Default
     private ApprovalStatus approvalStatus = ApprovalStatus.PENDING;
+
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
+    @Column(name = "admin_remarks", columnDefinition = "TEXT")
+    private String adminRemarks;
+
+    @Column(name = "decided_at")
+    private Instant decidedAt;
+
+    @Column(name = "decided_by", length = 100)
+    private String decidedBy;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

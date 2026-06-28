@@ -25,4 +25,13 @@ public class RegisterRequest {
     private String gender;
 
     private String village;
+
+    @Size(min = 8, max = 50, message = "Username must be at least 8 characters")
+    private String username;
+
+    @Pattern(regexp = "^[6-9]\\d{9}$", message = "Invalid WhatsApp number")
+    private String whatsappNumber;
+
+    @Size(min = 8, message = "Password must be at least 8 characters")
+    private String password;
 }

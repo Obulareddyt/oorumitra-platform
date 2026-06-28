@@ -18,4 +18,7 @@ public class TransportRequest {
     @Size(max = 80) private String availability;
     private BigDecimal latitude;
     private BigDecimal longitude;
+    @Size(max = 100) private String village;
+    private String description;
+    private String whatsappNumber;
 }

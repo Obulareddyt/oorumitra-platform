@@ -36,7 +36,7 @@ public class User {
     private String gender;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 10)
+    @Column(nullable = false, length = 20)
     @Builder.Default
     private Role role = Role.BUYER;
 
@@ -61,6 +61,19 @@ public class User {
 
     @Column(name = "village", length = 100)
     private String village;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "village_id")
+    private Village villageRef;
+
+    @Column(name = "username", length = 50, unique = true)
+    private String username;
+
+    @Column(name = "whatsapp_number", length = 15)
+    private String whatsappNumber;
+
+    @Column(name = "password_hash", length = 255)
+    private String passwordHash;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

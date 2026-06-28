@@ -10,9 +10,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -59,10 +62,11 @@ public class WorkerController {
         return ResponseEntity.ok(ApiResponse.ok(workerService.getMyListings(page, size)));
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<WorkerListingResponse>> create(
-            @Valid @RequestBody WorkerListingRequest req) {
-        return ResponseEntity.ok(ApiResponse.ok("Worker listing created", workerService.create(req)));
+            @Valid @RequestPart("data") WorkerListingRequest req,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images) throws IOException {
+        return ResponseEntity.ok(ApiResponse.ok("Worker listing created", workerService.create(req, images)));
     }
 
     @PutMapping("/{id}")

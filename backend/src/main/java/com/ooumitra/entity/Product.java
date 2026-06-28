@@ -90,6 +90,15 @@ public class Product {
     @Builder.Default
     private ApprovalStatus approvalStatus = ApprovalStatus.PENDING;
 
+    @Column(name = "admin_remarks", columnDefinition = "TEXT")
+    private String adminRemarks;
+
+    @Column(name = "decided_at")
+    private Instant decidedAt;
+
+    @Column(name = "decided_by", length = 100)
+    private String decidedBy;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;

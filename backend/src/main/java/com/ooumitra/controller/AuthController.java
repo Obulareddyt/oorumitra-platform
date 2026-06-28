@@ -1,5 +1,6 @@
 package com.ooumitra.controller;
 
+import com.ooumitra.dto.request.CredentialLoginRequest;
 import com.ooumitra.dto.request.LoginRequest;
 import com.ooumitra.dto.request.OtpRequest;
 import com.ooumitra.dto.request.RegisterRequest;
@@ -38,6 +39,12 @@ public class AuthController {
     @Operation(summary = "Login with OTP")
     public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest req) {
         return ResponseEntity.ok(ApiResponse.ok(authService.loginWithOtp(req.getMobileNumber(), req.getOtp())));
+    }
+
+    @PostMapping("/login-credentials")
+    @Operation(summary = "Login with username and password")
+    public ResponseEntity<ApiResponse<AuthResponse>> loginWithCredentials(@Valid @RequestBody CredentialLoginRequest req) {
+        return ResponseEntity.ok(ApiResponse.ok(authService.loginWithCredentials(req.getUsername(), req.getPassword())));
     }
 
     @PostMapping("/refresh")

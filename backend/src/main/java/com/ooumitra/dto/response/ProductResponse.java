@@ -30,6 +30,9 @@ public class ProductResponse {
     private BigDecimal averageRating;
     private Integer ratingCount;
     private ApprovalStatus approvalStatus;
+    private String adminRemarks;
+    private Instant decidedAt;
+    private String decidedBy;
     private Instant createdAt;
 
     public static ProductResponse from(Product p) {
@@ -44,6 +47,9 @@ public class ProductResponse {
                 .imageUrls(p.getImageUrls())
                 .averageRating(p.getAverageRating()).ratingCount(p.getRatingCount())
                 .approvalStatus(p.getApprovalStatus())
+                .adminRemarks(p.getAdminRemarks())
+                .decidedAt(p.getDecidedAt())
+                .decidedBy(p.getDecidedBy())
                 .createdAt(p.getCreatedAt()).build();
     }
 }

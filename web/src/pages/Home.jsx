@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { emergencyApi } from '../api/client'
 import { useAuth } from '../context/AuthContext'
+import VillageHero from '../components/VillageHero'
 
 const CATEGORIES = [
   { to: '/products', icon: '🛒', label: 'Products', desc: 'Buy & sell agricultural goods, hardware, livestock', color: 'bg-green-50 border-green-200 hover:bg-green-100' },
@@ -18,39 +19,21 @@ export default function Home() {
     emergencyApi.getServices().then(setEmergency).catch(() => {})
   }, [])
 
+  const userName = `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim()
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Hero */}
-      <div className="bg-gradient-to-r from-primary-600 to-primary-700 rounded-2xl text-white p-8 mb-8 relative overflow-hidden">
-        <div className="absolute right-4 top-2 text-8xl opacity-20 select-none">🌾</div>
-        <div className="relative">
-          {isLoggedIn ? (
-            <p className="text-primary-200 mb-1">Welcome back,</p>
-          ) : null}
-          <h1 className="text-3xl font-bold mb-2">
-            {isLoggedIn ? `${user?.firstName} ${user?.lastName}` : 'OoruMitra'}
-          </h1>
-          <p className="text-primary-100 text-lg mb-4">
-            {isLoggedIn
-              ? 'Find services, list your offerings, and connect with your community.'
-              : 'Your trusted rural marketplace — connecting villages across India.'}
-          </p>
-          {!isLoggedIn && (
-            <Link to="/login" className="inline-block bg-white text-primary-700 font-semibold px-6 py-2.5 rounded-lg hover:bg-primary-50 transition-colors">
-              Get Started →
-            </Link>
-          )}
-        </div>
-      </div>
+      <VillageHero isLoggedIn={isLoggedIn} userName={userName} />
 
       {/* Categories */}
       <h2 className="text-xl font-bold text-gray-800 mb-4">Browse Categories</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-        {CATEGORIES.map((cat) => (
+        {CATEGORIES.map((cat, i) => (
           <Link
             key={cat.to}
             to={cat.to}
-            className={`card border p-5 flex flex-col gap-3 transition-colors ${cat.color}`}
+            className={`card border p-5 flex flex-col gap-3 transition-colors animate-fadeInUp ${cat.color}`}
+            style={{ animationDelay: `${i * 0.08}s` }}
           >
             <span className="text-4xl">{cat.icon}</span>
             <div>
@@ -91,8 +74,12 @@ export default function Home() {
           { label: 'Villages Connected', value: '500+' },
           { label: 'Active Listings', value: '2,000+' },
           { label: 'Happy Users', value: '10,000+' },
-        ].map((s) => (
-          <div key={s.label} className="text-center bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
+        ].map((s, i) => (
+          <div
+            key={s.label}
+            className="text-center bg-white rounded-xl border border-gray-100 p-4 shadow-sm transition-transform hover:scale-105 animate-fadeInUp"
+            style={{ animationDelay: `${0.3 + i * 0.08}s` }}
+          >
             <p className="text-2xl font-bold text-primary-600">{s.value}</p>
             <p className="text-sm text-gray-500 mt-0.5">{s.label}</p>
           </div>

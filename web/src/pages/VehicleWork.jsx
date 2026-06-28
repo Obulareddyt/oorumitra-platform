@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { vehicleWorkApi } from '../api/client'
 import { PageSpinner } from '../components/Spinner'
 import EmptyState from '../components/EmptyState'
@@ -59,8 +60,10 @@ export default function VehicleWork() {
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {items.map((v) => (
-              <VehicleWorkCard key={v.id} item={v} onBook={() => setBooking(v)} />
+            {items.map((v, i) => (
+              <div key={v.id} className="animate-fadeInUp" style={{ animationDelay: `${Math.min(i, 8) * 0.05}s` }}>
+                <VehicleWorkCard item={v} onBook={() => setBooking(v)} />
+              </div>
             ))}
           </div>
           <Pagination page={page} totalPages={totalPages} onChange={setPage} />
@@ -75,44 +78,52 @@ export default function VehicleWork() {
 }
 
 function VehicleWorkCard({ item, onBook }) {
+  const navigate = useNavigate()
   return (
-    <div className="card p-5 flex flex-col gap-3">
-      <div className="flex items-center gap-3">
-        <div className="w-14 h-14 rounded-xl bg-purple-50 flex items-center justify-center text-3xl shrink-0">
-          {typeIcon[item.vehicleType] ?? '🚜'}
+    <div className="card flex flex-col cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate(`/vehicle-work/${item.id}`)}>
+      {item.imageUrls?.length > 0 && (
+        <div className="h-32 bg-gray-100 overflow-hidden">
+          <img src={item.imageUrls[0]} alt="" className="w-full h-full object-cover" />
         </div>
-        <div>
-          <p className="font-bold text-gray-800">{typeLabel(item.vehicleType)}</p>
-          <p className="text-sm text-gray-500">{item.ownerName}</p>
-        </div>
-      </div>
-      <div className="grid grid-cols-2 gap-2 text-sm">
-        {item.pricePerAcre && (
-          <div className="bg-gray-50 rounded-lg p-2 text-center">
-            <p className="text-gray-400 text-xs">Per Acre</p>
-            <p className="font-bold text-gray-800">₹{item.pricePerAcre}</p>
-          </div>
-        )}
-        {item.pricePerHour && (
-          <div className="bg-gray-50 rounded-lg p-2 text-center">
-            <p className="text-gray-400 text-xs">Per Hour</p>
-            <p className="font-bold text-gray-800">₹{item.pricePerHour}</p>
-          </div>
-        )}
-      </div>
-      <div className="text-sm text-gray-600 space-y-1">
-        {item.village && <p>📍 {item.village}</p>}
-        {item.availableUntil && <p>📅 Available until {item.availableUntil}</p>}
-        <span className={`badge ${item.availableStatus ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-          {item.availableStatus ? '✓ Available' : '✗ Unavailable'}
-        </span>
-      </div>
-      {item.averageRating > 0 && (
-        <p className="text-xs text-amber-600">⭐ {item.averageRating?.toFixed(1)} ({item.ratingCount} reviews)</p>
       )}
-      <div className="flex gap-2 mt-auto">
-        <a href={`tel:${item.mobileNumber}`} className="btn-outline text-xs py-1.5 flex-1 text-center">📞 Call</a>
-        <button onClick={onBook} disabled={!item.availableStatus} className="btn-primary text-xs py-1.5 flex-1 disabled:opacity-50">Book</button>
+      <div className="p-5 flex flex-col gap-3 flex-1">
+        <div className="flex items-center gap-3">
+          <div className="w-14 h-14 rounded-xl bg-purple-50 flex items-center justify-center text-3xl shrink-0">
+            {typeIcon[item.vehicleType] ?? '🚜'}
+          </div>
+          <div>
+            <p className="font-bold text-gray-800">{typeLabel(item.vehicleType)}</p>
+            <p className="text-sm text-gray-500">{item.ownerName}</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-2 text-sm">
+          {item.pricePerAcre && (
+            <div className="bg-gray-50 rounded-lg p-2 text-center">
+              <p className="text-gray-400 text-xs">Per Acre</p>
+              <p className="font-bold text-gray-800">₹{item.pricePerAcre}</p>
+            </div>
+          )}
+          {item.pricePerHour && (
+            <div className="bg-gray-50 rounded-lg p-2 text-center">
+              <p className="text-gray-400 text-xs">Per Hour</p>
+              <p className="font-bold text-gray-800">₹{item.pricePerHour}</p>
+            </div>
+          )}
+        </div>
+        <div className="text-sm text-gray-600 space-y-1">
+          {item.village && <p>📍 {item.village}</p>}
+          {item.availableUntil && <p>📅 Available until {item.availableUntil}</p>}
+          <span className={`badge ${item.availableStatus ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+            {item.availableStatus ? '✓ Available' : '✗ Unavailable'}
+          </span>
+        </div>
+        {item.averageRating > 0 && (
+          <p className="text-xs text-amber-600">⭐ {item.averageRating?.toFixed(1)} ({item.ratingCount} reviews)</p>
+        )}
+        <div className="flex gap-2 mt-auto">
+          <a href={`tel:${item.mobileNumber}`} className="btn-outline text-xs py-1.5 flex-1 text-center">📞 Call</a>
+          <button onClick={onBook} disabled={!item.availableStatus} className="btn-primary text-xs py-1.5 flex-1 disabled:opacity-50">Book</button>
+        </div>
       </div>
     </div>
   )

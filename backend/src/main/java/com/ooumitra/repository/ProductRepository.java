@@ -25,6 +25,10 @@ public interface ProductRepository extends JpaRepository<Product, Long>,
 
     List<Product> findByApprovalStatus(ApprovalStatus approvalStatus);
 
+    Page<Product> findAllByApprovalStatus(ApprovalStatus approvalStatus, Pageable pageable);
+
+    long countByApprovalStatus(ApprovalStatus approvalStatus);
+
     Page<Product> findByIsActiveTrueAndApprovalStatus(ApprovalStatus approvalStatus, Pageable pageable);
 
     Page<Product> findByCategoryAndIsActiveTrueAndApprovalStatus(

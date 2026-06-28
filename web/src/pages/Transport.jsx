@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { transportApi } from '../api/client'
 import { PageSpinner } from '../components/Spinner'
 import EmptyState from '../components/EmptyState'
@@ -59,8 +60,10 @@ export default function Transport() {
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {items.map((t) => (
-              <TransportCard key={t.id} transport={t} onBook={() => setBooking(t)} />
+            {items.map((t, i) => (
+              <div key={t.id} className="animate-fadeInUp" style={{ animationDelay: `${Math.min(i, 8) * 0.05}s` }}>
+                <TransportCard transport={t} onBook={() => setBooking(t)} />
+              </div>
             ))}
           </div>
           <Pagination page={page} totalPages={totalPages} onChange={setPage} />
@@ -75,42 +78,50 @@ export default function Transport() {
 }
 
 function TransportCard({ transport, onBook }) {
+  const navigate = useNavigate()
   return (
-    <div className="card p-5 flex flex-col gap-3">
-      <div className="flex items-center gap-3">
-        <div className="w-14 h-14 rounded-xl bg-amber-50 flex items-center justify-center text-3xl shrink-0">
-          {vehicleIcon[transport.vehicleType] ?? '🚚'}
+    <div className="card flex flex-col cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate(`/transport/${transport.id}`)}>
+      {transport.imageUrls?.length > 0 && (
+        <div className="h-32 bg-gray-100 overflow-hidden">
+          <img src={transport.imageUrls[0]} alt="" className="w-full h-full object-cover" />
         </div>
-        <div>
-          <p className="font-bold text-gray-800">{vehicleLabel[transport.vehicleType]}</p>
-          <p className="text-sm text-gray-500">{transport.ownerName}</p>
-        </div>
-      </div>
-      <div className="grid grid-cols-2 gap-2 text-sm">
-        {transport.ratePerKm && (
-          <div className="bg-gray-50 rounded-lg p-2 text-center">
-            <p className="text-gray-400 text-xs">Per KM</p>
-            <p className="font-bold text-gray-800">₹{transport.ratePerKm}</p>
-          </div>
-        )}
-        {transport.ratePerHour && (
-          <div className="bg-gray-50 rounded-lg p-2 text-center">
-            <p className="text-gray-400 text-xs">Per Hour</p>
-            <p className="font-bold text-gray-800">₹{transport.ratePerHour}</p>
-          </div>
-        )}
-      </div>
-      <div className="text-sm text-gray-600 space-y-1">
-        {transport.weightCapacity && <p>⚖️ Capacity: {transport.weightCapacity}</p>}
-        {transport.availability && <p>🕐 {transport.availability}</p>}
-        {transport.negotiable && <span className="badge bg-green-100 text-green-700">Negotiable</span>}
-      </div>
-      {transport.averageRating > 0 && (
-        <p className="text-xs text-amber-600">⭐ {transport.averageRating?.toFixed(1)} ({transport.ratingCount} reviews)</p>
       )}
-      <div className="flex gap-2 mt-auto">
-        <a href={`tel:${transport.mobileNumber}`} className="btn-outline text-xs py-1.5 flex-1 text-center">📞 Call</a>
-        <button onClick={onBook} className="btn-primary text-xs py-1.5 flex-1">Book</button>
+      <div className="p-5 flex flex-col gap-3 flex-1">
+        <div className="flex items-center gap-3">
+          <div className="w-14 h-14 rounded-xl bg-amber-50 flex items-center justify-center text-3xl shrink-0">
+            {vehicleIcon[transport.vehicleType] ?? '🚚'}
+          </div>
+          <div>
+            <p className="font-bold text-gray-800">{vehicleLabel[transport.vehicleType]}</p>
+            <p className="text-sm text-gray-500">{transport.ownerName}</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-2 text-sm">
+          {transport.ratePerKm && (
+            <div className="bg-gray-50 rounded-lg p-2 text-center">
+              <p className="text-gray-400 text-xs">Per KM</p>
+              <p className="font-bold text-gray-800">₹{transport.ratePerKm}</p>
+            </div>
+          )}
+          {transport.ratePerHour && (
+            <div className="bg-gray-50 rounded-lg p-2 text-center">
+              <p className="text-gray-400 text-xs">Per Hour</p>
+              <p className="font-bold text-gray-800">₹{transport.ratePerHour}</p>
+            </div>
+          )}
+        </div>
+        <div className="text-sm text-gray-600 space-y-1">
+          {transport.weightCapacity && <p>⚖️ Capacity: {transport.weightCapacity}</p>}
+          {transport.availability && <p>🕐 {transport.availability}</p>}
+          {transport.negotiable && <span className="badge bg-green-100 text-green-700">Negotiable</span>}
+        </div>
+        {transport.averageRating > 0 && (
+          <p className="text-xs text-amber-600">⭐ {transport.averageRating?.toFixed(1)} ({transport.ratingCount} reviews)</p>
+        )}
+        <div className="flex gap-2 mt-auto">
+          <a href={`tel:${transport.mobileNumber}`} className="btn-outline text-xs py-1.5 flex-1 text-center">📞 Call</a>
+          <button onClick={onBook} className="btn-primary text-xs py-1.5 flex-1">Book</button>
+        </div>
       </div>
     </div>
   )

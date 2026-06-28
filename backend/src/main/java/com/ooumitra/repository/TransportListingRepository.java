@@ -25,6 +25,10 @@ public interface TransportListingRepository extends JpaRepository<TransportListi
 
     List<TransportListing> findByApprovalStatus(ApprovalStatus approvalStatus);
 
+    Page<TransportListing> findAllByApprovalStatus(ApprovalStatus approvalStatus, Pageable pageable);
+
+    long countByApprovalStatus(ApprovalStatus approvalStatus);
+
     Page<TransportListing> findByIsActiveTrueAndApprovalStatus(ApprovalStatus approvalStatus, Pageable pageable);
 
     Page<TransportListing> findByVehicleTypeAndIsActiveTrueAndApprovalStatus(
