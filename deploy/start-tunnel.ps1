@@ -1,8 +1,6 @@
-# Exposes the web app (which proxies /api to the backend) to the internet
-# via a free Cloudflare quick tunnel. Prints a random https://*.trycloudflare.com
-# URL — share that URL with friends. Valid HTTPS cert included automatically,
-# no domain or router configuration needed.
+# Exposes the web app via the named Cloudflare tunnel "oorumitra".
+# Routes traffic from oorumitra.tgvctechnologies.in → localhost:3000
 #
 # Run this AFTER start-backend.ps1 and start-web.ps1 are both already running.
 
-cloudflared tunnel --url http://localhost:3000
+& "C:\Program Files (x86)\cloudflared\cloudflared.exe" tunnel --config "$PSScriptRoot\cloudflared-config.yml" run

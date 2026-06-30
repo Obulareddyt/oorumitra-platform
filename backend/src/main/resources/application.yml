@@ -3,12 +3,13 @@ spring:
     name: ooru-mitra-backend
 
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/ooumitra}
-    username: ${DB_USERNAME:ooumitra}
-    password: ${DB_PASSWORD:ooumitra123}
+    url: ${DB_URL:jdbc:mysql://in-mum-web679.main-hosting.eu:3306/u185240877_oorumitra?useSSL=true&allowPublicKeyRetrieval=true&serverTimezone=Asia/Kolkata&characterEncoding=UTF-8}
+    username: ${DB_USERNAME:u185240877_samara}
+    password: ${DB_PASSWORD:Oorumitra@2026#}
+    driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
-      maximum-pool-size: 20
-      minimum-idle: 5
+      maximum-pool-size: 10
+      minimum-idle: 3
       connection-timeout: 30000
 
   jpa:
@@ -17,9 +18,8 @@ spring:
     show-sql: false
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+        dialect: org.hibernate.dialect.MariaDBDialect
         format_sql: true
-        default_schema: public
 
   flyway:
     enabled: true
@@ -59,7 +59,8 @@ jwt:
 msg91:
   auth-key: ${MSG91_AUTH_KEY:your-msg91-auth-key}
   template-id: ${MSG91_TEMPLATE_ID:your-otp-template-id}
-  sender-id: OMITRA
+  notification-template-id: ${MSG91_NOTIFICATION_TEMPLATE_ID:your-notification-template-id}
+  sender-id: ${MSG91_SENDER_ID:OMITRA}
   otp-expiry-minutes: 10
   base-url: https://api.msg91.com/api/v5
 

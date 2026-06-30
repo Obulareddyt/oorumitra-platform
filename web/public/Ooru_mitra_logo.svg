@@ -1,0 +1,146 @@
+<svg viewBox="0 0 560 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="OoruMitra Logo">
+  <defs>
+    <!-- Ring gradient: green → blue → orange -->
+    <linearGradient id="lm-ring" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0%"   stopColor="#2E7D32"/>
+      <stop offset="42%"  stopColor="#0277BD"/>
+      <stop offset="100%" stopColor="#E65100"/>
+    </linearGradient>
+    <!-- Inner sky background -->
+    <linearGradient id="lm-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stopColor="#FFF8F0"/>
+      <stop offset="45%"  stopColor="#E1F5FE"/>
+      <stop offset="100%" stopColor="#F1F8E9"/>
+    </linearGradient>
+    <!-- Sun radial -->
+    <radialGradient id="lm-sun" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stopColor="#FFEE58"/>
+      <stop offset="70%"  stopColor="#FFB300"/>
+      <stop offset="100%" stopColor="#FF8F00"/>
+    </radialGradient>
+    <!-- Sun glow -->
+    <radialGradient id="lm-glow" cx="63%" cy="28%" r="32%">
+      <stop offset="0%"   stopColor="#FFE082" stopOpacity="0.45"/>
+      <stop offset="100%" stopColor="#FF8F00" stopOpacity="0"/>
+    </radialGradient>
+    <!-- Clip to inner circle -->
+    <clipPath id="lm-clip">
+      <circle cx="100" cy="100" r="77"/>
+    </clipPath>
+    <!-- Text gradient -->
+    <linearGradient id="lm-text" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stopColor="#1B5E20"/>
+      <stop offset="55%"  stopColor="#01579B"/>
+      <stop offset="100%" stopColor="#E65100"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ── Icon ── -->
+  <!-- White background circle -->
+  <circle cx="100" cy="100" r="99" fill="white"/>
+  <!-- Gradient ring (the "O") -->
+  <circle cx="100" cy="100" r="96"  fill="url(#lm-ring)"/>
+  <circle cx="100" cy="100" r="79"  fill="white"/>
+
+  <!-- Inner scene, clipped -->
+  <g clip-path="url(#lm-clip)">
+
+    <!-- Sky + ground base -->
+    <circle cx="100" cy="100" r="77" fill="url(#lm-sky)"/>
+
+    <!-- Sun atmospheric glow -->
+    <circle cx="100" cy="100" r="77" fill="url(#lm-glow)"/>
+
+    <!-- Background hills -->
+    <ellipse cx="78"  cy="128" rx="52" ry="16" fill="#C8E6C9" opacity="0.55"/>
+    <ellipse cx="125" cy="131" rx="42" ry="13" fill="#DCEDC8" opacity="0.45"/>
+
+    <!-- ── Sun ── -->
+    <circle cx="126" cy="66" r="13" fill="url(#lm-sun)"/>
+    <!-- Rays -->
+    <g stroke="#FFB300" stroke-width="2" stroke-linecap="round" opacity="0.85">
+      <line x1="126" y1="48" x2="126" y2="43"/>
+      <line x1="137" y1="52" x2="141" y2="48"/>
+      <line x1="143" y1="63" x2="148" y2="62"/>
+      <line x1="115" y1="52" x2="111" y2="48"/>
+      <line x1="109" y1="63" x2="104" y2="62"/>
+    </g>
+
+    <!-- ── Tree (left) ── -->
+    <rect x="54" y="116" width="6" height="22" fill="#6D4C41" rx="2"/>
+    <!-- Canopy layers -->
+    <circle cx="57" cy="112" r="11" fill="#2E7D32"/>
+    <circle cx="57" cy="103" r=" 9" fill="#388E3C"/>
+    <circle cx="57" cy=" 95" r=" 7" fill="#43A047"/>
+
+    <!-- ── Village house ── -->
+    <!-- Body -->
+    <rect x="76" y="115" width="38" height="26" fill="#1565C0" rx="2"/>
+    <!-- Roof -->
+    <polygon points="72,117 95,95 118,117" fill="#BF360C"/>
+    <!-- Door -->
+    <rect x="88" y="128" width="14" height="13" fill="#0D47A1" rx="1.5"/>
+    <!-- Windows -->
+    <rect x="79" y="119" width=" 9" height="7" fill="#64B5F6" rx="1" opacity="0.9"/>
+    <rect x="102" y="119" width=" 9" height="7" fill="#64B5F6" rx="1" opacity="0.9"/>
+
+    <!-- ── Network nodes (upper right) ── -->
+    <circle cx="131" cy="91"  r="3.5" fill="#0288D1"/>
+    <circle cx="144" cy="78"  r="2.8" fill="#0288D1" opacity="0.85"/>
+    <circle cx="148" cy="97"  r="2.4" fill="#0288D1" opacity="0.75"/>
+    <circle cx="138" cy="107" r="2.2" fill="#0288D1" opacity="0.7"/>
+    <circle cx="156" cy="86"  r="2"   fill="#0288D1" opacity="0.6"/>
+    <!-- Connecting lines -->
+    <g stroke="#0288D1" stroke-width="1.2" opacity="0.38">
+      <line x1="131" y1="91"  x2="144" y2="78"/>
+      <line x1="131" y1="91"  x2="148" y2="97"/>
+      <line x1="131" y1="91"  x2="138" y2="107"/>
+      <line x1="144" y1="78"  x2="156" y2="86"/>
+      <line x1="148" y1="97"  x2="156" y2="86"/>
+      <line x1="148" y1="97"  x2="138" y2="107"/>
+    </g>
+
+    <!-- Ground fill -->
+    <path d="M 23 140 Q 100 134 177 140 L 177 177 Q 100 177 23 177 Z" fill="#C8E6C9" opacity="0.55"/>
+    <path d="M 23 145 Q 100 139 177 145 L 177 177 Q 100 177 23 177 Z" fill="#A5D6A7" opacity="0.4"/>
+
+    <!-- Horizon line -->
+    <path d="M 23 140 Q 100 135 177 140" stroke="#4CAF50" stroke-width="1.5" fill="none" opacity="0.5"/>
+
+  </g>
+
+  <!-- Thin inner ring border for polish -->
+  <circle cx="100" cy="100" r="79" fill="none" stroke="#E0E0E0" stroke-width="0.5"/>
+
+  <!-- ── Wordmark ── -->
+  <!-- "Ooru" — primary green-blue -->
+  <text
+    x="210" y="98"
+    font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif"
+    font-size="48"
+    font-weight="800"
+    letter-spacing="-1"
+    fill="url(#lm-text)">Ooru</text>
+
+  <!-- "Mitra" — slightly lighter weight -->
+  <text
+    x="210" y="148"
+    font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif"
+    font-size="48"
+    font-weight="700"
+    letter-spacing="-1"
+    fill="url(#lm-text)">Mitra</text>
+
+  <!-- Tagline -->
+  <text
+    x="212" y="170"
+    font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif"
+    font-size="12.5"
+    font-weight="400"
+    letter-spacing="2.5"
+    fill="#78909C">VILLAGE FRIEND</text>
+
+  <!-- Accent dot between Ooru and Mitra -->
+  <circle cx="197" cy="121" r="3.5" fill="url(#lm-ring)"/>
+
+</svg>

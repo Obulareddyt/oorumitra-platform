@@ -19,5 +19,16 @@ if (-not (Test-Path $secretFile)) {
 }
 $env:JWT_SECRET = Get-Content -Path $secretFile -Raw
 
+# Load additional secrets from .secrets file (gitignored)
+$dotSecrets = "$PSScriptRoot\.secrets"
+if (Test-Path $dotSecrets) {
+    Get-Content $dotSecrets | ForEach-Object {
+        if ($_ -match '^\s*([^#=]+)=(.*)$') {
+            [System.Environment]::SetEnvironmentVariable($Matches[1].Trim(), $Matches[2].Trim(), 'Process')
+        }
+    }
+}
+
 Set-Location "$PSScriptRoot\..\backend"
-java -jar target/ooru-mitra-backend-1.0.0.jar
+java -jar target/ooru-mitra-backend-1.0.0.jar `
+    "--spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MariaDBDialect"

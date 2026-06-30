@@ -17,7 +17,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -25,6 +28,7 @@ import java.util.List;
 public class TransportService {
 
     private final TransportListingRepository repo;
+    private final S3Service s3Service;
 
     @Value("${app.pagination.default-page-size}")
     private int defaultPageSize;
@@ -69,15 +73,20 @@ public class TransportService {
     }
 
     @Transactional
-    public TransportResponse create(TransportRequest req) {
+    public TransportResponse create(TransportRequest req, List<MultipartFile> images) throws IOException {
         User user = SecurityUtils.currentUser();
+        List<String> imageUrls = (images != null && !images.isEmpty())
+                ? s3Service.uploadFiles(images, "transport") : new ArrayList<>();
         TransportListing listing = TransportListing.builder()
                 .user(user).vehicleType(req.getVehicleType())
                 .ownerName(req.getOwnerName()).mobileNumber(req.getMobileNumber())
                 .ratePerKm(req.getRatePerKm()).ratePerHour(req.getRatePerHour())
                 .weightCapacity(req.getWeightCapacity()).negotiable(req.isNegotiable())
                 .availability(req.getAvailability())
+                .village(req.getVillage())
+                .description(req.getDescription())
                 .latitude(req.getLatitude()).longitude(req.getLongitude())
+                .imageUrls(imageUrls)
                 .build();
         return TransportResponse.from(repo.save(listing));
     }

@@ -17,8 +17,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -26,6 +29,7 @@ import java.util.List;
 public class WorkerService {
 
     private final WorkerListingRepository workerRepo;
+    private final S3Service s3Service;
 
     @Value("${app.pagination.default-page-size}")
     private int defaultPageSize;
@@ -83,8 +87,10 @@ public class WorkerService {
     }
 
     @Transactional
-    public WorkerListingResponse create(WorkerListingRequest req) {
+    public WorkerListingResponse create(WorkerListingRequest req, List<MultipartFile> images) throws IOException {
         User user = SecurityUtils.currentUser();
+        List<String> imageUrls = (images != null && !images.isEmpty())
+                ? s3Service.uploadFiles(images, "workers") : new ArrayList<>();
         WorkerListing listing = WorkerListing.builder()
                 .user(user)
                 .groupName(req.getGroupName())
@@ -97,6 +103,8 @@ public class WorkerService {
                 .workType(req.getWorkType())
                 .latitude(req.getLatitude())
                 .longitude(req.getLongitude())
+                .description(req.getDescription())
+                .imageUrls(imageUrls)
                 .build();
         return WorkerListingResponse.from(workerRepo.save(listing));
     }

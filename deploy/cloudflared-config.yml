@@ -1,7 +1,7 @@
-tunnel: bc7cbe72-4434-48f8-878a-724241e8af15
+﻿tunnel: bc7cbe72-4434-48f8-878a-724241e8af15
 credentials-file: C:\Users\LENOVO\.cloudflared\bc7cbe72-4434-48f8-878a-724241e8af15.json
 
 ingress:
-  - hostname: app.oorumitra.in
+  - hostname: oorumitra.tgvctechnologies.in
     service: http://localhost:3000
   - service: http_status:404

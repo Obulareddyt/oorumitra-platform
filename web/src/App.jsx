@@ -13,6 +13,10 @@ import Bookings from './pages/Bookings'
 import Profile from './pages/Profile'
 import Admin from './pages/Admin'
 import Sell from './pages/Sell'
+import ListingDetail from './pages/ListingDetail'
+import RoleManagement from './pages/RoleManagement'
+import VillageManagement from './pages/VillageManagement'
+import UserManagement from './pages/UserManagement'
 
 function Layout({ children }) {
   return (
@@ -50,7 +54,11 @@ export default function App() {
                   <Route path="/bookings" element={<Bookings />} />
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/admin" element={<Admin />} />
+                  <Route path="/admin/roles" element={<RoleManagement />} />
+                  <Route path="/admin/villages" element={<VillageManagement />} />
+                  <Route path="/admin/users" element={<UserManagement />} />
                   <Route path="/sell" element={<Sell />} />
+                  <Route path="/:type/:id" element={<ListingDetail />} />
                 </Routes>
               </Layout>
             }

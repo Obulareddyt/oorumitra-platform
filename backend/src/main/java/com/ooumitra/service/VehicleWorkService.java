@@ -17,7 +17,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -25,6 +28,7 @@ import java.util.List;
 public class VehicleWorkService {
 
     private final VehicleWorkListingRepository repo;
+    private final S3Service s3Service;
 
     @Value("${app.pagination.default-page-size}")
     private int defaultPageSize;
@@ -69,15 +73,19 @@ public class VehicleWorkService {
     }
 
     @Transactional
-    public VehicleWorkResponse create(VehicleWorkRequest req) {
+    public VehicleWorkResponse create(VehicleWorkRequest req, List<MultipartFile> images) throws IOException {
         User user = SecurityUtils.currentUser();
+        List<String> imageUrls = (images != null && !images.isEmpty())
+                ? s3Service.uploadFiles(images, "vehicle-work") : new ArrayList<>();
         VehicleWorkListing listing = VehicleWorkListing.builder()
                 .user(user).vehicleType(req.getVehicleType())
                 .ownerName(req.getOwnerName()).mobileNumber(req.getMobileNumber())
                 .pricePerAcre(req.getPricePerAcre()).pricePerHour(req.getPricePerHour())
                 .village(req.getVillage()).availableStatus(req.isAvailableStatus())
                 .availableUntil(req.getAvailableUntil())
+                .description(req.getDescription())
                 .latitude(req.getLatitude()).longitude(req.getLongitude())
+                .imageUrls(imageUrls)
                 .build();
         return VehicleWorkResponse.from(repo.save(listing));
     }
