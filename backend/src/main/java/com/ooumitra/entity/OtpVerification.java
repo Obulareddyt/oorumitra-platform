@@ -30,6 +30,18 @@ public class OtpVerification {
     @Column(name = "expires_at", nullable = false)
     private Instant expiresAt;
 
+    @Column(name = "attempts", nullable = false)
+    @Builder.Default
+    private int attempts = 0;
+
+    @Column(name = "resend_count", nullable = false)
+    @Builder.Default
+    private int resendCount = 0;
+
+    @Column(name = "channel", length = 20)
+    @Builder.Default
+    private String channel = "SMS";
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;

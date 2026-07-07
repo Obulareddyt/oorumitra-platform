@@ -2,8 +2,11 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { authApi } from '../api/client'
 import { useAuth } from '../context/AuthContext'
+import { useTranslation } from 'react-i18next'
+import { changeAppLanguage, getSavedLanguage } from '../api/i18n'
 
 export default function Login() {
+  const { t } = useTranslation()
   const { login, isLoggedIn } = useAuth()
   const navigate = useNavigate()
 
@@ -110,10 +113,27 @@ export default function Login() {
 
         <div className="bg-white rounded-2xl shadow-lg p-8">
 
+          {/* Language Selection Bar */}
+          <div className="flex justify-end items-center gap-1.5 mb-6 pb-3 border-b border-gray-100">
+            <span className="text-[11px] font-bold text-gray-400 uppercase">🌐 Language:</span>
+            <select
+              value={getSavedLanguage()}
+              onChange={(e) => changeAppLanguage(e.target.value)}
+              className="bg-gray-50 border border-gray-200 text-xs font-semibold rounded-lg px-2.5 py-1 text-gray-700 focus:outline-none focus:ring-1 focus:ring-primary-500 cursor-pointer"
+            >
+              <option value="en">English</option>
+              <option value="te">తెలుగు</option>
+              <option value="ta">தமிழ்</option>
+              <option value="ml">മലയാളം</option>
+              <option value="kn">ಕನ್ನಡ</option>
+              <option value="hi">हिन्दी</option>
+            </select>
+          </div>
+
           {/* ── Credential Login ── */}
           {mode === 'credentials' && (
             <>
-              <h2 className="text-xl font-bold text-gray-800 mb-1">Sign In</h2>
+              <h2 className="text-xl font-bold text-gray-800 mb-1">{t('login.title', 'Sign In')}</h2>
               <p className="text-sm text-gray-500 mb-6">Enter your username and password to continue</p>
 
               <form onSubmit={handleCredentialLogin} className="space-y-4" noValidate>

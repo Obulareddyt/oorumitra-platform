@@ -1,21 +1,52 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useState, useRef, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
+import { changeAppLanguage, getSavedLanguage } from '../api/i18n'
+import { translationsApi } from '../api/client'
 
 export default function Navbar() {
   const { user, logout, isLoggedIn } = useAuth()
   const navigate = useNavigate()
+  const { t } = useTranslation()
+  
   const [menuOpen, setMenuOpen] = useState(false)
   const [adminOpen, setAdminOpen] = useState(false)
+  const [langOpen, setLangOpen] = useState(false)
+  
   const adminRef = useRef(null)
+  const langRef = useRef(null)
+  
   const isSuperAdmin = user?.role === 'SUPER_ADMIN'
   const isAdmin = user?.role === 'ADMIN' || isSuperAdmin
 
+  const [activeLanguages, setActiveLanguages] = useState([
+    { languageCode: 'en', languageName: 'English', nativeName: 'English' },
+    { languageCode: 'te', languageName: 'Telugu', nativeName: 'తెలుగు' },
+    { languageCode: 'ta', languageName: 'Tamil', nativeName: 'தமிழ்' },
+    { languageCode: 'ml', languageName: 'Malayalam', nativeName: 'മലയാളം' },
+    { languageCode: 'kn', languageName: 'Kannada', nativeName: 'ಕನ್ನಡ' },
+    { languageCode: 'hi', languageName: 'Hindi', nativeName: 'हिन्दी' }
+  ])
+
   useEffect(() => {
-    const close = (e) => { if (adminRef.current && !adminRef.current.contains(e.target)) setAdminOpen(false) }
+    translationsApi.getActiveLanguages()
+      .then(res => {
+        if (res && res.length > 0) setActiveLanguages(res)
+      })
+      .catch(err => console.warn('Could not fetch active languages:', err))
+  }, [])
+
+  useEffect(() => {
+    const close = (e) => {
+      if (adminRef.current && !adminRef.current.contains(e.target)) setAdminOpen(false)
+      if (langRef.current && !langRef.current.contains(e.target)) setLangOpen(false)
+    }
     document.addEventListener('mousedown', close)
     return () => document.removeEventListener('mousedown', close)
   }, [])
+
+  const currentLang = activeLanguages.find(l => l.languageCode === getSavedLanguage()) || activeLanguages[0]
 
   const handleLogout = () => { logout(); navigate('/'); setMenuOpen(false) }
 
@@ -29,15 +60,16 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center group">
-            <img src="/Ooru_mitra_logo_2.png" alt="OoruMitra" className="h-10 w-auto transition-transform group-hover:scale-105" />
+            <img src="/logo-primary.svg" alt="OoruMitra" className="h-10 w-auto transition-transform group-hover:scale-105" />
           </Link>
 
           <div className="hidden md:flex items-center gap-6 text-sm">
-            <NavLink to="/products" className={navClass}>Products</NavLink>
-            <NavLink to="/workers" className={navClass}>Workers</NavLink>
-            <NavLink to="/transport" className={navClass}>Transport</NavLink>
-            <NavLink to="/vehicle-work" className={navClass}>Vehicle Work</NavLink>
-            <NavLink to="/emergency" className={navClass}>Emergency</NavLink>
+            <NavLink to="/products" className={navClass}>{t('cat.products', 'Products')}</NavLink>
+            <NavLink to="/workers" className={navClass}>{t('cat.workers', 'Workers')}</NavLink>
+            <NavLink to="/transport" className={navClass}>{t('cat.transport', 'Transport')}</NavLink>
+            <NavLink to="/vehicle-work" className={navClass}>{t('cat.vehicles', 'Vehicle Work')}</NavLink>
+            <NavLink to="/emergency" className={navClass}>{t('cat.emergency', 'Emergency')}</NavLink>
+            <NavLink to="/banner" className={navClass}>Promo Video</NavLink>
 
             {isAdmin && (
               <div className="relative" ref={adminRef}>
@@ -73,8 +105,46 @@ export default function Navbar() {
 
           <div className="flex items-center gap-3">
             <Link to="/sell" className="btn-primary text-sm py-1.5 px-4 hidden sm:inline-block">
-              + Post Ad
+              {t('action.post_ad', '+ Post Ad')}
             </Link>
+
+            {/* Language Selection Dropdown */}
+            <div className="relative" ref={langRef}>
+              <button
+                onClick={() => setLangOpen(!langOpen)}
+                className="flex items-center gap-1.5 text-gray-600 hover:text-primary-600 px-2 py-1.5 rounded-lg border border-gray-200 hover:border-primary-500 bg-white hover:bg-primary-50/20 text-xs font-semibold transition-all cursor-pointer"
+              >
+                <span>🌐</span>
+                <span>{currentLang?.nativeName || 'English'}</span>
+                <span className="text-[10px]">▼</span>
+              </button>
+              {langOpen && (
+                <div className="absolute right-0 mt-2 w-44 bg-white rounded-xl shadow-xl border border-gray-150 py-1.5 z-50 animate-scaleIn origin-top-right">
+                  <div className="px-3 py-1 text-[10px] uppercase font-bold text-gray-400 tracking-wider">
+                    Select Language
+                  </div>
+                  {activeLanguages.map((lang) => (
+                    <button
+                      key={lang.languageCode}
+                      type="button"
+                      onClick={() => {
+                        changeAppLanguage(lang.languageCode)
+                        setLangOpen(false)
+                      }}
+                      className={`w-full text-left px-4 py-2 text-xs font-medium transition-colors flex justify-between items-center ${
+                        currentLang.languageCode === lang.languageCode
+                          ? 'text-primary-600 bg-primary-50/50 font-bold'
+                          : 'text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      <span>{lang.nativeName}</span>
+                      <span className="text-[10px] text-gray-400 font-normal">{lang.languageName}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {isLoggedIn ? (
               <div className="relative">
                 <button

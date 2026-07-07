@@ -29,6 +29,7 @@ public class VehicleWorkService {
 
     private final VehicleWorkListingRepository repo;
     private final S3Service s3Service;
+    private final com.ooumitra.repository.CategoryManagementRepository categoryManagementRepo;
 
     @Value("${app.pagination.default-page-size}")
     private int defaultPageSize;
@@ -44,7 +45,9 @@ public class VehicleWorkService {
         Page<VehicleWorkListing> result = vehicleType != null
                 ? repo.findByVehicleTypeAndIsActiveTrueAndApprovalStatus(vehicleType, ApprovalStatus.APPROVED, pageReq)
                 : repo.findByIsActiveTrueAndApprovalStatus(ApprovalStatus.APPROVED, pageReq);
-        var content = result.getContent().stream().map(VehicleWorkResponse::from).toList();
+        var content = result.getContent().stream()
+                .filter(VehicleWorkListing::isAvailableStatus)
+                .map(VehicleWorkResponse::from).toList();
         return new PagedResponse<>(content, result.getTotalElements(), result.getTotalPages(), page, size);
     }
 
@@ -52,13 +55,15 @@ public class VehicleWorkService {
     public List<VehicleWorkResponse> getNearby(double lat, double lng, double radiusKm, int limit) {
         if (radiusKm <= 0) radiusKm = defaultRadiusKm;
         return repo.findNearby(lat, lng, radiusKm, PageRequest.of(0, limit))
-                .stream().map(VehicleWorkResponse::from).toList();
+                .stream()
+                .filter(VehicleWorkListing::isAvailableStatus)
+                .map(VehicleWorkResponse::from).toList();
     }
 
     @Transactional(readOnly = true)
     public VehicleWorkResponse getById(Long id) {
         return VehicleWorkResponse.from(repo.findById(id)
-                .filter(v -> v.isActive() && v.getApprovalStatus() == ApprovalStatus.APPROVED)
+                .filter(VehicleWorkListing::isActive)
                 .orElseThrow(() -> OoruMitraException.notFound("Vehicle work listing")));
     }
 
@@ -74,6 +79,7 @@ public class VehicleWorkService {
 
     @Transactional
     public VehicleWorkResponse create(VehicleWorkRequest req, List<MultipartFile> images) throws IOException {
+        validateServicesCategoryEnabled();
         User user = SecurityUtils.currentUser();
         List<String> imageUrls = (images != null && !images.isEmpty())
                 ? s3Service.uploadFiles(images, "vehicle-work") : new ArrayList<>();
@@ -92,6 +98,7 @@ public class VehicleWorkService {
 
     @Transactional
     public VehicleWorkResponse update(Long id, VehicleWorkRequest req) {
+        validateServicesCategoryEnabled();
         VehicleWorkListing listing = getOwned(id);
         listing.setVehicleType(req.getVehicleType());
         listing.setOwnerName(req.getOwnerName()); listing.setMobileNumber(req.getMobileNumber());
@@ -109,6 +116,13 @@ public class VehicleWorkService {
         repo.save(listing);
     }
 
+    @Transactional
+    public VehicleWorkResponse updateAvailability(Long id, boolean available) {
+        VehicleWorkListing listing = getOwned(id);
+        listing.setAvailableStatus(available);
+        return VehicleWorkResponse.from(repo.save(listing));
+    }
+
     private VehicleWorkListing getOwned(Long id) {
         Long userId = SecurityUtils.currentUserId();
         VehicleWorkListing listing = repo.findById(id)
@@ -123,5 +137,13 @@ public class VehicleWorkService {
             case "rating" -> Sort.by(Sort.Direction.DESC, "averageRating");
             default -> Sort.by(Sort.Direction.DESC, "createdAt");
         };
+    }
+
+    private void validateServicesCategoryEnabled() {
+        categoryManagementRepo.findByKeyName("SERVICES").ifPresent(c -> {
+            if ("DISABLED".equalsIgnoreCase(c.getStatus())) {
+                throw OoruMitraException.badRequest("New listings are disabled under the " + c.getLabel() + " category.");
+            }
+        });
     }
 }

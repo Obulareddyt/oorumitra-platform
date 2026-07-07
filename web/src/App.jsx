@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import Navbar from './components/Navbar'
 import Home from './pages/Home'
+import PromotionalBanner from './pages/PromotionalBanner'
+import PromotionalVideo from './pages/PromotionalVideo'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Products from './pages/Products'
@@ -17,6 +19,7 @@ import ListingDetail from './pages/ListingDetail'
 import RoleManagement from './pages/RoleManagement'
 import VillageManagement from './pages/VillageManagement'
 import UserManagement from './pages/UserManagement'
+import ScreenshotsShowcase from './pages/ScreenshotsShowcase'
 
 function Layout({ children }) {
   return (
@@ -40,12 +43,15 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/screenshots/:id" element={<ScreenshotsShowcase />} />
           <Route
             path="/*"
             element={
               <Layout>
                 <Routes>
                   <Route path="/" element={<Home />} />
+                  <Route path="/banner" element={<PromotionalBanner />} />
+                  <Route path="/promo" element={<PromotionalVideo />} />
                   <Route path="/products" element={<Products />} />
                   <Route path="/workers" element={<Workers />} />
                   <Route path="/transport" element={<Transport />} />

@@ -1,5 +1,5 @@
 package com.ooumitra.enums;
 
 public enum Language {
-    EN, TE, TA, KN, HI
+    EN, TE, TA, KN, HI, ML
 }

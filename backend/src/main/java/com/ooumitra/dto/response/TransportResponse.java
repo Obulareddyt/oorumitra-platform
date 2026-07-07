@@ -30,6 +30,7 @@ public class TransportResponse {
     private BigDecimal averageRating;
     private Integer ratingCount;
     private ApprovalStatus approvalStatus;
+    private boolean availableStatus;
     private String adminRemarks;
     private Instant decidedAt;
     private String decidedBy;
@@ -47,6 +48,7 @@ public class TransportResponse {
                 .imageUrls(t.getImageUrls())
                 .averageRating(t.getAverageRating()).ratingCount(t.getRatingCount())
                 .approvalStatus(t.getApprovalStatus())
+                .availableStatus(t.isAvailableStatus())
                 .adminRemarks(t.getAdminRemarks())
                 .decidedAt(t.getDecidedAt())
                 .decidedBy(t.getDecidedBy())

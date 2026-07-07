@@ -1,6 +1,7 @@
 package com.ooumitra.dto.request;
 
 import com.ooumitra.enums.ProductCategory;
+import com.ooumitra.enums.ProductAvailabilityStatus;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
@@ -20,4 +21,5 @@ public class ProductRequest {
     private BigDecimal longitude;
     @Size(max = 60) private String availability;
     private String description;
+    private ProductAvailabilityStatus availabilityStatus;
 }

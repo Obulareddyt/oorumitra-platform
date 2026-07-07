@@ -57,9 +57,10 @@ public class DevDataInitializer implements CommandLineRunner {
     }
 
     private void seedOtp() {
+        org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder encoder = new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
         OtpVerification otp = OtpVerification.builder()
                 .mobileNumber(ADMIN_MOBILE)
-                .otp(ADMIN_OTP)
+                .otp(encoder.encode(ADMIN_OTP))
                 .expiresAt(Instant.now().plus(24, ChronoUnit.HOURS))
                 .build();
         otpRepo.save(otp);

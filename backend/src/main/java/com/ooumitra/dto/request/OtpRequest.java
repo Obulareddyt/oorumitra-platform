@@ -8,4 +8,6 @@ import lombok.Data;
 public class OtpRequest {
     @NotBlank @Pattern(regexp = "^[6-9]\\d{9}$", message = "Invalid Indian mobile number")
     private String mobileNumber;
+
+    private String channel = "SMS";
 }

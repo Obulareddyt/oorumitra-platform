@@ -2,6 +2,8 @@ package com.ooumitra.controller;
 
 import com.ooumitra.entity.User;
 import com.ooumitra.enums.Language;
+import com.ooumitra.entity.UserLanguagePreference;
+import com.ooumitra.repository.UserLanguagePreferenceRepository;
 import com.ooumitra.repository.UserRepository;
 import com.ooumitra.util.ApiResponse;
 import com.ooumitra.util.SecurityUtils;
@@ -19,6 +21,7 @@ import java.util.Map;
 public class UserController {
 
     private final UserRepository userRepo;
+    private final UserLanguagePreferenceRepository langPrefRepo;
 
     @GetMapping("/profile")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getProfile() {
@@ -60,8 +63,16 @@ public class UserController {
     @PatchMapping("/language")
     public ResponseEntity<ApiResponse<Void>> updateLanguage(@RequestBody Map<String, String> body) {
         User user = SecurityUtils.currentUser();
-        user.setLanguage(Language.valueOf(body.get("language")));
+        String langCode = body.get("language").toUpperCase();
+        user.setLanguage(Language.valueOf(langCode));
         userRepo.save(user);
+
+        // Update preference table
+        UserLanguagePreference pref = langPrefRepo.findByUserId(user.getId())
+                .orElseGet(() -> UserLanguagePreference.builder().user(user).build());
+        pref.setLanguageCode(langCode.toLowerCase());
+        langPrefRepo.save(pref);
+
         return ResponseEntity.ok(ApiResponse.ok("Language updated"));
     }
 }

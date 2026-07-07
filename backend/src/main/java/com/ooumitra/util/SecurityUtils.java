@@ -20,4 +20,17 @@ public final class SecurityUtils {
     public static Long currentUserId() {
         return currentUser().getId();
     }
+
+    public static User currentUserOrNull() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !(auth.getPrincipal() instanceof User user)) {
+            return null;
+        }
+        return user;
+    }
+
+    public static Long currentUserIdOrNull() {
+        User user = currentUserOrNull();
+        return user != null ? user.getId() : null;
+    }
 }

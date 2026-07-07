@@ -2,6 +2,7 @@ package com.ooumitra.entity;
 
 import com.ooumitra.enums.ApprovalStatus;
 import com.ooumitra.enums.ProductCategory;
+import com.ooumitra.enums.ProductAvailabilityStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -67,6 +68,9 @@ public class Product {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "voice_note_url", length = 255)
+    private String voiceNoteUrl;
+
     @ElementCollection
     @CollectionTable(name = "product_images", joinColumns = @JoinColumn(name = "product_id"))
     @Column(name = "image_url")
@@ -84,6 +88,15 @@ public class Product {
     @Column(name = "is_active", nullable = false)
     @Builder.Default
     private boolean isActive = true;
+
+    @Column(name = "available_status", nullable = false)
+    @Builder.Default
+    private boolean availableStatus = true;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "availability_status", nullable = false, length = 20)
+    @Builder.Default
+    private ProductAvailabilityStatus availabilityStatus = ProductAvailabilityStatus.ACTIVE;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "approval_status", nullable = false, length = 20)

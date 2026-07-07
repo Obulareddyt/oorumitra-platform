@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { authApi } from '../api/client'
 import { useAuth } from '../context/AuthContext'
+import { useTranslation } from 'react-i18next'
+import { changeAppLanguage, getSavedLanguage } from '../api/i18n'
 
 const Req = () => <span className="text-red-500 ml-0.5">*</span>
 
@@ -23,6 +25,7 @@ function validate(form) {
 }
 
 export default function Register() {
+  const { t } = useTranslation()
   const { login, isLoggedIn } = useAuth()
   const navigate = useNavigate()
 
@@ -43,6 +46,18 @@ export default function Register() {
   const [otp, setOtp] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  
+  // OTP enhancements
+  const [channel, setChannel] = useState('SMS')
+  const [timer, setTimer] = useState(0)
+  const [resends, setResends] = useState(0)
+
+  useEffect(() => {
+    if (timer > 0) {
+      const t = setTimeout(() => setTimer(timer - 1), 1000)
+      return () => clearTimeout(t)
+    }
+  }, [timer])
 
   if (isLoggedIn) {
     navigate('/')
@@ -65,14 +80,24 @@ export default function Register() {
   }
 
   const handleSendOtp = async (e) => {
-    e.preventDefault()
+    if (e) e.preventDefault()
     const err = validate(form)
     if (err) { setError(err); return }
+    
+    if (resends >= 3) {
+      setError('Maximum resend attempts reached. Please wait or try again in 5 minutes.')
+      return
+    }
+    
     setLoading(true)
     setError('')
     try {
-      await authApi.sendOtp(form.mobileNumber)
+      await authApi.sendOtp(form.mobileNumber, channel)
       setStep('otp')
+      setTimer(60) // 60 seconds countdown
+      if (step === 'otp') {
+        setResends(r => r + 1)
+      }
     } catch (err) {
       const msg = err.message || ''
       if (msg.toLowerCase().includes('already registered') || msg.toLowerCase().includes('conflict')) {
@@ -102,10 +127,10 @@ export default function Register() {
       const msg = err.message || ''
       if (msg.toLowerCase().includes('already registered')) {
         setError('This mobile number is already registered. Please sign in.')
-      } else if (msg.toLowerCase().includes('invalid') || msg.toLowerCase().includes('expired')) {
-        setError('Invalid or expired OTP. Please go back and request a new one.')
+      } else if (msg.toLowerCase().includes('expired')) {
+        setError('OTP has expired. Please request a new OTP.')
       } else {
-        setError(msg)
+        setError('Invalid OTP. Please try again.')
       }
     } finally {
       setLoading(false)
@@ -116,14 +141,32 @@ export default function Register() {
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-green-100 flex items-center justify-center p-4 py-8">
       <div className="w-full max-w-md">
         <div className="text-center mb-6">
-          <img src="/Ooru_mitra_logo_2.png" alt="OoruMitra" className="h-20 w-auto mx-auto mb-2 drop-shadow" />
-          <p className="text-gray-500 mt-1">Rural Marketplace & Services</p>
+          <img src="/logo-primary.svg" alt="OoruMitra" className="h-16 w-auto mx-auto mb-2 drop-shadow" />
+          <p className="text-gray-500 mt-1 font-semibold text-sm">Rural Marketplace & Services</p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
+
+          {/* Language Selection Bar */}
+          <div className="flex justify-end items-center gap-1.5 mb-6 pb-3 border-b border-gray-100">
+            <span className="text-[11px] font-bold text-gray-400 uppercase">🌐 Language:</span>
+            <select
+              value={getSavedLanguage()}
+              onChange={(e) => changeAppLanguage(e.target.value)}
+              className="bg-gray-50 border border-gray-200 text-xs font-semibold rounded-lg px-2.5 py-1 text-gray-700 focus:outline-none focus:ring-1 focus:ring-primary-500 cursor-pointer"
+            >
+              <option value="en">English</option>
+              <option value="te">తెలుగు</option>
+              <option value="ta">தமிழ்</option>
+              <option value="ml">മലയാളം</option>
+              <option value="kn">ಕನ್ನಡ</option>
+              <option value="hi">हिन्दी</option>
+            </select>
+          </div>
+
           {step === 'details' ? (
             <>
-              <h2 className="text-xl font-bold text-gray-800 mb-1">Create Account</h2>
+              <h2 className="text-xl font-bold text-gray-800 mb-1">{t('register.title', 'Create Account')}</h2>
               <p className="text-sm text-gray-500 mb-5">Fill in your details to get started</p>
 
               <form onSubmit={handleSendOtp} className="space-y-4" noValidate>
@@ -266,6 +309,35 @@ export default function Register() {
                   <input type="email" className="input" placeholder="you@email.com" value={form.email} onChange={update('email')} />
                 </div>
 
+                {/* OTP Delivery Method Option */}
+                <div className="bg-gray-50 rounded-xl p-3 border border-gray-200 text-left">
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                    OTP Delivery Method
+                  </label>
+                  <div className="flex gap-4">
+                    <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                      <input 
+                        type="radio" 
+                        name="otpChannel" 
+                        value="SMS" 
+                        checked={channel === 'SMS'} 
+                        onChange={() => setChannel('SMS')} 
+                      />
+                      Send OTP via SMS
+                    </label>
+                    <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                      <input 
+                        type="radio" 
+                        name="otpChannel" 
+                        value="WHATSAPP" 
+                        checked={channel === 'WHATSAPP'} 
+                        onChange={() => setChannel('WHATSAPP')} 
+                      />
+                      Send OTP via WhatsApp
+                    </label>
+                  </div>
+                </div>
+
                 {error && (
                   <div className="bg-red-50 border border-red-200 rounded-lg p-3">
                     <p className="text-red-700 text-sm">{error}</p>
@@ -292,8 +364,9 @@ export default function Register() {
               </button>
               <h2 className="text-xl font-bold text-gray-800 mb-1">Verify OTP</h2>
               <p className="text-sm text-gray-500 mb-6">
-                OTP sent to <span className="font-semibold text-gray-700">+91 {form.mobileNumber}</span>
+                OTP sent to <span className="font-semibold text-gray-700">+91 {form.mobileNumber}</span> via <span className="font-bold text-primary-600">{channel}</span>
               </p>
+              
               <form onSubmit={handleRegister} className="space-y-4" noValidate>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">OTP<Req /></label>
@@ -309,15 +382,18 @@ export default function Register() {
                   />
                 </div>
                 {error && <p className="text-red-700 text-sm bg-red-50 border border-red-200 rounded-lg p-3">{error}</p>}
-                <button type="submit" disabled={loading} className="btn-primary w-full py-2.5">
+                
+                <button type="submit" disabled={loading || !otp || otp.length !== 6} className="btn-primary w-full py-2.5">
                   {loading ? 'Creating account...' : 'Create Account'}
                 </button>
               </form>
+              
               <button
                 onClick={handleSendOtp}
-                className="text-sm text-primary-600 hover:underline mt-3 block text-center w-full"
+                disabled={loading || timer > 0}
+                className="text-sm text-primary-600 hover:underline mt-4 block text-center w-full disabled:text-gray-400 disabled:no-underline font-bold"
               >
-                Resend OTP
+                {timer > 0 ? `Resend OTP in ${timer}s` : 'Resend OTP'}
               </button>
             </>
           )}

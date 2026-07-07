@@ -67,6 +67,12 @@ public class VehicleWorkController {
         return ResponseEntity.ok(ApiResponse.ok("Updated", vehicleWorkService.update(id, req)));
     }
 
+    @PutMapping("/{id}/availability")
+    public ResponseEntity<ApiResponse<VehicleWorkResponse>> updateAvailability(
+            @PathVariable Long id, @RequestParam boolean available) {
+        return ResponseEntity.ok(ApiResponse.ok("Vehicle work availability updated", vehicleWorkService.updateAvailability(id, available)));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         vehicleWorkService.delete(id);

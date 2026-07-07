@@ -29,6 +29,7 @@ public class TransportService {
 
     private final TransportListingRepository repo;
     private final S3Service s3Service;
+    private final com.ooumitra.repository.CategoryManagementRepository categoryManagementRepo;
 
     @Value("${app.pagination.default-page-size}")
     private int defaultPageSize;
@@ -44,7 +45,9 @@ public class TransportService {
         Page<TransportListing> result = vehicleType != null
                 ? repo.findByVehicleTypeAndIsActiveTrueAndApprovalStatus(vehicleType, ApprovalStatus.APPROVED, pageReq)
                 : repo.findByIsActiveTrueAndApprovalStatus(ApprovalStatus.APPROVED, pageReq);
-        var content = result.getContent().stream().map(TransportResponse::from).toList();
+        var content = result.getContent().stream()
+                .filter(TransportListing::isAvailableStatus)
+                .map(TransportResponse::from).toList();
         return new PagedResponse<>(content, result.getTotalElements(), result.getTotalPages(), page, size);
     }
 
@@ -52,13 +55,15 @@ public class TransportService {
     public List<TransportResponse> getNearby(double lat, double lng, double radiusKm, int limit) {
         if (radiusKm <= 0) radiusKm = defaultRadiusKm;
         return repo.findNearby(lat, lng, radiusKm, PageRequest.of(0, limit))
-                .stream().map(TransportResponse::from).toList();
+                .stream()
+                .filter(TransportListing::isAvailableStatus)
+                .map(TransportResponse::from).toList();
     }
 
     @Transactional(readOnly = true)
     public TransportResponse getById(Long id) {
         return TransportResponse.from(repo.findById(id)
-                .filter(t -> t.isActive() && t.getApprovalStatus() == ApprovalStatus.APPROVED)
+                .filter(TransportListing::isActive)
                 .orElseThrow(() -> OoruMitraException.notFound("Transport listing")));
     }
 
@@ -74,6 +79,7 @@ public class TransportService {
 
     @Transactional
     public TransportResponse create(TransportRequest req, List<MultipartFile> images) throws IOException {
+        validateServicesCategoryEnabled();
         User user = SecurityUtils.currentUser();
         List<String> imageUrls = (images != null && !images.isEmpty())
                 ? s3Service.uploadFiles(images, "transport") : new ArrayList<>();
@@ -93,6 +99,7 @@ public class TransportService {
 
     @Transactional
     public TransportResponse update(Long id, TransportRequest req) {
+        validateServicesCategoryEnabled();
         TransportListing listing = getOwned(id);
         listing.setVehicleType(req.getVehicleType());
         listing.setOwnerName(req.getOwnerName()); listing.setMobileNumber(req.getMobileNumber());
@@ -110,6 +117,13 @@ public class TransportService {
         repo.save(listing);
     }
 
+    @Transactional
+    public TransportResponse updateAvailability(Long id, boolean available) {
+        TransportListing listing = getOwned(id);
+        listing.setAvailableStatus(available);
+        return TransportResponse.from(repo.save(listing));
+    }
+
     private TransportListing getOwned(Long id) {
         Long userId = SecurityUtils.currentUserId();
         TransportListing listing = repo.findById(id)
@@ -124,5 +138,13 @@ public class TransportService {
             case "rating" -> Sort.by(Sort.Direction.DESC, "averageRating");
             default -> Sort.by(Sort.Direction.DESC, "createdAt");
         };
+    }
+
+    private void validateServicesCategoryEnabled() {
+        categoryManagementRepo.findByKeyName("SERVICES").ifPresent(c -> {
+            if ("DISABLED".equalsIgnoreCase(c.getStatus())) {
+                throw OoruMitraException.badRequest("New listings are disabled under the " + c.getLabel() + " category.");
+            }
+        });
     }
 }

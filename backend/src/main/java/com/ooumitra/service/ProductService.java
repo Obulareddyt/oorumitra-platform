@@ -3,12 +3,17 @@ package com.ooumitra.service;
 import com.ooumitra.dto.request.ProductRequest;
 import com.ooumitra.dto.response.PagedResponse;
 import com.ooumitra.dto.response.ProductResponse;
+import com.ooumitra.dto.response.ProductStatusHistoryResponse;
 import com.ooumitra.entity.Product;
+import com.ooumitra.entity.ProductStatusHistory;
 import com.ooumitra.entity.User;
 import com.ooumitra.enums.ApprovalStatus;
 import com.ooumitra.enums.ProductCategory;
+import com.ooumitra.enums.ProductAvailabilityStatus;
+import com.ooumitra.enums.NotificationType;
 import com.ooumitra.exception.OoruMitraException;
 import com.ooumitra.repository.ProductRepository;
+import com.ooumitra.repository.ProductStatusHistoryRepository;
 import com.ooumitra.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +35,9 @@ public class ProductService {
 
     private final ProductRepository productRepo;
     private final S3Service s3Service;
+    private final com.ooumitra.repository.CategoryManagementRepository categoryManagementRepo;
+    private final ProductStatusHistoryRepository productStatusHistoryRepo;
+    private final FCMService fcmService;
 
     @Value("${app.pagination.default-page-size}")
     private int defaultPageSize;
@@ -44,10 +53,11 @@ public class ProductService {
         PageRequest pageReq = PageRequest.of(page, size, sort);
 
         Page<Product> result = (category != null)
-                ? productRepo.findByCategoryAndIsActiveTrueAndApprovalStatus(category, ApprovalStatus.APPROVED, pageReq)
-                : productRepo.findByIsActiveTrueAndApprovalStatus(ApprovalStatus.APPROVED, pageReq);
+                ? productRepo.findByCategoryAndIsActiveTrueAndApprovalStatusAndAvailabilityStatus(category, ApprovalStatus.APPROVED, ProductAvailabilityStatus.ACTIVE, pageReq)
+                : productRepo.findByIsActiveTrueAndApprovalStatusAndAvailabilityStatus(ApprovalStatus.APPROVED, ProductAvailabilityStatus.ACTIVE, pageReq);
 
         var content = result.getContent().stream()
+                .filter(Product::isAvailableStatus)
                 .filter(p -> negotiable == null || p.isNegotiable() == negotiable)
                 .map(ProductResponse::from)
                 .toList();
@@ -58,14 +68,26 @@ public class ProductService {
     public List<ProductResponse> getNearby(double lat, double lng, double radiusKm, int limit) {
         if (radiusKm <= 0) radiusKm = defaultRadiusKm;
         return productRepo.findNearby(lat, lng, radiusKm, PageRequest.of(0, limit))
-                .stream().map(ProductResponse::from).toList();
+                .stream()
+                .filter(Product::isAvailableStatus)
+                .map(ProductResponse::from).toList();
     }
 
     @Transactional(readOnly = true)
     public ProductResponse getById(Long id) {
-        return ProductResponse.from(productRepo.findById(id)
-                .filter(p -> p.isActive() && p.getApprovalStatus() == ApprovalStatus.APPROVED)
-                .orElseThrow(() -> OoruMitraException.notFound("Product")));
+        Product p = productRepo.findById(id)
+                .filter(Product::isActive)
+                .orElseThrow(() -> OoruMitraException.notFound("Product"));
+        
+        if (p.getAvailabilityStatus() == ProductAvailabilityStatus.INACTIVE) {
+            Long currentUserId = SecurityUtils.currentUserIdOrNull();
+            boolean isOwner = currentUserId != null && p.getUser().getId().equals(currentUserId);
+            boolean isAdmin = currentUserId != null && SecurityUtils.currentUser().getRole().name().contains("ADMIN");
+            if (!isOwner && !isAdmin) {
+                throw OoruMitraException.notFound("Product");
+            }
+        }
+        return ProductResponse.from(p);
     }
 
     @Transactional(readOnly = true)
@@ -79,12 +101,18 @@ public class ProductService {
     }
 
     @Transactional
-    public ProductResponse create(ProductRequest req, List<MultipartFile> images) throws IOException {
+    public ProductResponse create(ProductRequest req, List<MultipartFile> images, MultipartFile voiceNote) throws IOException {
+        validateCategoryEnabled(req.getCategory());
         User user = SecurityUtils.currentUser();
         List<String> imageUrls = new ArrayList<>();
         if (images != null && !images.isEmpty()) {
             imageUrls = s3Service.uploadFiles(images, "products");
         }
+        String voiceNoteUrl = null;
+        if (voiceNote != null && !voiceNote.isEmpty()) {
+            voiceNoteUrl = s3Service.uploadFile(voiceNote, "products/audio");
+        }
+        ProductAvailabilityStatus availabilityStatus = req.getAvailabilityStatus() != null ? req.getAvailabilityStatus() : ProductAvailabilityStatus.ACTIVE;
         Product product = Product.builder()
                 .user(user)
                 .productName(req.getProductName())
@@ -99,17 +127,40 @@ public class ProductService {
                 .longitude(req.getLongitude())
                 .availability(req.getAvailability())
                 .description(req.getDescription())
+                .voiceNoteUrl(voiceNoteUrl)
                 .imageUrls(imageUrls)
+                .availabilityStatus(availabilityStatus)
                 .build();
         return ProductResponse.from(productRepo.save(product));
     }
 
     @Transactional
-    public ProductResponse update(Long id, ProductRequest req, List<MultipartFile> images) throws IOException {
+    public ProductResponse update(Long id, ProductRequest req, List<MultipartFile> images, MultipartFile voiceNote) throws IOException {
+        validateCategoryEnabled(req.getCategory());
         Product product = getOwnedProduct(id);
         if (images != null && !images.isEmpty()) {
             product.getImageUrls().forEach(s3Service::deleteFile);
             product.setImageUrls(s3Service.uploadFiles(images, "products"));
+        }
+        if (voiceNote != null && !voiceNote.isEmpty()) {
+            if (product.getVoiceNoteUrl() != null) {
+                s3Service.deleteFile(product.getVoiceNoteUrl());
+            }
+            product.setVoiceNoteUrl(s3Service.uploadFile(voiceNote, "products/audio"));
+        }
+        if (req.getAvailabilityStatus() != null) {
+            ProductAvailabilityStatus oldStatus = product.getAvailabilityStatus();
+            ProductAvailabilityStatus newStatus = req.getAvailabilityStatus();
+            if (oldStatus != newStatus) {
+                product.setAvailabilityStatus(newStatus);
+                productStatusHistoryRepo.save(ProductStatusHistory.builder()
+                        .product(product)
+                        .oldStatus(oldStatus.name())
+                        .newStatus(newStatus.name())
+                        .changedBy(product.getUser())
+                        .remarks("Updated availability status by owner via edit to " + (newStatus == ProductAvailabilityStatus.ACTIVE ? "Active" : "Inactive"))
+                        .build());
+            }
         }
         product.setProductName(req.getProductName());
         product.setCategory(req.getCategory());
@@ -123,6 +174,21 @@ public class ProductService {
         product.setLongitude(req.getLongitude());
         product.setAvailability(req.getAvailability());
         product.setDescription(req.getDescription());
+        return ProductResponse.from(productRepo.save(product));
+    }
+
+    @Transactional
+    public ProductResponse markAsSold(Long id) {
+        Product product = getOwnedProduct(id);
+        product.setApprovalStatus(ApprovalStatus.SOLD);
+        product.setAvailableStatus(false);
+        return ProductResponse.from(productRepo.save(product));
+    }
+
+    @Transactional
+    public ProductResponse updateAvailability(Long id, boolean available) {
+        Product product = getOwnedProduct(id);
+        product.setAvailableStatus(available);
         return ProductResponse.from(productRepo.save(product));
     }
 
@@ -150,5 +216,108 @@ public class ProductService {
             case "rating" -> Sort.by(Sort.Direction.DESC, "averageRating");
             default -> Sort.by(Sort.Direction.DESC, "createdAt");
         };
+    }
+
+    private void validateCategoryEnabled(ProductCategory category) {
+        if (category == null) return;
+        String key = (category == ProductCategory.AGRICULTURE || category == ProductCategory.SEEDS)
+                ? "AGRICULTURE" : "MARKETPLACE";
+        categoryManagementRepo.findByKeyName(key).ifPresent(c -> {
+            if ("DISABLED".equalsIgnoreCase(c.getStatus())) {
+                throw OoruMitraException.badRequest("New listings are disabled under the " + c.getLabel() + " category.");
+            }
+        });
+    }
+
+    @Transactional
+    public ProductResponse updateAvailabilityStatus(Long id, ProductAvailabilityStatus status) {
+        Product product = getOwnedProduct(id);
+        ProductAvailabilityStatus oldStatus = product.getAvailabilityStatus();
+        if (oldStatus != status) {
+            product.setAvailabilityStatus(status);
+            product = productRepo.save(product);
+            
+            productStatusHistoryRepo.save(ProductStatusHistory.builder()
+                    .product(product)
+                    .oldStatus(oldStatus.name())
+                    .newStatus(status.name())
+                    .changedBy(product.getUser())
+                    .remarks("Updated availability status by owner to " + (status == ProductAvailabilityStatus.ACTIVE ? "Active" : "Inactive"))
+                    .build());
+        }
+        return ProductResponse.from(product);
+    }
+
+    @Transactional(readOnly = true)
+    public PagedResponse<ProductResponse> getActiveProducts(int page, int size) {
+        PageRequest pageReq = PageRequest.of(page, size <= 0 ? 20 : size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Product> result = productRepo.findByIsActiveTrueAndApprovalStatusAndAvailabilityStatus(
+                ApprovalStatus.APPROVED, ProductAvailabilityStatus.ACTIVE, pageReq);
+        var content = result.getContent().stream()
+                .filter(Product::isAvailableStatus)
+                .map(ProductResponse::from)
+                .toList();
+        return new PagedResponse<>(content, result.getTotalElements(), result.getTotalPages(), page, size);
+    }
+
+    @Transactional(readOnly = true)
+    public PagedResponse<ProductResponse> getInactiveProducts(int page, int size) {
+        User currentUser = SecurityUtils.currentUser();
+        PageRequest pageReq = PageRequest.of(page, size <= 0 ? 20 : size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Product> result;
+        if (currentUser.getRole().name().contains("ADMIN")) {
+            result = productRepo.findByIsActiveTrueAndAvailabilityStatus(ProductAvailabilityStatus.INACTIVE, pageReq);
+        } else {
+            result = productRepo.findByUserIdAndIsActiveTrueAndAvailabilityStatus(currentUser.getId(), ProductAvailabilityStatus.INACTIVE, pageReq);
+        }
+        var content = result.getContent().stream().map(ProductResponse::from).toList();
+        return new PagedResponse<>(content, result.getTotalElements(), result.getTotalPages(), page, size);
+    }
+
+    @Transactional
+    public ProductResponse adminUpdateProductStatus(Long id, ProductAvailabilityStatus status, String remarks) {
+        Product product = productRepo.findById(id)
+                .orElseThrow(() -> OoruMitraException.notFound("Product"));
+        ProductAvailabilityStatus oldStatus = product.getAvailabilityStatus();
+        
+        product.setAvailabilityStatus(status);
+        product = productRepo.save(product);
+
+        productStatusHistoryRepo.save(ProductStatusHistory.builder()
+                .product(product)
+                .oldStatus(oldStatus.name())
+                .newStatus(status.name())
+                .changedBy(SecurityUtils.currentUser())
+                .remarks(remarks != null && !remarks.isBlank() ? remarks : "Updated availability status by administrator to " + (status == ProductAvailabilityStatus.ACTIVE ? "Active" : "Inactive"))
+                .build());
+
+        String messageBody = "Your product availability status has been updated by the administrator.\n\nStatus: " + 
+                (status == ProductAvailabilityStatus.ACTIVE ? "Active" : "Inactive") + 
+                (remarks != null && !remarks.isBlank() ? "\nRemarks: " + remarks : "");
+
+        fcmService.sendToUser(product.getUser(), "Product Status Updated", messageBody, 
+                NotificationType.PRODUCT_AVAILABILITY, Map.of("productId", String.valueOf(product.getId())));
+
+        return ProductResponse.from(product);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProductStatusHistoryResponse> getStatusHistory(Long id) {
+        Product product = productRepo.findById(id)
+                .orElseThrow(() -> OoruMitraException.notFound("Product"));
+        
+        Long currentUserId = SecurityUtils.currentUserIdOrNull();
+        if (currentUserId == null) {
+            throw new OoruMitraException("Unauthorized", org.springframework.http.HttpStatus.UNAUTHORIZED);
+        }
+        boolean isOwner = product.getUser().getId().equals(currentUserId);
+        boolean isAdmin = SecurityUtils.currentUser().getRole().name().contains("ADMIN");
+        if (!isOwner && !isAdmin) {
+            throw OoruMitraException.forbidden("Cannot view status history of another user's product");
+        }
+
+        return productStatusHistoryRepo.findByProductIdOrderByChangedDateDesc(id).stream()
+                .map(ProductStatusHistoryResponse::from)
+                .toList();
     }
 }

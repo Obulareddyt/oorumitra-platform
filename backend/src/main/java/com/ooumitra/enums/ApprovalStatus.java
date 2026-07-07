@@ -1,5 +1,5 @@
 package com.ooumitra.enums;
 
 public enum ApprovalStatus {
-    PENDING, APPROVED, REJECTED
+    PENDING, APPROVED, REJECTED, SOLD
 }

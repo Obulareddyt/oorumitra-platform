@@ -6,6 +6,7 @@ import com.ooumitra.entity.TransportListing;
 import com.ooumitra.entity.VehicleWorkListing;
 import com.ooumitra.entity.WorkerListing;
 import com.ooumitra.enums.ApprovalStatus;
+import com.ooumitra.enums.ProductAvailabilityStatus;
 import com.ooumitra.exception.OoruMitraException;
 import com.ooumitra.repository.ProductRepository;
 import com.ooumitra.repository.TransportListingRepository;
@@ -80,11 +81,18 @@ public class AdminService {
     }
 
     @Transactional(readOnly = true)
-    public PagedResponse<ProductResponse> getProducts(ApprovalStatus status, int page, int size) {
+    public PagedResponse<ProductResponse> getProducts(ApprovalStatus status, ProductAvailabilityStatus availabilityStatus, int page, int size) {
         PageRequest pr = PageRequest.of(page, size <= 0 ? 20 : size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Product> result = status != null
-                ? productRepo.findAllByApprovalStatus(status, pr)
-                : productRepo.findAll(pr);
+        Page<Product> result;
+        if (status != null && availabilityStatus != null) {
+            result = productRepo.findAllByApprovalStatusAndAvailabilityStatus(status, availabilityStatus, pr);
+        } else if (status != null) {
+            result = productRepo.findAllByApprovalStatus(status, pr);
+        } else if (availabilityStatus != null) {
+            result = productRepo.findAllByAvailabilityStatus(availabilityStatus, pr);
+        } else {
+            result = productRepo.findAll(pr);
+        }
         return new PagedResponse<>(result.getContent().stream().map(ProductResponse::from).toList(),
                 result.getTotalElements(), result.getTotalPages(), page, size);
     }

@@ -5,6 +5,10 @@
 @layer base {
   body {
     @apply bg-gray-50 text-gray-900 antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', sans-serif;
   }
 }
 
@@ -31,3 +35,145 @@
     @apply active:scale-95;
   }
 }
+
+/* Cinematic 3D Banner Animation Classes & Keyframes */
+.cinematic-drone-bg {
+  animation: cinematic-drone 20s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite alternate;
+  will-change: transform;
+}
+
+.float-card-1 {
+  animation: float-ui-card-1 5s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+}
+
+.float-card-2 {
+  animation: float-ui-card-2 5.5s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+}
+
+.float-card-3 {
+  animation: float-ui-card-3 6s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+}
+
+.cinematic-phone {
+  animation: phone-reveal 20s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.cinematic-logo {
+  animation: cinematic-logo-zoom 2.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.cinematic-tagline {
+  animation: tagline-glow 2s cubic-bezier(0.16, 1, 0.3, 1) 1.2s forwards;
+}
+
+.cinematic-rays {
+  animation: light-rays 4s ease-in-out infinite;
+}
+
+.cinematic-tractor {
+  animation: tractor-move 18s linear infinite;
+}
+
+.cinematic-birds {
+  animation: bird-fly 15s linear infinite;
+}
+
+@keyframes cinematic-drone {
+  0% {
+    transform: scale(1.18) translate3d(-30px, -15px, 0px) rotate(0.8deg);
+  }
+  50% {
+    transform: scale(1.08) translate3d(20px, 10px, 0px) rotate(-0.5deg);
+  }
+  100% {
+    transform: scale(1) translate3d(0, 0, 0) rotate(0deg);
+  }
+}
+
+@keyframes float-ui-card-1 {
+  0% { opacity: 0; transform: translate3d(-50px, 80px, 0) scale(0.8); }
+  12% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+  85% { opacity: 1; transform: translate3d(0, -15px, 0) scale(1); }
+  100% { opacity: 0; transform: translate3d(30px, -60px, 0) scale(0.8); }
+}
+
+@keyframes float-ui-card-2 {
+  0% { opacity: 0; transform: translate3d(50px, 90px, 0) scale(0.8); }
+  12% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+  85% { opacity: 1; transform: translate3d(0, -15px, 0) scale(1); }
+  100% { opacity: 0; transform: translate3d(-30px, -60px, 0) scale(0.8); }
+}
+
+@keyframes float-ui-card-3 {
+  0% { opacity: 0; transform: translate3d(0, 100px, 0) scale(0.8); }
+  12% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+  85% { opacity: 1; transform: translate3d(0, -15px, 0) scale(1); }
+  100% { opacity: 0; transform: translate3d(0, -70px, 0) scale(0.8); }
+}
+
+@keyframes cinematic-logo-zoom {
+  0% {
+    opacity: 0;
+    transform: scale(0.6) translateZ(0);
+    filter: blur(10px) brightness(2);
+  }
+  40% {
+    opacity: 0.8;
+    filter: blur(0px) brightness(1.2);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateZ(0);
+    filter: blur(0px) brightness(1);
+  }
+}
+
+@keyframes tagline-glow {
+  0% {
+    opacity: 0;
+    letter-spacing: -0.05em;
+    filter: drop-shadow(0 0 0px rgba(251, 191, 36, 0));
+  }
+  100% {
+    opacity: 1;
+    letter-spacing: 0.05em;
+    filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.4));
+  }
+}
+
+@keyframes light-rays {
+  0%, 100% { opacity: 0.1; }
+  50% { opacity: 0.25; }
+}
+
+@keyframes tractor-move {
+  0% { transform: translate3d(1200px, 345px, 0) scale(0.7) scaleX(-1); }
+  45% { transform: translate3d(300px, 345px, 0) scale(0.7) scaleX(-1); }
+  50% { transform: translate3d(300px, 345px, 0) scale(0.7) scaleX(1); }
+  100% { transform: translate3d(1300px, 345px, 0) scale(0.7) scaleX(1); }
+}
+
+@keyframes bird-fly {
+  0% { transform: translate3d(-100px, 60px, 0) scale(0.5); }
+  100% { transform: translate3d(1400px, -20px, 0) scale(0.8); }
+}
+
+@keyframes phone-reveal {
+  0% { transform: translate3d(-15%, 80%, 100px) rotate3d(1, 0.5, 0.5, 25deg); opacity: 0; }
+  15%, 85% { transform: translate3d(0, 0, 0) rotate3d(0, 0, 0, 0deg); opacity: 1; }
+  100% { transform: translate3d(15%, -80%, 100px) rotate3d(-1, 0.5, -0.5, 25deg); opacity: 0; }
+}
+
+@keyframes float-icon {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-5px) rotate(2deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+.animate-float-icon {
+  animation: float-icon 3s ease-in-out infinite;
+}
+
+

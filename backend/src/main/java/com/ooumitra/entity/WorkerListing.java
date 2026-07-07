@@ -81,6 +81,10 @@ public class WorkerListing {
     @Builder.Default
     private boolean isActive = true;
 
+    @Column(name = "available_status", nullable = false)
+    @Builder.Default
+    private boolean availableStatus = true;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "approval_status", nullable = false, length = 20)
     @Builder.Default

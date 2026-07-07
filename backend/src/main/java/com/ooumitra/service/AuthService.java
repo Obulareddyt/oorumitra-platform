@@ -22,8 +22,13 @@ public class AuthService {
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Transactional
-    public void sendOtp(String mobileNumber) {
-        otpService.sendOtp(mobileNumber);
+    public void sendOtp(String mobileNumber, String channel) {
+        otpService.sendOtp(mobileNumber, channel);
+    }
+
+    @Transactional
+    public void verifyOtpOnly(String mobileNumber, String otp) {
+        otpService.verifyOtpOnly(mobileNumber, otp);
     }
 
     @Transactional

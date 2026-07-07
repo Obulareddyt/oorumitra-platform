@@ -3,6 +3,7 @@ package com.ooumitra.dto.response;
 import com.ooumitra.entity.Product;
 import com.ooumitra.enums.ApprovalStatus;
 import com.ooumitra.enums.ProductCategory;
+import com.ooumitra.enums.ProductAvailabilityStatus;
 import lombok.Builder;
 import lombok.Data;
 
@@ -26,14 +27,18 @@ public class ProductResponse {
     private BigDecimal longitude;
     private String availability;
     private String description;
+    private String voiceNoteUrl;
     private List<String> imageUrls;
     private BigDecimal averageRating;
     private Integer ratingCount;
     private ApprovalStatus approvalStatus;
+    private boolean availableStatus;
     private String adminRemarks;
     private Instant decidedAt;
     private String decidedBy;
     private Instant createdAt;
+    private Instant updatedAt;
+    private ProductAvailabilityStatus availabilityStatus;
 
     public static ProductResponse from(Product p) {
         return ProductResponse.builder()
@@ -44,12 +49,17 @@ public class ProductResponse {
                 .negotiable(p.isNegotiable()).location(p.getLocation())
                 .latitude(p.getLatitude()).longitude(p.getLongitude())
                 .availability(p.getAvailability()).description(p.getDescription())
+                .voiceNoteUrl(p.getVoiceNoteUrl())
                 .imageUrls(p.getImageUrls())
                 .averageRating(p.getAverageRating()).ratingCount(p.getRatingCount())
                 .approvalStatus(p.getApprovalStatus())
+                .availableStatus(p.isAvailableStatus())
                 .adminRemarks(p.getAdminRemarks())
                 .decidedAt(p.getDecidedAt())
                 .decidedBy(p.getDecidedBy())
-                .createdAt(p.getCreatedAt()).build();
+                .createdAt(p.getCreatedAt())
+                .updatedAt(p.getUpdatedAt())
+                .availabilityStatus(p.getAvailabilityStatus())
+                .build();
     }
 }

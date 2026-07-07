@@ -17,7 +17,8 @@ api.interceptors.response.use(
 )
 
 export const authApi = {
-  sendOtp: (mobileNumber) => api.post('/auth/send-otp', { mobileNumber }),
+  sendOtp: (mobileNumber, channel) => api.post('/auth/send-otp', { mobileNumber, channel }),
+  verifyOtp: (mobileNumber, otp) => api.post(`/auth/verify-otp?mobileNumber=${mobileNumber}&otp=${otp}`),
   login: (mobileNumber, otp) => api.post('/auth/login', { mobileNumber, otp }),
   loginWithCredentials: (username, password) => api.post('/auth/login-credentials', { username, password }),
   register: (data) => api.post('/auth/register', data),
@@ -35,8 +36,22 @@ export const productsApi = {
   getAll: (params) => api.get('/products', { params }),
   getById: (id) => api.get(`/products/${id}`),
   create: (data, images, voiceBlob) => multipartCreate('/products', data, images, voiceBlob),
+  update: (id, data, images, voiceBlob) => {
+    const form = new FormData()
+    form.append('data', new Blob([JSON.stringify(data)], { type: 'application/json' }))
+    images?.forEach((img) => form.append('images', img))
+    if (voiceBlob) form.append('voiceNote', voiceBlob, 'voice-note.webm')
+    return api.put(`/products/${id}`, form)
+  },
   delete: (id) => api.delete(`/products/${id}`),
   getMy: (params) => api.get('/products/my', { params }),
+  markAsSold: (id) => api.put(`/products/${id}/sold`),
+  updateAvailability: (id, available) => api.put(`/products/${id}/availability`, null, { params: { available } }),
+  updateAvailabilityStatus: (id, status) => api.put(`/products/${id}/availability-status`, null, { params: { status } }),
+  getActive: (params) => api.get('/products/active', { params }),
+  getInactive: (params) => api.get('/products/inactive', { params }),
+  adminUpdateStatus: (id, status, remarks) => api.put(`/products/admin/${id}/status`, null, { params: { status, remarks } }),
+  getStatusHistory: (id) => api.get(`/products/${id}/status-history`),
 }
 
 export const workersApi = {
@@ -45,6 +60,7 @@ export const workersApi = {
   getMy: (params) => api.get('/workers/my', { params }),
   create: (data, images, voiceBlob) => multipartCreate('/workers', data, images, voiceBlob),
   delete: (id) => api.delete(`/workers/${id}`),
+  updateAvailability: (id, available) => api.put(`/workers/${id}/availability`, null, { params: { available } }),
 }
 
 export const transportApi = {
@@ -53,6 +69,7 @@ export const transportApi = {
   getMy: (params) => api.get('/transport/my', { params }),
   create: (data, images, voiceBlob) => multipartCreate('/transport', data, images, voiceBlob),
   delete: (id) => api.delete(`/transport/${id}`),
+  updateAvailability: (id, available) => api.put(`/transport/${id}/availability`, null, { params: { available } }),
 }
 
 export const vehicleWorkApi = {
@@ -61,6 +78,7 @@ export const vehicleWorkApi = {
   getMy: (params) => api.get('/vehicle-work/my', { params }),
   create: (data, images, voiceBlob) => multipartCreate('/vehicle-work', data, images, voiceBlob),
   delete: (id) => api.delete(`/vehicle-work/${id}`),
+  updateAvailability: (id, available) => api.put(`/vehicle-work/${id}/availability`, null, { params: { available } }),
 }
 
 export const bookingsApi = {
@@ -72,6 +90,7 @@ export const bookingsApi = {
 export const userApi = {
   getProfile: () => api.get('/users/profile'),
   updateProfile: (data) => api.put('/users/profile', data),
+  updateLanguage: (language) => api.patch('/users/language', { language }),
 }
 
 export const emergencyApi = {
@@ -123,6 +142,43 @@ export const adminApi = {
   rejectTransport: (id, data) => api.post(`/admin/transport/${id}/reject`, data),
   approveVehicleWork: (id, data) => api.post(`/admin/vehicle-work/${id}/approve`, data),
   rejectVehicleWork: (id, data) => api.post(`/admin/vehicle-work/${id}/reject`, data),
+}
+
+export const categoryApi = {
+  getEnabled: () => api.get('/categories'),
+  getAllAdmin: () => api.get('/admin/categories'),
+  create: (data) => api.post('/admin/categories', data),
+  update: (id, data) => api.put(`/admin/categories/${id}`, data),
+  delete: (id) => api.delete(`/admin/categories/${id}`),
+}
+
+function multipartAd(url, method, data, mediaFile) {
+  const form = new FormData()
+  form.append('data', new Blob([JSON.stringify(data)], { type: 'application/json' }))
+  if (mediaFile) form.append('mediaFile', mediaFile)
+  return api({ method, url, data: form, headers: { 'Content-Type': 'multipart/form-data' } })
+}
+
+export const adApi = {
+  getActive: (adType) => api.get('/advertisements', { params: adType ? { adType } : {} }),
+  getAllAdmin: () => api.get('/admin/advertisements'),
+  create: (data, mediaFile) => multipartAd('/admin/advertisements', 'POST', data, mediaFile),
+  update: (id, data, mediaFile) => multipartAd(`/admin/advertisements/${id}`, 'PUT', data, mediaFile),
+  delete: (id) => api.delete(`/admin/advertisements/${id}`),
+}
+
+export const translationsApi = {
+  getActiveLanguages: () => api.get('/translations/languages'),
+  getAllLanguages: () => api.get('/translations/languages/all'),
+  getMap: (langCode) => api.get(`/translations/${langCode}`),
+  addKey: (key, defaultValue) => api.post('/translations/add-key', null, { params: { key, defaultValue } }),
+  updateEntry: (key, langCode, value) => api.put('/translations/update', null, { params: { key, langCode, value } }),
+  toggleLanguage: (code, active) => api.put(`/translations/languages/${code}/toggle`, null, { params: { active } }),
+  getStats: () => api.get('/translations/completion-stats'),
+  addLanguage: (code, name, nativeName) => api.post('/translations/languages/add', null, { params: { code, name, nativeName } }),
+  getEntries: () => api.get('/translations/entries'),
+  importMap: (langCode, map) => api.post(`/translations/import/${langCode}`, map),
+  exportMap: (langCode) => api.get(`/translations/export/${langCode}`),
 }
 
 export default api

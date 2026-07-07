@@ -3,6 +3,7 @@ package com.ooumitra.controller;
 import com.ooumitra.dto.request.AdminDecisionRequest;
 import com.ooumitra.dto.response.*;
 import com.ooumitra.enums.ApprovalStatus;
+import com.ooumitra.enums.ProductAvailabilityStatus;
 import com.ooumitra.service.AdminService;
 import com.ooumitra.util.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,9 +38,10 @@ public class AdminController {
     @GetMapping("/products")
     public ResponseEntity<ApiResponse<PagedResponse<ProductResponse>>> getProducts(
             @RequestParam(required = false) ApprovalStatus status,
+            @RequestParam(required = false) ProductAvailabilityStatus availabilityStatus,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        return ResponseEntity.ok(ApiResponse.ok(adminService.getProducts(status, page, size)));
+        return ResponseEntity.ok(ApiResponse.ok(adminService.getProducts(status, availabilityStatus, page, size)));
     }
 
     @GetMapping("/workers")

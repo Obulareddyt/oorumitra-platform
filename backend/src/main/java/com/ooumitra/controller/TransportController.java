@@ -67,6 +67,12 @@ public class TransportController {
         return ResponseEntity.ok(ApiResponse.ok("Updated", transportService.update(id, req)));
     }
 
+    @PutMapping("/{id}/availability")
+    public ResponseEntity<ApiResponse<TransportResponse>> updateAvailability(
+            @PathVariable Long id, @RequestParam boolean available) {
+        return ResponseEntity.ok(ApiResponse.ok("Transport availability updated", transportService.updateAvailability(id, available)));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         transportService.delete(id);

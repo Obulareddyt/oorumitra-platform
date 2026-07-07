@@ -30,6 +30,7 @@ public class WorkerListingResponse {
     private BigDecimal averageRating;
     private Integer ratingCount;
     private ApprovalStatus approvalStatus;
+    private boolean availableStatus;
     private String adminRemarks;
     private Instant decidedAt;
     private String decidedBy;
@@ -47,6 +48,7 @@ public class WorkerListingResponse {
                 .imageUrls(w.getImageUrls())
                 .averageRating(w.getAverageRating()).ratingCount(w.getRatingCount())
                 .approvalStatus(w.getApprovalStatus())
+                .availableStatus(w.isAvailableStatus())
                 .adminRemarks(w.getAdminRemarks())
                 .decidedAt(w.getDecidedAt())
                 .decidedBy(w.getDecidedBy())

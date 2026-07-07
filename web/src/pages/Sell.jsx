@@ -29,6 +29,9 @@ export default function Sell() {
     ownerName: `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim(),
     mobileNumber: user?.mobileNumber ?? '',
     whatsappNumber: '',
+    availability: '',
+    fromDate: '',
+    toDate: '',
   }))
   const [images, setImages] = useState([])
   const [locationFetching, setLocationFetching] = useState(false)
@@ -57,6 +60,9 @@ export default function Sell() {
       ownerName: `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim(),
       mobileNumber: user?.mobileNumber ?? '',
       whatsappNumber: '',
+      availability: '',
+      fromDate: '',
+      toDate: '',
     })
     setImages([])
     setAudioBlob(null)
@@ -158,7 +164,7 @@ export default function Sell() {
           amount: Number(form.amount),
           negotiable: !!form.negotiable,
           location: form.location,
-          availability: form.availability,
+          availability: form.availability || undefined,
         }, images, audioBlob)
       } else if (type === 'WORKER') {
         await workersApi.create({
@@ -169,6 +175,7 @@ export default function Sell() {
           priceType: form.priceType || 'HOUR',
           amount: Number(form.amount),
           workType: form.workType || 'OTHERS',
+          description: `Available: ${form.fromDate} to ${form.toDate}\n\n${form.description || ''}`,
         }, images, audioBlob)
       } else if (type === 'TRANSPORT') {
         await transportApi.create({
@@ -178,8 +185,9 @@ export default function Sell() {
           ratePerHour: form.ratePerHour ? Number(form.ratePerHour) : undefined,
           weightCapacity: form.weightCapacity,
           negotiable: !!form.negotiable,
-          availability: form.availability,
+          availability: `From ${form.fromDate} to ${form.toDate}`,
           village: form.village,
+          description: form.description || undefined,
         }, images, audioBlob)
       } else {
         await vehicleWorkApi.create({
@@ -189,6 +197,8 @@ export default function Sell() {
           pricePerHour: form.pricePerHour ? Number(form.pricePerHour) : undefined,
           village: form.village,
           availableStatus: form.availableStatus ?? true,
+          availableUntil: form.toDate,
+          description: `Available: ${form.fromDate} to ${form.toDate}\n\n${form.description || ''}`,
         }, images, audioBlob)
       }
       setSuccess(true)
@@ -258,7 +268,7 @@ export default function Sell() {
                 <input type="number" className="input" value={form.amount || ''} onChange={update('amount')} required placeholder="0" />
               </Field>
               <Field label="Availability">
-                <input className="input" value={form.availability || ''} onChange={update('availability')} placeholder="e.g. Daily" />
+                <input className="input" value={form.availability || ''} onChange={update('availability')} placeholder="e.g. In Stock" />
               </Field>
             </div>
             <label className="flex items-center gap-2 text-sm text-gray-700">
@@ -293,6 +303,19 @@ export default function Sell() {
                 <input type="number" className="input" value={form.amount || ''} onChange={update('amount')} required placeholder="0" />
               </Field>
             </div>
+            <div className="flex flex-col gap-1 w-full text-left mt-2">
+              <label className="text-xs font-bold text-gray-700">Available Date Range (From - To)<Req /></label>
+              <div className="grid grid-cols-2 gap-2 mt-1">
+                <div className="relative">
+                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">📅</span>
+                  <input type="date" className="input pl-8" value={form.fromDate || ''} onChange={update('fromDate')} required />
+                </div>
+                <div className="relative">
+                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">📅</span>
+                  <input type="date" className="input pl-8" value={form.toDate || ''} onChange={update('toDate')} required />
+                </div>
+              </div>
+            </div>
           </>
         )}
 
@@ -315,9 +338,19 @@ export default function Sell() {
             <Field label="Weight Capacity">
               <input className="input" value={form.weightCapacity || ''} onChange={update('weightCapacity')} placeholder="e.g. 2 Tonnes" />
             </Field>
-            <Field label="Availability">
-              <input className="input" value={form.availability || ''} onChange={update('availability')} placeholder="e.g. Mon-Sat, 6AM-6PM" />
-            </Field>
+            <div className="flex flex-col gap-1 w-full text-left mb-2">
+              <label className="text-xs font-bold text-gray-700">Available Date Range (From - To)<Req /></label>
+              <div className="grid grid-cols-2 gap-2 mt-1">
+                <div className="relative">
+                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">📅</span>
+                  <input type="date" className="input pl-8" value={form.fromDate || ''} onChange={update('fromDate')} required />
+                </div>
+                <div className="relative">
+                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">📅</span>
+                  <input type="date" className="input pl-8" value={form.toDate || ''} onChange={update('toDate')} required />
+                </div>
+              </div>
+            </div>
             <label className="flex items-center gap-2 text-sm text-gray-700">
               <input type="checkbox" checked={!!form.negotiable} onChange={updateChecked('negotiable')} /> Negotiable
             </label>
@@ -339,6 +372,19 @@ export default function Sell() {
               <Field label="Price per Hour (₹)">
                 <input type="number" className="input" value={form.pricePerHour || ''} onChange={update('pricePerHour')} placeholder="optional" />
               </Field>
+            </div>
+            <div className="flex flex-col gap-1 w-full text-left mt-2">
+              <label className="text-xs font-bold text-gray-700">Available Date Range (From - To)<Req /></label>
+              <div className="grid grid-cols-2 gap-2 mt-1">
+                <div className="relative">
+                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">📅</span>
+                  <input type="date" className="input pl-8" value={form.fromDate || ''} onChange={update('fromDate')} required />
+                </div>
+                <div className="relative">
+                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">📅</span>
+                  <input type="date" className="input pl-8" value={form.toDate || ''} onChange={update('toDate')} required />
+                </div>
+              </div>
             </div>
           </>
         )}
@@ -406,40 +452,42 @@ export default function Sell() {
           </div>
         </Field>
 
-        {/* Photos */}
-        <Field label={<>Photos <span className="text-gray-400 font-normal text-xs">(optional, up to 6)</span></>}>
-          <div className="flex flex-wrap gap-3">
-            {images.map((img, i) => (
-              <div key={i} className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200 group">
-                <img src={URL.createObjectURL(img)} alt="" className="w-full h-full object-cover" />
-                <button
-                  type="button"
-                  onClick={() => removeImage(i)}
-                  className="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-black/60 text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                >×</button>
-              </div>
-            ))}
-            {images.length < 6 && (
-              <div className="flex flex-col gap-2">
-                {/* Gallery picker */}
-                <label className="w-20 h-9 rounded-lg border-2 border-dashed border-gray-300 text-gray-400 hover:border-primary-400 flex items-center justify-center text-xl cursor-pointer transition-colors"
-                  title="Choose from gallery">
-                  🖼
-                  <input type="file" accept="image/*" multiple className="hidden" onChange={handleAddImages} />
-                </label>
-                {/* Camera capture */}
-                <label className="w-20 h-9 rounded-lg border-2 border-dashed border-blue-300 text-blue-400 hover:border-blue-500 flex items-center justify-center text-xl cursor-pointer transition-colors"
-                  title="Take a photo">
-                  📷
-                  <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleAddImages} />
-                </label>
-              </div>
+        {/* Photos — Only for Product Listings */}
+        {type === 'PRODUCT' && (
+          <Field label={<>Photos <span className="text-gray-400 font-normal text-xs">(optional, up to 6)</span></>}>
+            <div className="flex flex-wrap gap-3">
+              {images.map((img, i) => (
+                <div key={i} className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200 group">
+                  <img src={URL.createObjectURL(img)} alt="" className="w-full h-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => removeImage(i)}
+                    className="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-black/60 text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  >×</button>
+                </div>
+              ))}
+              {images.length < 6 && (
+                <div className="flex flex-col gap-2">
+                  {/* Gallery picker */}
+                  <label className="w-20 h-9 rounded-lg border-2 border-dashed border-gray-300 text-gray-400 hover:border-primary-400 flex items-center justify-center text-xl cursor-pointer transition-colors"
+                    title="Choose from gallery">
+                    🖼
+                    <input type="file" accept="image/*" multiple className="hidden" onChange={handleAddImages} />
+                  </label>
+                  {/* Camera capture */}
+                  <label className="w-20 h-9 rounded-lg border-2 border-dashed border-blue-300 text-blue-400 hover:border-blue-500 flex items-center justify-center text-xl cursor-pointer transition-colors"
+                    title="Take a photo">
+                    📷
+                    <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleAddImages} />
+                  </label>
+                </div>
+              )}
+            </div>
+            {images.length === 0 && (
+              <p className="text-xs text-gray-400 mt-1">No photos added — you can add up to 6</p>
             )}
-          </div>
-          {images.length === 0 && (
-            <p className="text-xs text-gray-400 mt-1">No photos added — you can add up to 6</p>
-          )}
-        </Field>
+          </Field>
+        )}
 
         {/* Voice note */}
         <Field label="Voice Note (optional)">

@@ -25,4 +25,7 @@ public interface OtpVerificationRepository extends JpaRepository<OtpVerification
     @Transactional
     @Query("DELETE FROM OtpVerification o WHERE o.expiresAt < :cutoff")
     void deleteExpired(Instant cutoff);
+
+    @Query("SELECT COUNT(o) FROM OtpVerification o WHERE o.mobileNumber = :mobileNumber AND o.createdAt >= :cutoff")
+    long countOtpsSentInLastFiveMinutes(String mobileNumber, Instant cutoff);
 }

@@ -30,6 +30,7 @@ public class WorkerService {
 
     private final WorkerListingRepository workerRepo;
     private final S3Service s3Service;
+    private final com.ooumitra.repository.CategoryManagementRepository categoryManagementRepo;
 
     @Value("${app.pagination.default-page-size}")
     private int defaultPageSize;
@@ -53,6 +54,7 @@ public class WorkerService {
         }
 
         var filtered = result.getContent().stream()
+                .filter(WorkerListing::isAvailableStatus)
                 .filter(w -> village == null || w.getVillage().equalsIgnoreCase(village))
                 .filter(w -> minAmount == null || w.getAmount().compareTo(minAmount) >= 0)
                 .filter(w -> maxAmount == null || w.getAmount().compareTo(maxAmount) <= 0)
@@ -66,13 +68,15 @@ public class WorkerService {
     public List<WorkerListingResponse> getNearby(double lat, double lng, double radiusKm, int limit) {
         if (radiusKm <= 0) radiusKm = defaultRadiusKm;
         return workerRepo.findNearby(lat, lng, radiusKm, PageRequest.of(0, limit))
-                .stream().map(WorkerListingResponse::from).toList();
+                .stream()
+                .filter(WorkerListing::isAvailableStatus)
+                .map(WorkerListingResponse::from).toList();
     }
 
     @Transactional(readOnly = true)
     public WorkerListingResponse getById(Long id) {
         return WorkerListingResponse.from(workerRepo.findById(id)
-                .filter(w -> w.isActive() && w.getApprovalStatus() == ApprovalStatus.APPROVED)
+                .filter(WorkerListing::isActive)
                 .orElseThrow(() -> OoruMitraException.notFound("Worker listing")));
     }
 
@@ -88,6 +92,7 @@ public class WorkerService {
 
     @Transactional
     public WorkerListingResponse create(WorkerListingRequest req, List<MultipartFile> images) throws IOException {
+        validateJobsCategoryEnabled();
         User user = SecurityUtils.currentUser();
         List<String> imageUrls = (images != null && !images.isEmpty())
                 ? s3Service.uploadFiles(images, "workers") : new ArrayList<>();
@@ -111,6 +116,7 @@ public class WorkerService {
 
     @Transactional
     public WorkerListingResponse update(Long id, WorkerListingRequest req) {
+        validateJobsCategoryEnabled();
         WorkerListing listing = getOwnedListing(id);
         listing.setGroupName(req.getGroupName());
         listing.setOwnerName(req.getOwnerName());
@@ -132,6 +138,13 @@ public class WorkerService {
         workerRepo.save(listing);
     }
 
+    @Transactional
+    public WorkerListingResponse updateAvailability(Long id, boolean available) {
+        WorkerListing listing = getOwnedListing(id);
+        listing.setAvailableStatus(available);
+        return WorkerListingResponse.from(workerRepo.save(listing));
+    }
+
     private WorkerListing getOwnedListing(Long id) {
         Long userId = SecurityUtils.currentUserId();
         WorkerListing listing = workerRepo.findById(id)
@@ -149,5 +162,13 @@ public class WorkerService {
             case "rating" -> Sort.by(Sort.Direction.DESC, "averageRating");
             default -> Sort.by(Sort.Direction.DESC, "createdAt");
         };
+    }
+
+    private void validateJobsCategoryEnabled() {
+        categoryManagementRepo.findByKeyName("JOBS").ifPresent(c -> {
+            if ("DISABLED".equalsIgnoreCase(c.getStatus())) {
+                throw OoruMitraException.badRequest("New listings are disabled under the " + c.getLabel() + " category.");
+            }
+        });
     }
 }

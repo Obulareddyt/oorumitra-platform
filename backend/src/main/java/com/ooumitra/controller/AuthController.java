@@ -25,8 +25,15 @@ public class AuthController {
     @PostMapping("/send-otp")
     @Operation(summary = "Send OTP to mobile number")
     public ResponseEntity<ApiResponse<Void>> sendOtp(@Valid @RequestBody OtpRequest req) {
-        authService.sendOtp(req.getMobileNumber());
+        authService.sendOtp(req.getMobileNumber(), req.getChannel());
         return ResponseEntity.ok(ApiResponse.ok("OTP sent successfully"));
+    }
+
+    @PostMapping("/verify-otp")
+    @Operation(summary = "Verify OTP code only")
+    public ResponseEntity<ApiResponse<Void>> verifyOtpOnly(@RequestParam String mobileNumber, @RequestParam String otp) {
+        authService.verifyOtpOnly(mobileNumber, otp);
+        return ResponseEntity.ok(ApiResponse.ok("Mobile number verified successfully."));
     }
 
     @PostMapping("/register")

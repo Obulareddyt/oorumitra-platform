@@ -75,6 +75,13 @@ public class WorkerController {
         return ResponseEntity.ok(ApiResponse.ok("Worker listing updated", workerService.update(id, req)));
     }
 
+    @PutMapping("/{id}/availability")
+    @Operation(summary = "Update worker listing availability status")
+    public ResponseEntity<ApiResponse<WorkerListingResponse>> updateAvailability(
+            @PathVariable Long id, @RequestParam boolean available) {
+        return ResponseEntity.ok(ApiResponse.ok("Worker availability updated", workerService.updateAvailability(id, available)));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         workerService.delete(id);
