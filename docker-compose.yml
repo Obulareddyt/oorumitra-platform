@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: oorumitra-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: oorumitra
+      MYSQL_ROOT_PASSWORD: root_password_here
+      MYSQL_USER: oorumitra_user
+      MYSQL_PASSWORD: oorumitra_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      timeout: 20s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: oorumitra-backend
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:mysql://db:3306/oorumitra?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Kolkata
+      DB_USERNAME: oorumitra_user
+      DB_PASSWORD: oorumitra_password
+      JWT_SECRET: OoruMitraSecretKey2026OoruMitraSecretKey2026OoruMitraSecretKey2026
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: oorumitra-web
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  db_data:
