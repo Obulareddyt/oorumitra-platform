@@ -46,15 +46,15 @@ const slides = [
     image: 'C:/Users/LENOVO/.gemini/antigravity-ide/brain/b86b39ba-bccc-4b42-9422-8d1aa21fd2e6/05_profile_view_1783228392760.png'
   },
   {
-    title: 'Screen 06 – Post Advertisement',
+    title: 'Screen 06 – Create Post',
     filename: '06_Post_Advertisement.png',
-    description: 'Ad posting form allowing sellers to describe and rate their products.\n\nKey UI/UX Elements:\n• Category selector dropdown (Agriculture, Cattle, etc.)\n• Dynamic fields: Title, Text description, Amount\n• Upload Photos placeholder box\n• "Publish Advertisement" solid action button',
+    description: 'Post creation form allowing sellers to describe and price their products.\n\nKey UI/UX Elements:\n• Category selector dropdown (Agriculture, Cattle, etc.)\n• Dynamic fields: Title, Text description, Amount\n• Upload Photos placeholder box\n• "Submit" solid action button',
     image: 'C:/Users/LENOVO/.gemini/antigravity-ide/brain/b86b39ba-bccc-4b42-9422-8d1aa21fd2e6/06_post_advertisement_1783228410634.png'
   },
   {
-    title: 'Screen 07 – Product Posted Successfully',
+    title: 'Screen 07 – Post Submission Success',
     filename: '07_Post_Success.png',
-    description: 'Clean transaction success confirmation popup.\n\nKey UI/UX Elements:\n• Green circular verification check icon\n• Message: "Your advertisement has been submitted successfully"\n• Pending admin verification yellow warning badge\n• Solid "Back to Home" primary button',
+    description: 'Clean transaction success confirmation popup.\n\nKey UI/UX Elements:\n• Green circular verification check icon\n• Message: "Your post has been submitted successfully"\n• Pending admin verification yellow warning badge\n• Solid "Back to Home" primary button',
     image: 'C:/Users/LENOVO/.gemini/antigravity-ide/brain/b86b39ba-bccc-4b42-9422-8d1aa21fd2e6/07_post_success_1783228411879.png'
   },
   {

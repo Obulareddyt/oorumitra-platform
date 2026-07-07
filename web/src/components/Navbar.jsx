@@ -105,7 +105,7 @@ export default function Navbar() {
 
           <div className="flex items-center gap-3">
             <Link to="/sell" className="btn-primary text-sm py-1.5 px-4 hidden sm:inline-block">
-              {t('action.post_ad', '+ Post Ad')}
+              {t('action.post_ad', 'Create Post')}
             </Link>
 
             {/* Language Selection Dropdown */}
@@ -186,7 +186,7 @@ export default function Navbar() {
         {menuOpen && (
           <div className="md:hidden border-t border-gray-100 py-3 flex flex-col gap-2 text-sm">
             {[
-              ['/sell', '+ Post Ad'],
+              ['/sell', 'Create Post'],
               ['/products', 'Products'],
               ['/workers', 'Workers'],
               ['/transport', 'Transport'],

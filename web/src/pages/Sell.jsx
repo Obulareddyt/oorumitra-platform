@@ -3,6 +3,7 @@ import { useNavigate, Navigate } from 'react-router-dom'
 import { productsApi, workersApi, transportApi, vehicleWorkApi } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import PlacesInput from '../components/PlacesInput'
+import { useTranslation } from 'react-i18next'
 
 const TYPES = [
   { key: 'PRODUCT', label: 'Product', icon: '🛒' },
@@ -23,6 +24,7 @@ const titleCase = (s) => s.charAt(0) + s.slice(1).toLowerCase().replace(/_/g, ' 
 export default function Sell() {
   const { isLoggedIn, user } = useAuth()
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   const [type, setType] = useState('PRODUCT')
   const [form, setForm] = useState(() => ({
@@ -227,7 +229,7 @@ export default function Sell() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
-      <h1 className="text-2xl font-bold text-gray-900 mb-1">Post a Listing 📢</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-1">{t('action.post_ad', 'Create Post')} 📢</h1>
       <p className="text-gray-500 text-sm mb-6">Sell a product or offer a service — listings go live after admin approval</p>
 
       {/* Type tabs */}
@@ -526,7 +528,7 @@ export default function Sell() {
         {error && <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3">{error}</p>}
 
         <button type="submit" disabled={loading} className="btn-primary w-full py-2.5">
-          {loading ? 'Submitting…' : 'Submit for Approval'}
+          {loading ? t('action.submitting', 'Submitting…') : t('action.submit', 'Submit')}
         </button>
       </form>
     </div>

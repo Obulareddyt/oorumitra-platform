@@ -6,7 +6,7 @@ const SCREEN_DATA = {
   3: { title: '03_User_Registration.png', header: 'User Registration' },
   4: { title: '04_Home_Dashboard.png', header: 'Home Dashboard' },
   5: { title: '05_Profile_View.png', header: 'User Profile' },
-  6: { title: '06_Post_Advertisement.png', header: 'Post Advertisement' },
+  6: { title: '06_Post_Advertisement.png', header: 'Create Post' },
   7: { title: '07_Post_Success.png', header: 'Submission Success' },
   8: { title: '08_My_Products.png', header: 'My Listings' },
   9: { title: '09_Workers_List.png', header: 'Workers Listings' },
@@ -243,12 +243,12 @@ export default function ScreenshotsShowcase() {
             </div>
           )}
 
-          {/* Screen 6: Post Advertisement */}
+          {/* Screen 6: Create Post */}
           {screenId === 6 && (
             <div className="absolute inset-0 bg-slate-900 flex flex-col justify-between p-5 overflow-y-auto">
               <div className="text-left pt-2 border-b border-slate-800 pb-2">
-                <h2 className="text-sm font-black text-white uppercase tracking-wider">Post New Advertisement</h2>
-                <p className="text-[10px] text-slate-400 mt-0.5">Submit item listing for village verification</p>
+                <h2 className="text-sm font-black text-white uppercase tracking-wider">Create New Post</h2>
+                <p className="text-[10px] text-slate-400 mt-0.5">Submit post details for village verification</p>
               </div>
 
               <div className="space-y-3.5 my-4 text-xs">
@@ -280,7 +280,7 @@ export default function ScreenshotsShowcase() {
                 </div>
               </div>
 
-              <button className="w-full bg-indigo-600 text-white font-bold py-2.5 rounded-xl text-xs shadow mb-2">Publish Advertisement</button>
+              <button className="w-full bg-indigo-600 text-white font-bold py-2.5 rounded-xl text-xs shadow mb-2">Submit</button>
             </div>
           )}
 
@@ -293,7 +293,7 @@ export default function ScreenshotsShowcase() {
                   ✓
                 </div>
                 <div className="space-y-1.5">
-                  <h2 className="text-md font-bold text-white">Your advertisement has been submitted successfully</h2>
+                  <h2 className="text-md font-bold text-white">Your post has been submitted successfully</h2>
                   <p className="text-xs text-slate-400 px-4 leading-normal">Our village administrator will verify and approve your listing shortly.</p>
                 </div>
                 <span className="inline-block bg-amber-500/15 text-amber-500 font-bold border border-amber-500/20 text-[10px] uppercase px-3 py-1 rounded-full">

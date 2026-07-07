@@ -38,7 +38,8 @@ export async function initializeI18n() {
         'action.search': 'Search',
         'profile.settings': 'Settings',
         'profile.logout': 'Logout',
-        'action.post_ad': 'Post Advertisement'
+        'action.post_ad': 'Create Post',
+        'action.submit': 'Submit'
       }
     }
   }
