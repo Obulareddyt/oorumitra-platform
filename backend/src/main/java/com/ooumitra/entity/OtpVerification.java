@@ -20,7 +20,7 @@ public class OtpVerification {
     @Column(name = "mobile_number", nullable = false, length = 15)
     private String mobileNumber;
 
-    @Column(name = "otp", nullable = false, length = 6)
+    @Column(name = "otp", nullable = false, length = 255)
     private String otp;
 
     @Column(name = "is_used", nullable = false)

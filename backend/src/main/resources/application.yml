@@ -3,7 +3,7 @@ spring:
     name: ooru-mitra-backend
 
   datasource:
-    url: ${DB_URL:jdbc:mysql://in-mum-web679.main-hosting.eu:3306/u185240877_oorumitra?useSSL=true&allowPublicKeyRetrieval=true&serverTimezone=Asia/Kolkata&characterEncoding=UTF-8}
+    url: ${DB_URL:jdbc:mysql://${DB_HOST:in-mum-web679.main-hosting.eu}:${DB_PORT:3306}/${DB_NAME:u185240877_oorumitra}?useSSL=true&allowPublicKeyRetrieval=true&serverTimezone=Asia/Kolkata&characterEncoding=UTF-8}
     username: ${DB_USERNAME:u185240877_samara}
     password: ${DB_PASSWORD:Oorumitra@2026#}
     driver-class-name: com.mysql.cj.jdbc.Driver
