@@ -26,7 +26,11 @@ services:
       - key: DB_PASSWORD
         sync: false
 
-      # Production CORS — the deployed web origin (comma-separated for multiple)
+      # Production CORS — the deployed web origin.
+      # Render service URLs are deterministic (<name>.onrender.com), so this is
+      # pre-linked to the ooumitra-web service — no manual wiring needed.
+      # (fromService returns only the bare host and can't add the https:// scheme,
+      #  so the full origin is set explicitly here to match the web service URL.)
       - key: CORS_ALLOWED_ORIGINS
         value: https://ooumitra-web.onrender.com
 
@@ -76,6 +80,17 @@ services:
       # Google Maps (browser key)
       - key: VITE_GOOGLE_MAPS_KEY
         sync: false
-      # Set to https://ooumitra-backend.onrender.com/api after backend first deploys
+      # API base — pre-linked to the ooumitra-backend service.
+      # Render service URLs are deterministic (<name>.onrender.com), so this is
+      # baked at build time with no manual step. If you rename the backend service,
+      # update this host to match.
+      #
+      # Equivalent fromService reference (returns bare host only — cannot add the
+      # https:// scheme or the /api path, which is why the full URL is set as a value):
+      #   - key: BACKEND_HOST
+      #     fromService:
+      #       type: web
+      #       name: ooumitra-backend
+      #       property: host
       - key: VITE_API_URL
-        sync: false
+        value: https://ooumitra-backend.onrender.com/api
