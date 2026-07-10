@@ -11,7 +11,7 @@ export default defineConfig({
   },
   preview: {
     port: 3000,
-    allowedHosts: true,
+    allowedHosts: ['localhost', '.trycloudflare.com', '.tgvctechnologies.in'],
     proxy: {
       '/api': 'http://localhost:8080',
     },
