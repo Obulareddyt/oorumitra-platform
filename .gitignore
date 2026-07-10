@@ -22,7 +22,8 @@ mobile/ios/GoogleService-Info.plist
 # Environment / secrets
 *.env
 .env.*
-backend/src/main/resources/application-prod.yml
+# NOTE: application-prod.yml is now secret-free (all values come from env vars),
+# so it is tracked and shipped in the image. Never add literal secrets to it.
 backend/src/main/resources/firebase-service-account.json
 deploy/.jwt-secret
 deploy/.secrets

@@ -8,14 +8,27 @@ services:
     plan: free
     region: singapore
     healthCheckPath: /actuator/health
+    autoDeploy: true
     envVars:
-      # Hostinger MariaDB — fill in Render dashboard
-      - key: DB_URL
-        value: "jdbc:mysql://in-mum-web679.main-hosting.eu:3306/u185240877_oorumitra?useSSL=true&allowPublicKeyRetrieval=true&serverTimezone=Asia/Kolkata&characterEncoding=UTF-8"
+      # Enable production profile (application-prod.yml)
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+
+      # Hostinger MariaDB — set secret values in the Render dashboard
+      - key: DB_HOST
+        value: in-mum-web679.main-hosting.eu
+      - key: DB_PORT
+        value: "3306"
+      - key: DB_NAME
+        value: u185240877_oorumitra
       - key: DB_USERNAME
         sync: false
       - key: DB_PASSWORD
         sync: false
+
+      # Production CORS — the deployed web origin (comma-separated for multiple)
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://ooumitra-web.onrender.com
 
       # JWT — auto-generated secure secret
       - key: JWT_SECRET
