@@ -6,7 +6,7 @@ react {
     // Autolinking is handled via settings.gradle
 }
 
-def enableProguardInReleaseBuilds = true
+def enableProguardInReleaseBuilds = false
 def jscFlavor = 'org.webkit:android-jsc:+'
 
 android {

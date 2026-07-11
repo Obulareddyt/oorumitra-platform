@@ -17,24 +17,34 @@ const AppContent: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    // Push notifications are optional. If Firebase isn't configured
+    // (no google-services.json), skip FCM entirely instead of crashing.
+    let unsubscribe: (() => void) | undefined;
     const setupFCM = async () => {
-      const authStatus = await messaging().requestPermission();
-      const enabled = authStatus === messaging.AuthorizationStatus.AUTHORIZED
-        || authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-      if (enabled) {
-        const token = await messaging().getToken();
-        if (token) {
-          try {
-            await userService.updateFcmToken(token);
-          } catch (_) {}
+      try {
+        const authStatus = await messaging().requestPermission();
+        const enabled = authStatus === messaging.AuthorizationStatus.AUTHORIZED
+          || authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+        if (enabled) {
+          const token = await messaging().getToken();
+          if (token) {
+            try {
+              await userService.updateFcmToken(token);
+            } catch (_) {}
+          }
         }
+        unsubscribe = messaging().onTokenRefresh(async token => {
+          try {await userService.updateFcmToken(token);} catch (_) {}
+        });
+      } catch (_) {
+        // Firebase unavailable — continue without push notifications.
       }
     };
     setupFCM();
 
-    return messaging().onTokenRefresh(async token => {
-      try {await userService.updateFcmToken(token);} catch (_) {}
-    });
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, []);
 
   return (
