@@ -1328,7 +1328,7 @@ export default function Admin() {
                       }`} />
                       <div className="bg-gray-50 rounded-xl p-3.5 border border-gray-100">
                         <div className="flex justify-between items-center flex-wrap gap-2 text-xs">
-                          <span className="font-bold text-gray-800">Changed by: {log.changedBy}</span>
+                          <span className="font-bold text-gray-800">Changed by: {log.changedBy} ({log.role || 'User'})</span>
                           <span className="text-gray-400">{new Date(log.changedDate).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}</span>
                         </div>
                         <div className="flex items-center gap-2 mt-2">

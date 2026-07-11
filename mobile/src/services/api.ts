@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const BASE_URL = __DEV__
   ? 'http://10.0.2.2:8080/api'   // Android emulator → localhost
-  : 'https://api.ooumitra.com/api';
+  : 'https://ooumitra-backend.onrender.com/api';
 
 export const api = axios.create({
   baseURL: BASE_URL,

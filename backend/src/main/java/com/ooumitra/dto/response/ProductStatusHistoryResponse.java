@@ -16,6 +16,7 @@ public class ProductStatusHistoryResponse {
     private Long changedById;
     private String remarks;
     private Instant changedDate;
+    private String role;
 
     public static ProductStatusHistoryResponse from(ProductStatusHistory history) {
         return ProductStatusHistoryResponse.builder()
@@ -27,6 +28,7 @@ public class ProductStatusHistoryResponse {
                 .changedById(history.getChangedBy().getId())
                 .remarks(history.getRemarks())
                 .changedDate(history.getChangedDate())
+                .role(history.getRole())
                 .build();
     }
 }

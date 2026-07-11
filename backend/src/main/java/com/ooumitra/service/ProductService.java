@@ -113,6 +113,9 @@ public class ProductService {
             voiceNoteUrl = s3Service.uploadFile(voiceNote, "products/audio");
         }
         ProductAvailabilityStatus availabilityStatus = req.getAvailabilityStatus() != null ? req.getAvailabilityStatus() : ProductAvailabilityStatus.ACTIVE;
+        String userFullName = user.getFirstName() + " " + user.getLastName();
+        String updaterRole = (user.getRole() == com.ooumitra.enums.Role.SUPER_ADMIN || user.getRole() == com.ooumitra.enums.Role.ADMIN) ? "Super Admin" : "User";
+
         Product product = Product.builder()
                 .user(user)
                 .productName(req.getProductName())
@@ -130,6 +133,9 @@ public class ProductService {
                 .voiceNoteUrl(voiceNoteUrl)
                 .imageUrls(imageUrls)
                 .availabilityStatus(availabilityStatus)
+                .statusUpdatedBy(userFullName)
+                .statusUpdatedDate(java.time.Instant.now())
+                .statusUpdatedRole(updaterRole)
                 .build();
         return ProductResponse.from(productRepo.save(product));
     }
@@ -153,11 +159,15 @@ public class ProductService {
             ProductAvailabilityStatus newStatus = req.getAvailabilityStatus();
             if (oldStatus != newStatus) {
                 product.setAvailabilityStatus(newStatus);
+                product.setStatusUpdatedBy(product.getUser().getFirstName() + " " + product.getUser().getLastName());
+                product.setStatusUpdatedDate(java.time.Instant.now());
+                product.setStatusUpdatedRole("User");
                 productStatusHistoryRepo.save(ProductStatusHistory.builder()
                         .product(product)
                         .oldStatus(oldStatus.name())
                         .newStatus(newStatus.name())
                         .changedBy(product.getUser())
+                        .role("User")
                         .remarks("Updated availability status by owner via edit to " + (newStatus == ProductAvailabilityStatus.ACTIVE ? "Active" : "Inactive"))
                         .build());
             }
@@ -235,6 +245,9 @@ public class ProductService {
         ProductAvailabilityStatus oldStatus = product.getAvailabilityStatus();
         if (oldStatus != status) {
             product.setAvailabilityStatus(status);
+            product.setStatusUpdatedBy(product.getUser().getFirstName() + " " + product.getUser().getLastName());
+            product.setStatusUpdatedDate(java.time.Instant.now());
+            product.setStatusUpdatedRole("User");
             product = productRepo.save(product);
             
             productStatusHistoryRepo.save(ProductStatusHistory.builder()
@@ -242,6 +255,7 @@ public class ProductService {
                     .oldStatus(oldStatus.name())
                     .newStatus(status.name())
                     .changedBy(product.getUser())
+                    .role("User")
                     .remarks("Updated availability status by owner to " + (status == ProductAvailabilityStatus.ACTIVE ? "Active" : "Inactive"))
                     .build());
         }
@@ -279,20 +293,28 @@ public class ProductService {
         Product product = productRepo.findById(id)
                 .orElseThrow(() -> OoruMitraException.notFound("Product"));
         ProductAvailabilityStatus oldStatus = product.getAvailabilityStatus();
+        User currentUser = SecurityUtils.currentUser();
+        String adminFullName = currentUser.getFirstName() + " " + currentUser.getLastName();
+        String roleStr = (currentUser.getRole() == com.ooumitra.enums.Role.SUPER_ADMIN || currentUser.getRole() == com.ooumitra.enums.Role.ADMIN) ? "Super Admin" : "User";
         
         product.setAvailabilityStatus(status);
+        product.setStatusUpdatedBy(adminFullName);
+        product.setStatusUpdatedDate(java.time.Instant.now());
+        product.setStatusUpdatedRole(roleStr);
         product = productRepo.save(product);
 
         productStatusHistoryRepo.save(ProductStatusHistory.builder()
                 .product(product)
                 .oldStatus(oldStatus.name())
                 .newStatus(status.name())
-                .changedBy(SecurityUtils.currentUser())
+                .changedBy(currentUser)
+                .role(roleStr)
                 .remarks(remarks != null && !remarks.isBlank() ? remarks : "Updated availability status by administrator to " + (status == ProductAvailabilityStatus.ACTIVE ? "Active" : "Inactive"))
                 .build());
 
-        String messageBody = "Your product availability status has been updated by the administrator.\n\nStatus: " + 
+        String messageBody = "Your product status has been changed to " + 
                 (status == ProductAvailabilityStatus.ACTIVE ? "Active" : "Inactive") + 
+                " by the Administrator." +
                 (remarks != null && !remarks.isBlank() ? "\nRemarks: " + remarks : "");
 
         fcmService.sendToUser(product.getUser(), "Product Status Updated", messageBody, 

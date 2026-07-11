@@ -39,6 +39,9 @@ public class ProductResponse {
     private Instant createdAt;
     private Instant updatedAt;
     private ProductAvailabilityStatus availabilityStatus;
+    private String statusUpdatedBy;
+    private Instant statusUpdatedDate;
+    private String statusUpdatedRole;
 
     public static ProductResponse from(Product p) {
         return ProductResponse.builder()
@@ -60,6 +63,9 @@ public class ProductResponse {
                 .createdAt(p.getCreatedAt())
                 .updatedAt(p.getUpdatedAt())
                 .availabilityStatus(p.getAvailabilityStatus())
+                .statusUpdatedBy(p.getStatusUpdatedBy())
+                .statusUpdatedDate(p.getStatusUpdatedDate())
+                .statusUpdatedRole(p.getStatusUpdatedRole())
                 .build();
     }
 }

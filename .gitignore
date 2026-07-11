@@ -7,6 +7,7 @@ backend/target/
 web/dist/
 backend/uploads/
 mobile/android/build/
+mobile/android/app/build/
 mobile/android/.gradle/
 mobile/ios/build/
 mobile/ios/Pods/
@@ -16,8 +17,10 @@ mobile/ios/DerivedData/
 mobile/android/local.properties
 mobile/android/app/google-services.json
 mobile/android/app/release.keystore
+mobile/android/app/oorumitra-release.keystore
 mobile/ios/GoogleService-Info.plist
 # debug.keystore is intentionally committed (not secret)
+# Release signing passwords live only in local gradle.properties (never committed)
 
 # Environment / secrets
 *.env

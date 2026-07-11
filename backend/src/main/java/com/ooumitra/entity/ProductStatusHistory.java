@@ -32,6 +32,9 @@ public class ProductStatusHistory {
     @Column(name = "remarks", columnDefinition = "TEXT")
     private String remarks;
 
+    @Column(name = "role", length = 20)
+    private String role;
+
     @CreationTimestamp
     @Column(name = "changed_date", nullable = false, updatable = false)
     private Instant changedDate;

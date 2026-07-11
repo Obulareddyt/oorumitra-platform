@@ -12,7 +12,7 @@ import {useAppSelector} from '../../store';
 import {ChatMessage} from '../../types';
 import {Colors, FontSize, Spacing, BorderRadius} from '../../theme';
 
-const WS_URL = __DEV__ ? 'ws://10.0.2.2:8080/ws' : 'wss://api.ooumitra.com/ws';
+const WS_URL = __DEV__ ? 'ws://10.0.2.2:8080/ws' : 'wss://ooumitra-backend.onrender.com/ws';
 
 const ChatScreen: React.FC = () => {
   const route = useRoute<any>();

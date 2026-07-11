@@ -98,6 +98,15 @@ public class Product {
     @Builder.Default
     private ProductAvailabilityStatus availabilityStatus = ProductAvailabilityStatus.ACTIVE;
 
+    @Column(name = "status_updated_by", length = 100)
+    private String statusUpdatedBy;
+
+    @Column(name = "status_updated_date")
+    private Instant statusUpdatedDate;
+
+    @Column(name = "status_updated_role", length = 20)
+    private String statusUpdatedRole;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "approval_status", nullable = false, length = 20)
     @Builder.Default
