@@ -75,7 +75,11 @@ public class OtpService {
                 smsProviderFactory.getActiveProvider().sendSms(mobileNumber, message);
             }
         } catch (Exception e) {
-            log.error("Failed to send OTP to {}: {}", mobileNumber, e.getMessage());
+            // Invalidate the just-created OTP so a failed delivery does not count
+            // against the user's rate limit, and surface an honest error to the caller.
+            log.error("Failed to send OTP to {} via {}: {}", mobileNumber, channel, e.getMessage());
+            otpRepo.invalidateAllForMobile(mobileNumber);
+            throw OoruMitraException.badRequest("Unable to send OTP at the moment. Please try again later.");
         }
     }
 
