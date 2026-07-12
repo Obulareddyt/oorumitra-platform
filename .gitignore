@@ -56,5 +56,12 @@ coverage/
 *.pptx
 *.pdf
 
+# Media & release artifacts (marketing assets, not source)
+*.mp4
+*.apk
+whatsapp_status_*.png
+OoruMitra_PPT_Screenshots/
+Oorumitra_Sscreenshots/
+
 # Gradle
 .gradle/

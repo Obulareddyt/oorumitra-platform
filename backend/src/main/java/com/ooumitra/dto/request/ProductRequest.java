@@ -20,6 +20,7 @@ public class ProductRequest {
     private BigDecimal latitude;
     private BigDecimal longitude;
     @Size(max = 60) private String availability;
+    @Min(0) private Integer quantity;
     private String description;
     private ProductAvailabilityStatus availabilityStatus;
 }

@@ -129,6 +129,7 @@ public class ProductService {
                 .latitude(req.getLatitude())
                 .longitude(req.getLongitude())
                 .availability(req.getAvailability())
+                .quantity(req.getQuantity())
                 .description(req.getDescription())
                 .voiceNoteUrl(voiceNoteUrl)
                 .imageUrls(imageUrls)
@@ -183,6 +184,7 @@ public class ProductService {
         product.setLatitude(req.getLatitude());
         product.setLongitude(req.getLongitude());
         product.setAvailability(req.getAvailability());
+        product.setQuantity(req.getQuantity());
         product.setDescription(req.getDescription());
         return ProductResponse.from(productRepo.save(product));
     }

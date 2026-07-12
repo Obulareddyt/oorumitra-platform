@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext'
 import Navbar from './components/Navbar'
 import Home from './pages/Home'
 import PromotionalBanner from './pages/PromotionalBanner'
+import MarketingPoster from './pages/MarketingPoster'
 import PromotionalVideo from './pages/PromotionalVideo'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -51,6 +52,7 @@ export default function App() {
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/banner" element={<PromotionalBanner />} />
+                  <Route path="/poster" element={<MarketingPoster />} />
                   <Route path="/promo" element={<PromotionalVideo />} />
                   <Route path="/products" element={<Products />} />
                   <Route path="/workers" element={<Workers />} />

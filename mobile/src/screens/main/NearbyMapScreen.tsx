@@ -1,10 +1,18 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Alert} from 'react-native';
-import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
+import {View, Text, StyleSheet, ActivityIndicator, TouchableOpacity} from 'react-native';
+import MapLibreGL, {MapView, Camera, PointAnnotation} from '@maplibre/maplibre-react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useNavigation} from '@react-navigation/native';
 import {workerService, productService, vehicleWorkService, transportService} from '../../services/listingService';
 import {Colors, FontSize, Spacing, BorderRadius} from '../../theme';
+
+// Geoapify map tiles + style (migrated from Google Maps).
+// Get a key at https://myprojects.geoapify.com
+const GEOAPIFY_KEY = '5218746485524164aaec184315a66a43';
+const GEOAPIFY_STYLE = `https://maps.geoapify.com/v1/styles/osm-bright/style.json?apiKey=${GEOAPIFY_KEY}`;
+
+// MapLibre needs no access token when using a third-party style URL.
+MapLibreGL.setAccessToken(null);
 
 type ListingType = 'WORKER' | 'PRODUCT' | 'VEHICLE_WORK' | 'TRANSPORT';
 
@@ -15,10 +23,9 @@ const FILTER_TYPES: {label: string; type: ListingType; icon: string; color: stri
   {label: 'Transport', type: 'TRANSPORT', icon: 'truck', color: Colors.livestock},
 ];
 
-const DEFAULT_REGION = {
-  latitude: 17.3850, longitude: 78.4867,
-  latitudeDelta: 0.5, longitudeDelta: 0.5,
-};
+// [longitude, latitude] — MapLibre uses lng,lat order.
+const DEFAULT_CENTER: [number, number] = [78.4867, 17.3850];
+const DEFAULT_ZOOM = 9;
 
 const NearbyMapScreen: React.FC = () => {
   const navigation = useNavigation<any>();
@@ -32,8 +39,8 @@ const NearbyMapScreen: React.FC = () => {
 
   const loadNearby = async () => {
     setLoading(true);
-    const lat = DEFAULT_REGION.latitude;
-    const lng = DEFAULT_REGION.longitude;
+    const lat = DEFAULT_CENTER[1];
+    const lng = DEFAULT_CENTER[0];
     const all: any[] = [];
     try {
       const promises = [];
@@ -80,21 +87,19 @@ const NearbyMapScreen: React.FC = () => {
 
       {loading && <ActivityIndicator style={styles.loader} color={Colors.primary} />}
 
-      <MapView
-        style={styles.map}
-        provider={PROVIDER_GOOGLE}
-        initialRegion={DEFAULT_REGION}
-        showsUserLocation
-        showsMyLocationButton>
-        {markers.map((item, i) => (
-          <Marker
+      <MapView style={styles.map} mapStyle={GEOAPIFY_STYLE}>
+        <Camera
+          defaultSettings={{centerCoordinate: DEFAULT_CENTER, zoomLevel: DEFAULT_ZOOM}}
+        />
+        {markers.map((item) => (
+          <PointAnnotation
             key={`${item._type}-${item.id}`}
-            coordinate={{latitude: item.latitude, longitude: item.longitude}}
+            id={`${item._type}-${item.id}`}
+            coordinate={[item.longitude, item.latitude]}
             title={item.title ?? item.name}
-            description={`${item._type?.replace(/_/g, ' ')} · ${item.village ?? ''}`}
-            pinColor={getPinColor(item._type)}
-            onCalloutPress={() => navigation.navigate(DETAIL_SCREENS[item._type as ListingType], {id: item.id})}
-          />
+            onSelected={() => navigation.navigate(DETAIL_SCREENS[item._type as ListingType], {id: item.id})}>
+            <View style={[styles.pin, {backgroundColor: getPinColor(item._type)}]} />
+          </PointAnnotation>
         ))}
       </MapView>
 
@@ -122,6 +127,10 @@ const styles = StyleSheet.create({
   filterTextActive: {color: Colors.textOnPrimary},
   map: {flex: 1, marginTop: 50},
   loader: {position: 'absolute', top: '50%', left: '50%', zIndex: 20},
+  pin: {
+    width: 18, height: 18, borderRadius: 9,
+    borderWidth: 2, borderColor: '#fff',
+  },
   legend: {
     position: 'absolute', bottom: 24, left: Spacing.base, right: Spacing.base,
     backgroundColor: Colors.surface, borderRadius: BorderRadius.xl,

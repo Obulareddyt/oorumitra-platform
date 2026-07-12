@@ -3,6 +3,7 @@ import { useNavigate, Navigate } from 'react-router-dom'
 import { productsApi, workersApi, transportApi, vehicleWorkApi } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import PlacesInput from '../components/PlacesInput'
+import { reverseGeocode } from '../api/geo'
 import { useTranslation } from 'react-i18next'
 
 const TYPES = [
@@ -86,15 +87,8 @@ export default function Sell() {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const { latitude: lat, longitude: lng } = pos.coords
-        const MAPS_KEY = import.meta.env.VITE_GOOGLE_MAPS_KEY
         try {
-          const res = await fetch(
-            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${MAPS_KEY}&result_type=locality|sublocality`
-          )
-          const data = await res.json()
-          const name = data.results?.[0]?.address_components?.find(c =>
-            c.types.some(t => ['locality','sublocality','sublocality_level_1'].includes(t))
-          )?.long_name || data.results?.[0]?.formatted_address?.split(',')[0] || ''
+          const name = await reverseGeocode(lat, lng)
           setForm((f) => ({ ...f, village: name, location: name, latitude: lat, longitude: lng }))
         } catch {
           setForm((f) => ({ ...f, latitude: lat, longitude: lng }))
@@ -164,9 +158,10 @@ export default function Sell() {
           category: form.category || 'AGRICULTURE',
           subCategory: form.subCategory,
           amount: Number(form.amount),
+          quantity: form.quantity ? Number(form.quantity) : undefined,
           negotiable: !!form.negotiable,
           location: form.location,
-          availability: form.availability || undefined,
+          availabilityStatus: (form.active ?? true) ? 'ACTIVE' : 'INACTIVE',
         }, images, audioBlob)
       } else if (type === 'WORKER') {
         await workersApi.create({
@@ -269,10 +264,30 @@ export default function Sell() {
               <Field label={<>Amount (₹)<Req /></>}>
                 <input type="number" className="input" value={form.amount || ''} onChange={update('amount')} required placeholder="0" />
               </Field>
-              <Field label="Availability">
-                <input className="input" value={form.availability || ''} onChange={update('availability')} placeholder="e.g. In Stock" />
+              <Field label="Quantity">
+                <input type="number" min="1" className="input" value={form.quantity || ''} onChange={update('quantity')} placeholder="e.g. 10" />
               </Field>
             </div>
+            <Field label="Availability">
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setForm((f) => ({ ...f, active: !(f.active ?? true) }))}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    (form.active ?? true) ? 'bg-primary-600' : 'bg-gray-300'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      (form.active ?? true) ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+                <span className={`text-sm font-medium ${(form.active ?? true) ? 'text-primary-700' : 'text-gray-500'}`}>
+                  {(form.active ?? true) ? 'Active' : 'Inactive'}
+                </span>
+              </div>
+            </Field>
             <label className="flex items-center gap-2 text-sm text-gray-700">
               <input type="checkbox" checked={!!form.negotiable} onChange={updateChecked('negotiable')} /> Negotiable
             </label>

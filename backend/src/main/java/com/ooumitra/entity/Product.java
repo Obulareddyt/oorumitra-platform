@@ -65,6 +65,9 @@ public class Product {
     @Column(name = "availability", length = 60)
     private String availability;
 
+    @Column(name = "quantity")
+    private Integer quantity;
+
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 

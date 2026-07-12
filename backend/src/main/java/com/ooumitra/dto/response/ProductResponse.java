@@ -26,6 +26,7 @@ public class ProductResponse {
     private BigDecimal latitude;
     private BigDecimal longitude;
     private String availability;
+    private Integer quantity;
     private String description;
     private String voiceNoteUrl;
     private List<String> imageUrls;
@@ -51,7 +52,7 @@ public class ProductResponse {
                 .mobileNumber(p.getMobileNumber()).amount(p.getAmount())
                 .negotiable(p.isNegotiable()).location(p.getLocation())
                 .latitude(p.getLatitude()).longitude(p.getLongitude())
-                .availability(p.getAvailability()).description(p.getDescription())
+                .availability(p.getAvailability()).quantity(p.getQuantity()).description(p.getDescription())
                 .voiceNoteUrl(p.getVoiceNoteUrl())
                 .imageUrls(p.getImageUrls())
                 .averageRating(p.getAverageRating()).ratingCount(p.getRatingCount())

@@ -66,10 +66,9 @@ msg91:
   otp-expiry-minutes: 10
   base-url: https://api.msg91.com/api/v5
 
-# Google Maps
-google:
-  maps:
-    api-key: ${GOOGLE_MAPS_API_KEY:your-google-maps-api-key}
+# Geoapify (geocoding — currently used only by the web frontend)
+geoapify:
+  api-key: ${GEOAPIFY_API_KEY:your-geoapify-api-key}
 
 # AWS S3
 aws:
