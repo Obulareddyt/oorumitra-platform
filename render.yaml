@@ -48,8 +48,8 @@ services:
       - key: MSG91_SENDER_ID
         value: OORMIT
 
-      # Geoapify (geocoding key — currently used only by the web frontend)
-      - key: GEOAPIFY_API_KEY
+      # Google Maps (server-side geocoding)
+      - key: GOOGLE_MAPS_API_KEY
         sync: false
 
       # AWS S3 (image uploads)
@@ -77,8 +77,8 @@ services:
         source: /*
         destination: /index.html
     envVars:
-      # Geoapify (browser key — geocoding & maps)
-      - key: VITE_GEOAPIFY_KEY
+      # Google Maps (browser key)
+      - key: VITE_GOOGLE_MAPS_KEY
         sync: false
       # API base — pre-linked to the ooumitra-backend service.
       # Render service URLs are deterministic (<name>.onrender.com), so this is

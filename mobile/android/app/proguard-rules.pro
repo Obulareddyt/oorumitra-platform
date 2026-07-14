@@ -6,8 +6,9 @@
 -keep class com.swmansion.reanimated.** { *; }
 -keep class com.swmansion.gesturehandler.** { *; }
 
-# maplibre-react-native
--keep class org.maplibre.** { *; }
+# react-native-maps
+-keep class com.google.android.gms.** { *; }
+-keep class com.google.maps.** { *; }
 
 # Firebase
 -keep class com.google.firebase.** { *; }

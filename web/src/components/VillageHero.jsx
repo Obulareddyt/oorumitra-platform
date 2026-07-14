@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
-import { reverseGeocode } from '../api/geo'
+
+const MAPS_KEY = import.meta.env.VITE_GOOGLE_MAPS_KEY
 
 // --- Slide 1: Dawn village scene (existing) ---
 function SlideDawn() {
@@ -342,7 +343,13 @@ function LocationBadge() {
       async (pos) => {
         const { latitude: lat, longitude: lng } = pos.coords
         try {
-          const name = await reverseGeocode(lat, lng)
+          const res = await fetch(
+            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${MAPS_KEY}&result_type=locality|sublocality|neighborhood|administrative_area_level_3`
+          )
+          const data = await res.json()
+          const name = data.results?.[0]?.address_components?.find(c =>
+            c.types.some(t => ['locality','sublocality','sublocality_level_1','neighborhood','administrative_area_level_3'].includes(t))
+          )?.long_name || data.results?.[0]?.formatted_address?.split(',')[0]
           setLocation(name || 'Location found')
           setStatus('done')
         } catch {

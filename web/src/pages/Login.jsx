@@ -199,6 +199,19 @@ export default function Login() {
                   {loading ? 'Signing in…' : 'Sign In'}
                 </button>
               </form>
+
+              <div className="mt-5 pt-4 border-t border-gray-100 text-center">
+                <p className="text-sm text-gray-500">
+                  Don't have a password?{' '}
+                  <button
+                    type="button"
+                    onClick={() => { setMode('otp-mobile'); clearError() }}
+                    className="text-primary-600 font-semibold hover:underline"
+                  >
+                    Login with OTP
+                  </button>
+                </p>
+              </div>
             </>
           )}
 

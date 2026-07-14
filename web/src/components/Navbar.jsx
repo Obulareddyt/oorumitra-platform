@@ -60,7 +60,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center group">
-            <img src="/Ooru_mitra_logo_2.png" alt="OoruMitra" className="h-10 w-auto transition-transform group-hover:scale-105" />
+            <img src="/logo-primary.svg" alt="OoruMitra" className="h-10 w-auto transition-transform group-hover:scale-105" />
           </Link>
 
           <div className="hidden md:flex items-center gap-6 text-sm">
@@ -69,6 +69,7 @@ export default function Navbar() {
             <NavLink to="/transport" className={navClass}>{t('cat.transport', 'Transport')}</NavLink>
             <NavLink to="/vehicle-work" className={navClass}>{t('cat.vehicles', 'Vehicle Work')}</NavLink>
             <NavLink to="/emergency" className={navClass}>{t('cat.emergency', 'Emergency')}</NavLink>
+            <NavLink to="/banner" className={navClass}>Promo Video</NavLink>
 
             {isAdmin && (
               <div className="relative" ref={adminRef}>
