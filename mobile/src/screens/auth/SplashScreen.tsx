@@ -1,19 +1,26 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useRef} from 'react';
 import {View, Text, StyleSheet, Animated} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {Colors, FontSize, Spacing} from '../../theme';
 
-const SplashScreen: React.FC = () => {
-  const scale = new Animated.Value(0.8);
-  const opacity = new Animated.Value(0);
+const SplashScreen: React.FC<any> = ({navigation}) => {
+  const scale = useRef(new Animated.Value(0.8)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     Animated.parallel([
       Animated.spring(scale, {toValue: 1, useNativeDriver: true}),
       Animated.timing(opacity, {toValue: 1, duration: 800, useNativeDriver: true}),
     ]).start();
-  }, []);
+
+    // Advance to the registration/login screen after the intro animation.
+    // Without this the app would stay stuck on the splash forever.
+    const timer = setTimeout(() => {
+      navigation?.replace?.('Registration');
+    }, 1800);
+    return () => clearTimeout(timer);
+  }, [navigation, scale, opacity]);
 
   return (
     <LinearGradient
