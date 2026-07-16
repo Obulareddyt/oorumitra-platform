@@ -6,6 +6,11 @@ react {
     // Autolinking is handled via settings.gradle
 }
 
+// Packages react-native-vector-icons' .ttf files as Android assets — without
+// this, icon glyphs render as tofu boxes (☒) since no font linking step
+// otherwise runs on Android.
+apply from: file("../../node_modules/react-native-vector-icons/fonts.gradle")
+
 def enableProguardInReleaseBuilds = false
 def jscFlavor = 'org.webkit:android-jsc:+'
 
