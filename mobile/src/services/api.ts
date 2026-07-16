@@ -37,6 +37,11 @@ api.interceptors.response.use(
         await AsyncStorage.multiRemove(['@access_token', '@refresh_token']);
       }
     }
+    // Surface the backend's ApiResponse.message (e.g. "Incorrect password") in
+    // place of axios's generic "Request failed with status code 500" — callers
+    // throughout the app read err.message directly.
+    const backendMessage = (error.response?.data as {message?: string} | undefined)?.message;
+    if (backendMessage) error.message = backendMessage;
     return Promise.reject(error);
   },
 );
