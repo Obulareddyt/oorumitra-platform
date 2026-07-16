@@ -12,11 +12,12 @@ import {Colors, FontSize, Spacing, BorderRadius} from '../../theme';
 
 const TYPES: {label: string; value: VehicleWorkType | undefined}[] = [
   {label: 'All', value: undefined},
-  {label: 'Ploughing', value: 'PLOUGHING'},
-  {label: 'Threshing', value: 'THRESHING'},
-  {label: 'Rotavator', value: 'ROTAVATOR'},
-  {label: 'Spraying', value: 'SPRAYING'},
-  {label: 'Harvesting', value: 'HARVESTING'},
+  {label: 'Tractor', value: 'TRACTOR'},
+  {label: 'JCB', value: 'JCB'},
+  {label: 'Crane', value: 'CRANE'},
+  {label: 'Borewell Machine', value: 'BOREWELL_MACHINE'},
+  {label: 'Excavator', value: 'EXCAVATOR'},
+  {label: 'Harvester', value: 'HARVESTER'},
 ];
 
 const VehicleCard: React.FC<{item: VehicleWorkListing; onPress: () => void}> = ({item, onPress}) => (
@@ -25,8 +26,8 @@ const VehicleCard: React.FC<{item: VehicleWorkListing; onPress: () => void}> = (
       <Icon name="tractor" size={32} color={Colors.vehicles} />
     </View>
     <View style={styles.info}>
-      <Text style={styles.title} numberOfLines={1}>{item.title}</Text>
-      <Text style={styles.type}>{item.vehicleWorkType?.replace(/_/g, ' ')}</Text>
+      <Text style={styles.title} numberOfLines={1}>{item.ownerName ?? item.vehicleType?.replace(/_/g, ' ')}</Text>
+      <Text style={styles.type}>{item.vehicleType?.replace(/_/g, ' ')}</Text>
       <View style={styles.row}>
         <Icon name="map-marker" size={13} color={Colors.textHint} />
         <Text style={styles.village}>{item.village}</Text>
@@ -60,7 +61,7 @@ const VehicleWorkScreen: React.FC = () => {
     if (!reset && p >= totalPages) return;
     setIsLoading(true);
     try {
-      const res = await vehicleWorkService.getAll({vehicleWorkType: selected, page: p, size: 20});
+      const res = await vehicleWorkService.getAll({vehicleType: selected, page: p, size: 20});
       setItems(prev => reset ? res.content : [...prev, ...res.content]);
       setTotalPages(res.totalPages);
       setPage(p + 1);

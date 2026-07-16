@@ -94,10 +94,10 @@ const SearchScreen: React.FC = () => {
                 <Icon name={tab === 'WORKER' ? 'account-hard-hat' : tab === 'PRODUCT' ? 'shopping' : tab === 'VEHICLE_WORK' ? 'tractor' : 'truck'} size={24} color={Colors.primary} />
               </View>
               <View style={styles.resultInfo}>
-                <Text style={styles.resultTitle}>{item.title ?? item.name}</Text>
+                <Text style={styles.resultTitle}>{item.productName ?? item.groupName ?? item.vehicleType ?? item.title}</Text>
                 <View style={styles.resultRow}>
                   <Icon name="map-marker" size={12} color={Colors.textHint} />
-                  <Text style={styles.resultSub}>{item.village}</Text>
+                  <Text style={styles.resultSub}>{item.village ?? item.location}</Text>
                 </View>
               </View>
               <Icon name="chevron-right" size={20} color={Colors.textHint} />

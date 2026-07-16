@@ -70,6 +70,11 @@ export const productService = {
     return data.data!;
   },
 
+  async updateAvailabilityStatus(id: number, status: 'ACTIVE' | 'INACTIVE') {
+    const {data} = await api.put<{data: Product}>(`/products/${id}/availability-status`, null, {params: {status}});
+    return data.data!;
+  },
+
   async create(payload: object, images?: {uri: string; type: string; name: string}[]) {
     const formData = new FormData();
     formData.append('data', JSON.stringify(payload));

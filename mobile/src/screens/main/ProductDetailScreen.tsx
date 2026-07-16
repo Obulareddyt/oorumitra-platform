@@ -9,6 +9,7 @@ import {productService} from '../../services/listingService';
 import {chatService} from '../../services/chatService';
 import {favouriteService} from '../../services/userService';
 import {useAppSelector} from '../../store';
+import {useRequireAuth} from '../../hooks/useRequireAuth';
 import {Product} from '../../types';
 import {Colors, FontSize, Spacing, BorderRadius} from '../../theme';
 
@@ -16,6 +17,7 @@ const {width} = Dimensions.get('window');
 
 const ProductDetailScreen: React.FC = () => {
   const navigation = useNavigation<any>();
+  const {requireAuth} = useRequireAuth();
   const route = useRoute<any>();
   const {id} = route.params;
   const currentUser = useAppSelector(s => s.auth.user);
@@ -40,7 +42,7 @@ const ProductDetailScreen: React.FC = () => {
       const convo = await chatService.startConversation({
         sellerId: product.userId, listingType: 'PRODUCT', listingId: product.id,
       });
-      navigation.navigate('Chat', {conversationId: convo.id, otherUserName: product.title});
+      navigation.navigate('Chat', {conversationId: convo.id, otherUserName: product.productName});
     } catch (_) {Alert.alert('Error', 'Failed to start chat');}
   };
 
@@ -73,7 +75,7 @@ const ProductDetailScreen: React.FC = () => {
 
       <View style={styles.body}>
         <View style={styles.titleRow}>
-          <Text style={styles.title}>{product.title}</Text>
+          <Text style={styles.title}>{product.productName}</Text>
           <TouchableOpacity onPress={() => setIsFav(!isFav)}>
             <Icon name={isFav ? 'heart' : 'heart-outline'} size={26} color={Colors.error} />
           </TouchableOpacity>
@@ -83,7 +85,12 @@ const ProductDetailScreen: React.FC = () => {
 
         <View style={styles.metaRow}>
           <Icon name="map-marker" size={15} color={Colors.textHint} />
-          <Text style={styles.metaText}>{product.village}</Text>
+          <Text style={styles.metaText}>{product.location}</Text>
+        </View>
+
+        <View style={styles.metaRow}>
+          <View style={[styles.availDot, {backgroundColor: product.availabilityStatus === 'ACTIVE' ? Colors.success : Colors.error}]} />
+          <Text style={styles.metaText}>{product.availabilityStatus === 'ACTIVE' ? 'Active' : 'Inactive'}</Text>
         </View>
 
         {product.averageRating != null && (
@@ -95,8 +102,8 @@ const ProductDetailScreen: React.FC = () => {
 
         <View style={styles.priceCard}>
           <Text style={styles.priceLabel}>Price</Text>
-          <Text style={styles.price}>₹{product.price}</Text>
-          <Text style={styles.priceType}>{product.priceType}</Text>
+          <Text style={styles.price}>₹{product.amount}</Text>
+          <Text style={styles.priceType}>{product.negotiable ? 'Negotiable' : 'Fixed Price'}</Text>
         </View>
 
         {product.description ? (
@@ -107,7 +114,7 @@ const ProductDetailScreen: React.FC = () => {
         ) : null}
 
         {!isOwner && (
-          <TouchableOpacity style={styles.chatBtn} onPress={handleChat}>
+          <TouchableOpacity style={styles.chatBtn} onPress={() => requireAuth(handleChat)}>
             <Icon name="chat" size={20} color={Colors.textOnPrimary} />
             <Text style={styles.chatBtnText}>Chat with Seller</Text>
           </TouchableOpacity>
@@ -131,6 +138,7 @@ const styles = StyleSheet.create({
   category: {fontSize: FontSize.base, color: Colors.primary, fontWeight: '600', marginBottom: Spacing.md},
   metaRow: {flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginBottom: Spacing.sm},
   metaText: {fontSize: FontSize.base, color: Colors.textSecondary},
+  availDot: {width: 10, height: 10, borderRadius: 5},
   priceCard: {
     backgroundColor: Colors.surfaceVariant, borderRadius: BorderRadius.lg,
     padding: Spacing.base, marginVertical: Spacing.base, alignItems: 'center',

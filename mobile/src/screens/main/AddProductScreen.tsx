@@ -1,7 +1,7 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View, Text, TextInput, StyleSheet, ScrollView,
-  TouchableOpacity, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Image,
+  TouchableOpacity, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Image, Switch,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {launchImageLibrary} from 'react-native-image-picker';
@@ -9,19 +9,30 @@ import {productService} from '../../services/listingService';
 import {ProductCategory} from '../../types';
 import {Colors, FontSize, Spacing, BorderRadius} from '../../theme';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import {useRequireAuth} from '../../hooks/useRequireAuth';
+import {useAppSelector} from '../../store';
 
-const CATEGORIES: ProductCategory[] = [
-  'SEEDS', 'FERTILIZERS', 'PESTICIDES', 'TOOLS', 'EQUIPMENT',
-  'LIVESTOCK', 'DAIRY', 'VEGETABLES', 'FRUITS', 'GRAINS', 'OTHER',
-];
+// Must match backend ProductCategory enum exactly.
+const CATEGORIES: ProductCategory[] = ['AGRICULTURE', 'HARDWARE', 'LIVESTOCK', 'VEHICLES', 'SEEDS', 'FRUITS', 'FLOWERS'];
 
 const AddProductScreen: React.FC = () => {
   const navigation = useNavigation<any>();
+  const {isAuthenticated} = useRequireAuth();
+  const user = useAppSelector(s => s.auth.user);
+
+  useEffect(() => {
+    if (!isAuthenticated) navigation.replace('Auth');
+  }, [isAuthenticated, navigation]);
+
   const [title, setTitle] = useState('');
+  const [subCategory, setSubCategory] = useState('');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState<ProductCategory>('VEGETABLES');
+  const [category, setCategory] = useState<ProductCategory>('AGRICULTURE');
   const [price, setPrice] = useState('');
+  const [quantity, setQuantity] = useState('');
   const [village, setVillage] = useState('');
+  const [negotiable, setNegotiable] = useState(false);
+  const [availableStatus, setAvailableStatus] = useState(true);
   const [images, setImages] = useState<{uri: string; type: string; name: string}[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -32,6 +43,8 @@ const AddProductScreen: React.FC = () => {
     }
   };
 
+  if (!isAuthenticated) return null;
+
   const handleSubmit = async () => {
     if (!title.trim() || !price || !village.trim()) {
       Alert.alert('Error', 'Please fill all required fields');
@@ -39,7 +52,19 @@ const AddProductScreen: React.FC = () => {
     }
     setIsLoading(true);
     try {
-      await productService.create({title, description, category, price: Number(price), village}, images);
+      await productService.create({
+        productName: title,
+        category,
+        subCategory: subCategory.trim() || undefined,
+        ownerName: `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim(),
+        mobileNumber: user?.mobileNumber ?? '',
+        amount: Number(price),
+        negotiable,
+        location: village,
+        quantity: quantity ? Number(quantity) : undefined,
+        description,
+        availabilityStatus: availableStatus ? 'ACTIVE' : 'INACTIVE',
+      }, images);
       Alert.alert('Success', 'Product listed!', [{text: 'OK', onPress: () => navigation.goBack()}]);
     } catch (err: any) {
       Alert.alert('Error', err?.message ?? 'Failed to list product');
@@ -63,11 +88,27 @@ const AddProductScreen: React.FC = () => {
           ))}
         </ScrollView>
 
+        <Text style={styles.label}>Sub Category</Text>
+        <TextInput style={styles.input} value={subCategory} onChangeText={setSubCategory} placeholder="optional" placeholderTextColor={Colors.textHint} />
+
         <Text style={styles.label}>Price (₹) *</Text>
         <TextInput style={styles.input} value={price} onChangeText={setPrice} keyboardType="numeric" placeholder="e.g. 50" placeholderTextColor={Colors.textHint} />
 
+        <Text style={styles.label}>Quantity</Text>
+        <TextInput style={styles.input} value={quantity} onChangeText={setQuantity} keyboardType="numeric" placeholder="optional" placeholderTextColor={Colors.textHint} />
+
         <Text style={styles.label}>Village *</Text>
         <TextInput style={styles.input} value={village} onChangeText={setVillage} placeholder="Your village/town" placeholderTextColor={Colors.textHint} />
+
+        <TouchableOpacity style={styles.switchRow} onPress={() => setNegotiable(v => !v)}>
+          <Text style={styles.label}>Negotiable</Text>
+          <Switch value={negotiable} onValueChange={setNegotiable} trackColor={{true: Colors.primary}} />
+        </TouchableOpacity>
+
+        <View style={styles.switchRow}>
+          <Text style={styles.label}>{availableStatus ? 'Active' : 'Inactive'}</Text>
+          <Switch value={availableStatus} onValueChange={setAvailableStatus} trackColor={{true: Colors.primary}} />
+        </View>
 
         <Text style={styles.label}>Description</Text>
         <TextInput
@@ -106,6 +147,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.md, padding: Spacing.md, fontSize: FontSize.base, color: Colors.text,
   },
   textarea: {height: 100, paddingTop: Spacing.md},
+  switchRow: {flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: Spacing.md},
   catScroll: {marginBottom: Spacing.sm},
   chip: {
     paddingHorizontal: Spacing.md, paddingVertical: Spacing.xs + 2,

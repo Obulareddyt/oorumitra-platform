@@ -18,9 +18,9 @@ const TYPE_ICONS: Record<string, string> = {
 
 const ServiceCard: React.FC<Props> = ({item, type, onPress}) => {
   const icon = TYPE_ICONS[type] ?? 'storefront';
-  const title = item.title ?? item.name ?? item.vehicleType ?? 'Service';
+  const title = item.productName ?? item.groupName ?? item.vehicleType ?? 'Service';
   const subtitle = item.village ?? item.location ?? '';
-  const price = item.pricePerDay ?? item.price ?? item.ratePerKm ?? null;
+  const price = item.amount ?? item.pricePerAcre ?? item.pricePerHour ?? item.ratePerKm ?? item.ratePerHour ?? null;
   const rating = item.averageRating;
 
   return (

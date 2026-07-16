@@ -4,12 +4,14 @@ import {useNavigation, useRoute} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {vehicleWorkService} from '../../services/listingService';
 import {chatService} from '../../services/chatService';
+import {useRequireAuth} from '../../hooks/useRequireAuth';
 import {useAppSelector} from '../../store';
 import {VehicleWorkListing} from '../../types';
 import {Colors, FontSize, Spacing, BorderRadius} from '../../theme';
 
 const VehicleWorkDetailScreen: React.FC = () => {
   const navigation = useNavigation<any>();
+  const {requireAuth} = useRequireAuth();
   const {id} = useRoute<any>().params;
   const currentUser = useAppSelector(s => s.auth.user);
   const [item, setItem] = useState<VehicleWorkListing | null>(null);
@@ -26,7 +28,7 @@ const VehicleWorkDetailScreen: React.FC = () => {
     if (!item) return;
     try {
       const c = await chatService.startConversation({sellerId: item.userId, listingType: 'VEHICLE_WORK', listingId: item.id});
-      navigation.navigate('Chat', {conversationId: c.id, otherUserName: item.title});
+      navigation.navigate('Chat', {conversationId: c.id, otherUserName: item.ownerName ?? item.vehicleType});
     } catch (_) {Alert.alert('Error', 'Failed to start chat');}
   };
 
@@ -39,8 +41,8 @@ const VehicleWorkDetailScreen: React.FC = () => {
         <Icon name="tractor" size={64} color={Colors.vehicles} />
       </View>
       <View style={styles.body}>
-        <Text style={styles.title}>{item.title}</Text>
-        <Text style={styles.type}>{item.vehicleWorkType?.replace(/_/g, ' ')}</Text>
+        <Text style={styles.title}>{item.vehicleType?.replace(/_/g, ' ')}</Text>
+        {item.ownerName ? <Text style={styles.type}>{item.ownerName}</Text> : null}
         <View style={styles.row}><Icon name="map-marker" size={16} color={Colors.textHint} /><Text style={styles.info}>{item.village}</Text></View>
         {item.averageRating != null && (
           <View style={styles.row}><Icon name="star" size={16} color={Colors.star} /><Text style={styles.info}>{Number(item.averageRating).toFixed(1)} ({item.ratingCount} reviews)</Text></View>
@@ -52,11 +54,11 @@ const VehicleWorkDetailScreen: React.FC = () => {
         {item.description ? <Text style={styles.desc}>{item.description}</Text> : null}
         {currentUser?.id !== item.userId && (
           <View style={styles.actions}>
-            <TouchableOpacity style={styles.chatBtn} onPress={handleChat}>
+            <TouchableOpacity style={styles.chatBtn} onPress={() => requireAuth(handleChat)}>
               <Icon name="chat" size={20} color={Colors.textOnPrimary} />
               <Text style={styles.chatText}>Chat</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.rateBtn} onPress={() => navigation.navigate('RateReview', {listingType: 'VEHICLE_WORK', listingId: id, title: item.title})}>
+            <TouchableOpacity style={styles.rateBtn} onPress={() => navigation.navigate('RateReview', {listingType: 'VEHICLE_WORK', listingId: id, title: item.ownerName ?? item.vehicleType})}>
               <Icon name="star-outline" size={20} color={Colors.primary} />
               <Text style={styles.rateBtnText}>Rate</Text>
             </TouchableOpacity>

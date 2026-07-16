@@ -1,44 +1,60 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View, Text, TextInput, StyleSheet, ScrollView,
-  TouchableOpacity, ActivityIndicator, Alert, Switch, KeyboardAvoidingView, Platform,
+  TouchableOpacity, ActivityIndicator, Alert, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useTranslation} from 'react-i18next';
 import {workerService} from '../../services/listingService';
-import {WorkType} from '../../types';
+import {WorkType, PriceType} from '../../types';
 import {Colors, FontSize, Spacing, BorderRadius} from '../../theme';
+import {useRequireAuth} from '../../hooks/useRequireAuth';
+import {useAppSelector} from '../../store';
 
+// Must match backend WorkType enum exactly.
 const WORK_TYPES: WorkType[] = [
-  'HARVESTING', 'PLANTING', 'WEEDING', 'IRRIGATION', 'SPRAYING',
-  'MASON_WORK', 'CARPENTRY', 'ELECTRICAL', 'PLUMBING', 'PAINTING',
-  'BOREWELL_WORK', 'CLEANING', 'DRIVING', 'OTHER',
+  'HARVESTING', 'PLANTING', 'CONSTRUCTION', 'MASON_WORK', 'PAINTING',
+  'PLUMBING', 'ELECTRICAL', 'CARPENTER', 'BOREWELL_WORK', 'ROAD_WORK',
+  'CLEANING', 'LOADING_UNLOADING', 'AGRICULTURE_WORK', 'OTHERS',
 ];
+const PRICE_TYPES: PriceType[] = ['PERSON', 'ACRE', 'HOUR'];
 
 const AddWorkerServiceScreen: React.FC = () => {
   const {t} = useTranslation();
   const navigation = useNavigation<any>();
+  const {isAuthenticated} = useRequireAuth();
+  const user = useAppSelector(s => s.auth.user);
+
+  useEffect(() => {
+    if (!isAuthenticated) navigation.replace('Auth');
+  }, [isAuthenticated, navigation]);
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [workType, setWorkType] = useState<WorkType>('HARVESTING');
   const [village, setVillage] = useState('');
-  const [pricePerDay, setPricePerDay] = useState('');
-  const [isAvailable, setIsAvailable] = useState(true);
-  const [experience, setExperience] = useState('');
+  const [availableWorkers, setAvailableWorkers] = useState('1');
+  const [priceType, setPriceType] = useState<PriceType>('PERSON');
+  const [amount, setAmount] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  if (!isAuthenticated) return null;
+
   const handleSubmit = async () => {
-    if (!title.trim() || !village.trim() || !pricePerDay) {
+    if (!title.trim() || !village.trim() || !amount) {
       Alert.alert('Error', 'Please fill all required fields');
       return;
     }
     setIsLoading(true);
     try {
       await workerService.create({
-        title, description, workType, village,
-        pricePerDay: Number(pricePerDay), isAvailable,
-        experienceYears: experience ? Number(experience) : 0,
+        groupName: title,
+        ownerName: `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim(),
+        mobileNumber: user?.mobileNumber ?? '',
+        description, workType, village,
+        availableWorkers: Number(availableWorkers) || 1,
+        priceType,
+        amount: Number(amount),
       });
       Alert.alert('Success', 'Service listed successfully!', [
         {text: 'OK', onPress: () => navigation.goBack()},
@@ -73,11 +89,20 @@ const AddWorkerServiceScreen: React.FC = () => {
         <Text style={styles.label}>Village / Location *</Text>
         <TextInput style={styles.input} value={village} onChangeText={setVillage} placeholder="Your village or town" placeholderTextColor={Colors.textHint} />
 
-        <Text style={styles.label}>Price Per Day (₹) *</Text>
-        <TextInput style={styles.input} value={pricePerDay} onChangeText={setPricePerDay} placeholder="e.g. 500" keyboardType="numeric" placeholderTextColor={Colors.textHint} />
+        <Text style={styles.label}>Available Workers *</Text>
+        <TextInput style={styles.input} value={availableWorkers} onChangeText={setAvailableWorkers} placeholder="e.g. 1" keyboardType="numeric" placeholderTextColor={Colors.textHint} />
 
-        <Text style={styles.label}>Experience (years)</Text>
-        <TextInput style={styles.input} value={experience} onChangeText={setExperience} placeholder="e.g. 5" keyboardType="numeric" placeholderTextColor={Colors.textHint} />
+        <Text style={styles.label}>Price Type *</Text>
+        <View style={[styles.typeScroll, styles.priceTypeRow]}>
+          {PRICE_TYPES.map(pt => (
+            <TouchableOpacity key={pt} style={[styles.typeChip, priceType === pt && styles.typeChipActive]} onPress={() => setPriceType(pt)}>
+              <Text style={[styles.typeText, priceType === pt && styles.typeTextActive]}>{pt}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <Text style={styles.label}>Amount (₹) *</Text>
+        <TextInput style={styles.input} value={amount} onChangeText={setAmount} placeholder="e.g. 500" keyboardType="numeric" placeholderTextColor={Colors.textHint} />
 
         <Text style={styles.label}>Description</Text>
         <TextInput
@@ -85,11 +110,6 @@ const AddWorkerServiceScreen: React.FC = () => {
           placeholder="Describe your skills and experience..." multiline numberOfLines={4}
           textAlignVertical="top" placeholderTextColor={Colors.textHint}
         />
-
-        <View style={styles.switchRow}>
-          <Text style={styles.label}>Available Now</Text>
-          <Switch value={isAvailable} onValueChange={setIsAvailable} trackColor={{true: Colors.primary}} />
-        </View>
 
         <TouchableOpacity style={[styles.submitBtn, isLoading && styles.btnDisabled]} onPress={handleSubmit} disabled={isLoading}>
           {isLoading ? <ActivityIndicator color={Colors.textOnPrimary} /> : <Text style={styles.submitText}>Post Service</Text>}
@@ -110,6 +130,7 @@ const styles = StyleSheet.create({
   },
   textarea: {height: 100, paddingTop: Spacing.md},
   typeScroll: {marginBottom: Spacing.sm},
+  priceTypeRow: {flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm},
   typeChip: {
     paddingHorizontal: Spacing.md, paddingVertical: Spacing.xs + 2,
     borderRadius: BorderRadius.full, borderWidth: 1.5, borderColor: Colors.border,

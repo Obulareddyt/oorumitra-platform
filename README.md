@@ -129,4 +129,4 @@ npm run ios
 
 ## License
 
-MIT
+

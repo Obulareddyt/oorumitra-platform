@@ -90,8 +90,8 @@ const NearbyMapScreen: React.FC = () => {
           <Marker
             key={`${item._type}-${item.id}`}
             coordinate={{latitude: item.latitude, longitude: item.longitude}}
-            title={item.title ?? item.name}
-            description={`${item._type?.replace(/_/g, ' ')} · ${item.village ?? ''}`}
+            title={item.productName ?? item.groupName ?? item.vehicleType ?? item.title}
+            description={`${item._type?.replace(/_/g, ' ')} · ${item.village ?? item.location ?? ''}`}
             pinColor={getPinColor(item._type)}
             onCalloutPress={() => navigation.navigate(DETAIL_SCREENS[item._type as ListingType], {id: item.id})}
           />

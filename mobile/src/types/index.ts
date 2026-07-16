@@ -5,21 +5,22 @@ export type BookingStatus = 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED';
 export type MessageType = 'TEXT' | 'IMAGE' | 'LOCATION';
 
 export type WorkType =
-  | 'HARVESTING' | 'PLANTING' | 'WEEDING' | 'IRRIGATION' | 'SPRAYING'
-  | 'MASON_WORK' | 'CARPENTRY' | 'ELECTRICAL' | 'PLUMBING' | 'PAINTING'
-  | 'BOREWELL_WORK' | 'CLEANING' | 'DRIVING' | 'OTHER';
+  | 'HARVESTING' | 'PLANTING' | 'CONSTRUCTION' | 'MASON_WORK' | 'PAINTING'
+  | 'PLUMBING' | 'ELECTRICAL' | 'CARPENTER' | 'BOREWELL_WORK' | 'ROAD_WORK'
+  | 'CLEANING' | 'LOADING_UNLOADING' | 'AGRICULTURE_WORK' | 'OTHERS';
 
-export type PriceType = 'FIXED' | 'NEGOTIABLE' | 'PER_DAY' | 'PER_ACRE' | 'PER_KM' | 'PER_HOUR';
+export type PriceType = 'PERSON' | 'ACRE' | 'HOUR';
 
 export type ProductCategory =
-  | 'SEEDS' | 'FERTILIZERS' | 'PESTICIDES' | 'TOOLS' | 'EQUIPMENT'
-  | 'LIVESTOCK' | 'DAIRY' | 'VEGETABLES' | 'FRUITS' | 'GRAINS' | 'OTHER';
+  | 'AGRICULTURE' | 'HARDWARE' | 'LIVESTOCK' | 'VEHICLES' | 'SEEDS' | 'FRUITS' | 'FLOWERS';
+
+export type ProductAvailabilityStatus = 'ACTIVE' | 'INACTIVE';
 
 export type VehicleWorkType =
-  | 'PLOUGHING' | 'THRESHING' | 'ROTAVATOR' | 'SPRAYING' | 'HARVESTING' | 'LEVELLING' | 'OTHER';
+  | 'TRACTOR' | 'JCB' | 'CRANE' | 'BOREWELL_MACHINE' | 'EXCAVATOR' | 'HARVESTER';
 
 export type TransportVehicleType =
-  | 'MINI_TRUCK' | 'LARGE_TRUCK' | 'TRACTOR_TRAILER' | 'PICKUP' | 'AUTO_RICKSHAW' | 'OTHER';
+  | 'AUTO' | 'TRACTOR' | 'MINI_TRUCK' | 'LORRY' | 'BUS';
 
 export interface User {
   id: number;
@@ -47,71 +48,108 @@ export interface AuthState {
 export interface WorkerListing {
   id: number;
   userId: number;
-  title: string;
-  description?: string;
-  workType: WorkType;
+  groupName: string;
+  ownerName?: string;
+  mobileNumber?: string;
   village: string;
-  pricePerDay: number;
-  isAvailable: boolean;
-  experienceYears?: number;
+  availableWorkers?: number;
+  priceType: PriceType;
+  amount: number;
+  workType: WorkType;
+  description?: string;
   latitude?: number;
   longitude?: number;
+  imageUrls?: string[];
   averageRating?: number;
   ratingCount?: number;
-  distance?: number;
+  approvalStatus?: string;
+  availableStatus: boolean;
+  adminRemarks?: string;
+  decidedAt?: string;
+  decidedBy?: number;
   createdAt: string;
 }
 
 export interface Product {
   id: number;
   userId: number;
-  title: string;
-  description?: string;
+  productName: string;
   category: ProductCategory;
-  price: number;
-  priceType?: PriceType;
-  village: string;
-  imageUrls: string[];
+  subCategory?: string;
+  ownerName?: string;
+  mobileNumber?: string;
+  amount: number;
+  negotiable?: boolean;
+  location: string;
   latitude?: number;
   longitude?: number;
+  availability?: string;
+  quantity?: number;
+  description?: string;
+  voiceNoteUrl?: string;
+  imageUrls: string[];
   averageRating?: number;
   ratingCount?: number;
-  distance?: number;
+  approvalStatus?: string;
+  availableStatus?: boolean;
+  adminRemarks?: string;
+  decidedAt?: string;
+  decidedBy?: number;
   createdAt: string;
+  updatedAt?: string;
+  availabilityStatus: ProductAvailabilityStatus;
+  statusUpdatedBy?: number;
+  statusUpdatedDate?: string;
+  statusUpdatedRole?: string;
 }
 
 export interface VehicleWorkListing {
   id: number;
   userId: number;
-  title: string;
-  description?: string;
-  vehicleWorkType: VehicleWorkType;
+  vehicleType: VehicleWorkType;
+  ownerName?: string;
+  mobileNumber?: string;
+  pricePerAcre?: number;
+  pricePerHour?: number;
   village: string;
-  pricePerAcre: number;
-  isAvailable: boolean;
+  availableStatus: boolean;
+  availableUntil?: string;
+  description?: string;
   latitude?: number;
   longitude?: number;
+  imageUrls?: string[];
   averageRating?: number;
   ratingCount?: number;
-  distance?: number;
+  approvalStatus?: string;
+  adminRemarks?: string;
+  decidedAt?: string;
+  decidedBy?: number;
   createdAt: string;
 }
 
 export interface TransportListing {
   id: number;
   userId: number;
-  title: string;
-  description?: string;
   vehicleType: TransportVehicleType;
+  ownerName?: string;
+  mobileNumber?: string;
+  ratePerKm?: number;
+  ratePerHour?: number;
+  weightCapacity?: string;
+  negotiable?: boolean;
+  availability?: string;
   village: string;
-  ratePerKm: number;
-  capacityTons?: number;
-  isAvailable?: boolean;
+  description?: string;
   latitude?: number;
   longitude?: number;
+  imageUrls?: string[];
   averageRating?: number;
   ratingCount?: number;
-  distance?: number;
+  approvalStatus?: string;
+  availableStatus: boolean;
+  adminRemarks?: string;
+  decidedAt?: string;
+  decidedBy?: number;
   createdAt: string;
 }
 
@@ -120,10 +158,14 @@ export interface RequestTicket {
   userId: number;
   title: string;
   description: string;
-  workType: WorkType;
-  village: string;
+  location: string;
+  requiredDate?: string;
   budget?: number;
-  status: 'OPEN' | 'IN_PROGRESS' | 'CLOSED';
+  mobileNumber?: string;
+  latitude?: number;
+  longitude?: number;
+  status: string;
+  responseCount?: number;
   createdAt: string;
 }
 

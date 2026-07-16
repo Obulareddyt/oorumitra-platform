@@ -1,10 +1,9 @@
 import React, {useEffect, useRef} from 'react';
-import {View, Text, StyleSheet, Animated} from 'react-native';
+import {View, Text, StyleSheet, Animated, Image} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {Colors, FontSize, Spacing} from '../../theme';
 
-const SplashScreen: React.FC<any> = ({navigation}) => {
+const SplashScreen: React.FC = () => {
   const scale = useRef(new Animated.Value(0.8)).current;
   const opacity = useRef(new Animated.Value(0)).current;
 
@@ -13,14 +12,7 @@ const SplashScreen: React.FC<any> = ({navigation}) => {
       Animated.spring(scale, {toValue: 1, useNativeDriver: true}),
       Animated.timing(opacity, {toValue: 1, duration: 800, useNativeDriver: true}),
     ]).start();
-
-    // Advance to the registration/login screen after the intro animation.
-    // Without this the app would stay stuck on the splash forever.
-    const timer = setTimeout(() => {
-      navigation?.replace?.('Registration');
-    }, 1800);
-    return () => clearTimeout(timer);
-  }, [navigation, scale, opacity]);
+  }, [scale, opacity]);
 
   return (
     <LinearGradient
@@ -28,7 +20,11 @@ const SplashScreen: React.FC<any> = ({navigation}) => {
       style={styles.container}>
       <Animated.View style={[styles.content, {transform: [{scale}], opacity}]}>
         <View style={styles.iconContainer}>
-          <Icon name="map-marker-radius" size={72} color={Colors.textOnPrimary} />
+          <Image
+            source={require('../../assets/images/ooru_mitra_logo_2.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
         </View>
         <Text style={styles.title}>OoruMitra</Text>
         <Text style={styles.tagline}>Services, Workers & Products Near You</Text>
@@ -50,7 +46,9 @@ const styles = StyleSheet.create({
     width: 120, height: 120, borderRadius: 60,
     backgroundColor: 'rgba(255,255,255,0.2)',
     justifyContent: 'center', alignItems: 'center', marginBottom: Spacing.xl,
+    overflow: 'hidden',
   },
+  logo: {width: 88, height: 88},
   title: {
     fontSize: FontSize.display, fontWeight: 'bold',
     color: Colors.textOnPrimary, letterSpacing: 2, marginBottom: Spacing.sm,

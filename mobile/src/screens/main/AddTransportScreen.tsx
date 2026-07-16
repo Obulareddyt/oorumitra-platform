@@ -1,33 +1,49 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {View, Text, TextInput, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert, KeyboardAvoidingView, Platform} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {transportService} from '../../services/listingService';
 import {TransportVehicleType} from '../../types';
 import {Colors, FontSize, Spacing, BorderRadius} from '../../theme';
+import {useRequireAuth} from '../../hooks/useRequireAuth';
+import {useAppSelector} from '../../store';
 
-const VEHICLE_TYPES: TransportVehicleType[] = ['MINI_TRUCK', 'LARGE_TRUCK', 'TRACTOR_TRAILER', 'PICKUP', 'AUTO_RICKSHAW', 'OTHER'];
+// Must match backend TransportVehicleType enum exactly.
+const VEHICLE_TYPES: TransportVehicleType[] = ['AUTO', 'TRACTOR', 'MINI_TRUCK', 'LORRY', 'BUS'];
 
 const AddTransportScreen: React.FC = () => {
   const navigation = useNavigation<any>();
-  const [title, setTitle] = useState('');
+  const {isAuthenticated} = useRequireAuth();
+  const user = useAppSelector(s => s.auth.user);
+
+  useEffect(() => {
+    if (!isAuthenticated) navigation.replace('Auth');
+  }, [isAuthenticated, navigation]);
+
   const [description, setDescription] = useState('');
   const [vehicleType, setVehicleType] = useState<TransportVehicleType>('MINI_TRUCK');
   const [village, setVillage] = useState('');
   const [ratePerKm, setRatePerKm] = useState('');
-  const [capacityTons, setCapacityTons] = useState('');
+  const [ratePerHour, setRatePerHour] = useState('');
+  const [weightCapacity, setWeightCapacity] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  if (!isAuthenticated) return null;
+
   const handleSubmit = async () => {
-    if (!title.trim() || !village.trim() || !ratePerKm) {
+    if (!village.trim()) {
       Alert.alert('Error', 'Please fill all required fields');
       return;
     }
     setIsLoading(true);
     try {
       await transportService.create({
-        title, description, vehicleType, village,
-        ratePerKm: Number(ratePerKm),
-        capacityTons: capacityTons ? Number(capacityTons) : undefined,
+        vehicleType,
+        ownerName: `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim(),
+        mobileNumber: user?.mobileNumber ?? '',
+        description, village,
+        ratePerKm: ratePerKm ? Number(ratePerKm) : undefined,
+        ratePerHour: ratePerHour ? Number(ratePerHour) : undefined,
+        weightCapacity: weightCapacity.trim() || undefined,
       });
       Alert.alert('Success', 'Transport listed!', [{text: 'OK', onPress: () => navigation.goBack()}]);
     } catch (err: any) {
@@ -40,9 +56,6 @@ const AddTransportScreen: React.FC = () => {
   return (
     <KeyboardAvoidingView style={{flex: 1}} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-        <Text style={styles.label}>Title *</Text>
-        <TextInput style={styles.input} value={title} onChangeText={setTitle} placeholder="e.g. Mini Truck for Hire" placeholderTextColor={Colors.textHint} />
-
         <Text style={styles.label}>Vehicle Type *</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
           {VEHICLE_TYPES.map(vt => (
@@ -55,11 +68,14 @@ const AddTransportScreen: React.FC = () => {
         <Text style={styles.label}>Village *</Text>
         <TextInput style={styles.input} value={village} onChangeText={setVillage} placeholder="Your village/town" placeholderTextColor={Colors.textHint} />
 
-        <Text style={styles.label}>Rate Per Km (₹) *</Text>
+        <Text style={styles.label}>Rate Per Km (₹)</Text>
         <TextInput style={styles.input} value={ratePerKm} onChangeText={setRatePerKm} keyboardType="numeric" placeholder="e.g. 25" placeholderTextColor={Colors.textHint} />
 
-        <Text style={styles.label}>Capacity (tons)</Text>
-        <TextInput style={styles.input} value={capacityTons} onChangeText={setCapacityTons} keyboardType="numeric" placeholder="e.g. 2.5" placeholderTextColor={Colors.textHint} />
+        <Text style={styles.label}>Rate Per Hour (₹)</Text>
+        <TextInput style={styles.input} value={ratePerHour} onChangeText={setRatePerHour} keyboardType="numeric" placeholder="e.g. 300" placeholderTextColor={Colors.textHint} />
+
+        <Text style={styles.label}>Weight Capacity</Text>
+        <TextInput style={styles.input} value={weightCapacity} onChangeText={setWeightCapacity} placeholder="e.g. 2.5 tons" placeholderTextColor={Colors.textHint} />
 
         <Text style={styles.label}>Description</Text>
         <TextInput style={[styles.input, styles.textarea]} value={description} onChangeText={setDescription} multiline numberOfLines={4} textAlignVertical="top" placeholder="Additional details about your vehicle..." placeholderTextColor={Colors.textHint} />

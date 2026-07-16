@@ -1,37 +1,41 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View, Text, TextInput, StyleSheet, ScrollView, TouchableOpacity,
   ActivityIndicator, Alert, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {ticketService} from '../../services/userService';
-import {WorkType} from '../../types';
 import {Colors, FontSize, Spacing, BorderRadius} from '../../theme';
-
-const WORK_TYPES: WorkType[] = [
-  'HARVESTING', 'PLANTING', 'WEEDING', 'IRRIGATION', 'SPRAYING',
-  'MASON_WORK', 'CARPENTRY', 'ELECTRICAL', 'PLUMBING', 'PAINTING',
-  'BOREWELL_WORK', 'CLEANING', 'DRIVING', 'OTHER',
-];
+import {useRequireAuth} from '../../hooks/useRequireAuth';
+import {useAppSelector} from '../../store';
 
 const PostRequestScreen: React.FC = () => {
   const navigation = useNavigation<any>();
+  const {isAuthenticated} = useRequireAuth();
+  const user = useAppSelector(s => s.auth.user);
+
+  useEffect(() => {
+    if (!isAuthenticated) navigation.replace('Auth');
+  }, [isAuthenticated, navigation]);
+
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [workType, setWorkType] = useState<WorkType>('OTHER');
-  const [village, setVillage] = useState('');
+  const [location, setLocation] = useState('');
   const [budget, setBudget] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  if (!isAuthenticated) return null;
+
   const handleSubmit = async () => {
-    if (!title.trim() || !description.trim() || !village.trim()) {
+    if (!title.trim() || !description.trim() || !location.trim()) {
       Alert.alert('Error', 'Please fill all required fields');
       return;
     }
     setIsLoading(true);
     try {
       await ticketService.create({
-        title, description, workType, village,
+        title, description, location,
+        mobileNumber: user?.mobileNumber ?? '',
         budget: budget ? Number(budget) : undefined,
       });
       Alert.alert('Posted!', 'Your request has been posted.', [{text: 'OK', onPress: () => navigation.goBack()}]);
@@ -48,17 +52,8 @@ const PostRequestScreen: React.FC = () => {
         <Text style={styles.label}>Title *</Text>
         <TextInput style={styles.input} value={title} onChangeText={setTitle} placeholder="e.g. Need harvester for 5 acres" placeholderTextColor={Colors.textHint} />
 
-        <Text style={styles.label}>Work Type *</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
-          {WORK_TYPES.map(wt => (
-            <TouchableOpacity key={wt} style={[styles.chip, workType === wt && styles.chipActive]} onPress={() => setWorkType(wt)}>
-              <Text style={[styles.chipText, workType === wt && styles.chipTextActive]}>{wt.replace(/_/g, ' ')}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-
-        <Text style={styles.label}>Village *</Text>
-        <TextInput style={styles.input} value={village} onChangeText={setVillage} placeholder="Your village/town" placeholderTextColor={Colors.textHint} />
+        <Text style={styles.label}>Location *</Text>
+        <TextInput style={styles.input} value={location} onChangeText={setLocation} placeholder="Your village/town" placeholderTextColor={Colors.textHint} />
 
         <Text style={styles.label}>Budget (₹)</Text>
         <TextInput style={styles.input} value={budget} onChangeText={setBudget} keyboardType="numeric" placeholder="Optional budget" placeholderTextColor={Colors.textHint} />

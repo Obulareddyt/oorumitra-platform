@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  ScrollView, ActivityIndicator, Alert, KeyboardAvoidingView, Platform,
+  ScrollView, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Image,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useTranslation} from 'react-i18next';
@@ -55,8 +55,19 @@ const RegistrationScreen: React.FC = () => {
   return (
     <KeyboardAvoidingView style={styles.wrapper} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+        <TouchableOpacity
+          style={styles.closeBtn}
+          onPress={() => navigation.getParent()?.goBack()}
+          hitSlop={{top: 12, bottom: 12, left: 12, right: 12}}>
+          <Icon name="close" size={24} color={Colors.textSecondary} />
+        </TouchableOpacity>
+
         <View style={styles.header}>
-          <Icon name="map-marker-radius" size={48} color={Colors.primary} />
+          <Image
+            source={require('../../assets/images/ooru_mitra_logo_2.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
           <Text style={styles.title}>{t('common.appName')}</Text>
           <Text style={styles.subtitle}>{isLogin ? t('auth.login') : t('auth.register')}</Text>
         </View>
@@ -152,7 +163,9 @@ const RegistrationScreen: React.FC = () => {
 const styles = StyleSheet.create({
   wrapper: {flex: 1, backgroundColor: Colors.background},
   container: {flexGrow: 1, padding: Spacing.xl, justifyContent: 'center'},
+  closeBtn: {position: 'absolute', top: Spacing.md, right: Spacing.md, zIndex: 1, padding: Spacing.xs},
   header: {alignItems: 'center', marginBottom: Spacing.xxxl},
+  logo: {width: 72, height: 72},
   title: {fontSize: FontSize.xxl, fontWeight: 'bold', color: Colors.primary, marginTop: Spacing.sm},
   subtitle: {fontSize: FontSize.lg, color: Colors.textSecondary, marginTop: 4},
   row: {flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.md},

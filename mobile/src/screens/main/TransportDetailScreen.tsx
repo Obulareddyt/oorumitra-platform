@@ -4,12 +4,14 @@ import {useNavigation, useRoute} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {transportService} from '../../services/listingService';
 import {chatService} from '../../services/chatService';
+import {useRequireAuth} from '../../hooks/useRequireAuth';
 import {useAppSelector} from '../../store';
 import {TransportListing} from '../../types';
 import {Colors, FontSize, Spacing, BorderRadius} from '../../theme';
 
 const TransportDetailScreen: React.FC = () => {
   const navigation = useNavigation<any>();
+  const {requireAuth} = useRequireAuth();
   const {id} = useRoute<any>().params;
   const currentUser = useAppSelector(s => s.auth.user);
   const [item, setItem] = useState<TransportListing | null>(null);
@@ -26,7 +28,7 @@ const TransportDetailScreen: React.FC = () => {
     if (!item) return;
     try {
       const c = await chatService.startConversation({sellerId: item.userId, listingType: 'TRANSPORT', listingId: item.id});
-      navigation.navigate('Chat', {conversationId: c.id, otherUserName: item.title});
+      navigation.navigate('Chat', {conversationId: c.id, otherUserName: item.ownerName ?? item.vehicleType});
     } catch (_) {Alert.alert('Error', 'Failed to start chat');}
   };
 
@@ -39,11 +41,11 @@ const TransportDetailScreen: React.FC = () => {
         <Icon name="truck" size={64} color={Colors.livestock} />
       </View>
       <View style={styles.body}>
-        <Text style={styles.title}>{item.title}</Text>
+        <Text style={styles.title}>{item.ownerName ?? item.vehicleType?.replace(/_/g, ' ')}</Text>
         <Text style={styles.type}>{item.vehicleType?.replace(/_/g, ' ')}</Text>
 
         <View style={styles.row}><Icon name="map-marker" size={16} color={Colors.textHint} /><Text style={styles.info}>{item.village}</Text></View>
-        {item.capacityTons && <View style={styles.row}><Icon name="weight" size={16} color={Colors.textHint} /><Text style={styles.info}>Capacity: {item.capacityTons} tons</Text></View>}
+        {item.weightCapacity && <View style={styles.row}><Icon name="weight" size={16} color={Colors.textHint} /><Text style={styles.info}>Capacity: {item.weightCapacity}</Text></View>}
 
         <View style={styles.priceCard}>
           <Text style={styles.priceLabel}>Rate Per Km</Text>
@@ -53,7 +55,7 @@ const TransportDetailScreen: React.FC = () => {
         {item.description ? <Text style={styles.desc}>{item.description}</Text> : null}
 
         {currentUser?.id !== item.userId && (
-          <TouchableOpacity style={styles.chatBtn} onPress={handleChat}>
+          <TouchableOpacity style={styles.chatBtn} onPress={() => requireAuth(handleChat)}>
             <Icon name="chat" size={20} color={Colors.textOnPrimary} />
             <Text style={styles.chatText}>Contact Driver</Text>
           </TouchableOpacity>

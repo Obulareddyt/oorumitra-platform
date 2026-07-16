@@ -12,15 +12,13 @@ import {Colors, FontSize, Spacing, BorderRadius} from '../../theme';
 
 const CATEGORIES: {label: string; value: ProductCategory | undefined}[] = [
   {label: 'All', value: undefined},
-  {label: 'Seeds', value: 'SEEDS'},
-  {label: 'Fertilizers', value: 'FERTILIZERS'},
-  {label: 'Tools', value: 'TOOLS'},
-  {label: 'Equipment', value: 'EQUIPMENT'},
+  {label: 'Agriculture', value: 'AGRICULTURE'},
+  {label: 'Hardware', value: 'HARDWARE'},
   {label: 'Livestock', value: 'LIVESTOCK'},
-  {label: 'Dairy', value: 'DAIRY'},
-  {label: 'Vegetables', value: 'VEGETABLES'},
+  {label: 'Vehicles', value: 'VEHICLES'},
+  {label: 'Seeds', value: 'SEEDS'},
   {label: 'Fruits', value: 'FRUITS'},
-  {label: 'Grains', value: 'GRAINS'},
+  {label: 'Flowers', value: 'FLOWERS'},
 ];
 
 const ProductCard: React.FC<{item: Product; onPress: () => void}> = ({item, onPress}) => (
@@ -33,10 +31,10 @@ const ProductCard: React.FC<{item: Product; onPress: () => void}> = ({item, onPr
       </View>
     )}
     <View style={styles.cardBody}>
-      <Text style={styles.cardTitle} numberOfLines={2}>{item.title}</Text>
+      <Text style={styles.cardTitle} numberOfLines={2}>{item.productName}</Text>
       <Text style={styles.cardCategory}>{item.category?.replace(/_/g, ' ')}</Text>
       <View style={styles.cardFooter}>
-        <Text style={styles.cardPrice}>₹{item.price}</Text>
+        <Text style={styles.cardPrice}>₹{item.amount}</Text>
         <View style={styles.ratingRow}>
           <Icon name="star" size={12} color={Colors.star} />
           <Text style={styles.rating}>{Number(item.averageRating ?? 0).toFixed(1)}</Text>

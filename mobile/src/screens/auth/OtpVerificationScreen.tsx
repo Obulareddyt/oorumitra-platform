@@ -1,7 +1,7 @@
 import React, {useState, useEffect, useRef} from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  ActivityIndicator, Alert,
+  ActivityIndicator, Alert, Image,
 } from 'react-native';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {useTranslation} from 'react-i18next';
@@ -47,6 +47,9 @@ const OtpVerificationScreen: React.FC = () => {
       } else {
         await dispatch(loginUser({mobileNumber, otp: code})).unwrap();
       }
+      // Auth is presented as a modal over whatever screen requested it
+      // (Main, or a restricted action) — dismiss it now that we're signed in.
+      navigation.getParent()?.goBack();
     } catch (err: any) {
       Alert.alert('Error', err?.message ?? 'Invalid OTP');
       setOtp(Array(OTP_LENGTH).fill(''));
@@ -68,6 +71,11 @@ const OtpVerificationScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      <Image
+        source={require('../../assets/images/ooru_mitra_logo_2.png')}
+        style={styles.logo}
+        resizeMode="contain"
+      />
       <Text style={styles.title}>{t('auth.enterOtp')}</Text>
       <Text style={styles.subtitle}>
         {t('auth.otpSent')} +91 {mobileNumber}
@@ -117,6 +125,7 @@ const OtpVerificationScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {flex: 1, backgroundColor: Colors.background, padding: Spacing.xl, justifyContent: 'center'},
+  logo: {width: 64, height: 64, alignSelf: 'center', marginBottom: Spacing.lg},
   title: {fontSize: FontSize.xxl, fontWeight: 'bold', color: Colors.text, textAlign: 'center', marginBottom: Spacing.sm},
   subtitle: {fontSize: FontSize.base, color: Colors.textSecondary, textAlign: 'center', marginBottom: Spacing.xxxl},
   otpRow: {flexDirection: 'row', justifyContent: 'center', gap: Spacing.sm, marginBottom: Spacing.xl},

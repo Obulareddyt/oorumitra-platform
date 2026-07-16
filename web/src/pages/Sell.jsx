@@ -20,6 +20,9 @@ const VEHICLE_WORK_TYPES = ['TRACTOR', 'JCB', 'CRANE', 'BOREWELL_MACHINE', 'EXCA
 
 const Req = () => <span className="text-red-500 ml-0.5">*</span>
 const titleCase = (s) => s.charAt(0) + s.slice(1).toLowerCase().replace(/_/g, ' ')
+const CATEGORY_LABELS = { VEHICLES: 'Vehicle' }
+const categoryLabel = (c) => CATEGORY_LABELS[c] || titleCase(c)
+const formatAmount = (raw) => (raw ? Number(raw).toLocaleString('en-IN') : '')
 
 export default function Sell() {
   const { isLoggedIn, user } = useAuth()
@@ -31,7 +34,7 @@ export default function Sell() {
     ownerName: `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim(),
     mobileNumber: user?.mobileNumber ?? '',
     whatsappNumber: '',
-    availability: '',
+    availableStatus: true,
     fromDate: '',
     toDate: '',
   }))
@@ -62,7 +65,7 @@ export default function Sell() {
       ownerName: `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim(),
       mobileNumber: user?.mobileNumber ?? '',
       whatsappNumber: '',
-      availability: '',
+      availableStatus: true,
       fromDate: '',
       toDate: '',
     })
@@ -166,7 +169,7 @@ export default function Sell() {
           amount: Number(form.amount),
           negotiable: !!form.negotiable,
           location: form.location,
-          availability: form.availability || undefined,
+          availabilityStatus: form.availableStatus === false ? 'INACTIVE' : 'ACTIVE',
         }, images, audioBlob)
       } else if (type === 'WORKER') {
         await workersApi.create({
@@ -258,19 +261,42 @@ export default function Sell() {
             <div className="grid grid-cols-2 gap-4">
               <Field label="Category">
                 <select className="input" value={form.category || 'AGRICULTURE'} onChange={update('category')}>
-                  {PRODUCT_CATEGORIES.map((c) => <option key={c} value={c}>{titleCase(c)}</option>)}
+                  {PRODUCT_CATEGORIES.map((c) => <option key={c} value={c}>{categoryLabel(c)}</option>)}
                 </select>
               </Field>
               <Field label="Sub Category">
-                <input className="input" value={form.subCategory || ''} onChange={update('subCategory')} placeholder="optional" />
+                <input className="input" value={form.subCategory || ''} onChange={update('subCategory')} />
               </Field>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <Field label={<>Amount (₹)<Req /></>}>
-                <input type="number" className="input" value={form.amount || ''} onChange={update('amount')} required placeholder="0" />
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  className="input"
+                  value={formatAmount(form.amount)}
+                  onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value.replace(/\D/g, '') }))}
+                  required
+                  placeholder="0"
+                />
               </Field>
               <Field label="Availability">
-                <input className="input" value={form.availability || ''} onChange={update('availability')} placeholder="e.g. In Stock" />
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={form.availableStatus !== false}
+                  onClick={() => setForm((f) => ({ ...f, availableStatus: f.availableStatus === false }))}
+                  className={`flex items-center justify-between w-full px-3 py-2 rounded-lg border transition-colors ${
+                    form.availableStatus !== false
+                      ? 'bg-green-50 border-green-300 text-green-700'
+                      : 'bg-gray-50 border-gray-300 text-gray-500'
+                  }`}
+                >
+                  <span className="text-sm font-medium">{form.availableStatus !== false ? 'Active' : 'Inactive'}</span>
+                  <span className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${form.availableStatus !== false ? 'bg-green-500' : 'bg-gray-300'}`}>
+                    <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${form.availableStatus !== false ? 'translate-x-4' : 'translate-x-1'}`} />
+                  </span>
+                </button>
               </Field>
             </div>
             <label className="flex items-center gap-2 text-sm text-gray-700">
@@ -302,7 +328,15 @@ export default function Sell() {
                 </select>
               </Field>
               <Field label={<>Amount (₹)<Req /></>}>
-                <input type="number" className="input" value={form.amount || ''} onChange={update('amount')} required placeholder="0" />
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  className="input"
+                  value={formatAmount(form.amount)}
+                  onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value.replace(/\D/g, '') }))}
+                  required
+                  placeholder="0"
+                />
               </Field>
             </div>
             <div className="flex flex-col gap-1 w-full text-left mt-2">
@@ -331,10 +365,10 @@ export default function Sell() {
             </Field>
             <div className="grid grid-cols-2 gap-4">
               <Field label="Rate per KM (₹)">
-                <input type="number" className="input" value={form.ratePerKm || ''} onChange={update('ratePerKm')} placeholder="optional" />
+                <input type="number" className="input" value={form.ratePerKm || ''} onChange={update('ratePerKm')} />
               </Field>
               <Field label="Rate per Hour (₹)">
-                <input type="number" className="input" value={form.ratePerHour || ''} onChange={update('ratePerHour')} placeholder="optional" />
+                <input type="number" className="input" value={form.ratePerHour || ''} onChange={update('ratePerHour')} />
               </Field>
             </div>
             <Field label="Weight Capacity">
@@ -369,10 +403,10 @@ export default function Sell() {
             </Field>
             <div className="grid grid-cols-2 gap-4">
               <Field label="Price per Acre (₹)">
-                <input type="number" className="input" value={form.pricePerAcre || ''} onChange={update('pricePerAcre')} placeholder="optional" />
+                <input type="number" className="input" value={form.pricePerAcre || ''} onChange={update('pricePerAcre')} />
               </Field>
               <Field label="Price per Hour (₹)">
-                <input type="number" className="input" value={form.pricePerHour || ''} onChange={update('pricePerHour')} placeholder="optional" />
+                <input type="number" className="input" value={form.pricePerHour || ''} onChange={update('pricePerHour')} />
               </Field>
             </div>
             <div className="flex flex-col gap-1 w-full text-left mt-2">
@@ -400,6 +434,40 @@ export default function Sell() {
             onChange={update('description')}
             placeholder="Describe your listing in detail…"
           />
+        </Field>
+
+        {/* Voice note */}
+        <Field label="Voice Note (optional)">
+          <div className="space-y-2">
+            {!isRecording && !audioUrl && (
+              <button
+                type="button"
+                onClick={startRecording}
+                className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+              >
+                🎙 Record voice note
+              </button>
+            )}
+            {isRecording && (
+              <div className="flex items-center gap-3">
+                <span className="flex items-center gap-1.5 text-red-600 text-sm font-medium">
+                  <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse" />
+                  Recording {recordingSeconds}s
+                </span>
+                <button type="button" onClick={stopRecording} className="px-3 py-1.5 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-colors">
+                  Stop
+                </button>
+              </div>
+            )}
+            {audioUrl && !isRecording && (
+              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <audio src={audioUrl} controls className="flex-1 h-8" style={{minWidth:0}} />
+                <button type="button" onClick={deleteRecording} className="text-red-500 hover:text-red-700 text-sm flex-shrink-0">
+                  🗑 Delete
+                </button>
+              </div>
+            )}
+          </div>
         </Field>
 
         {/* Location — mandatory */}
@@ -447,7 +515,6 @@ export default function Sell() {
               type="tel"
               maxLength={10}
               className="input rounded-l-none"
-              placeholder="optional"
               value={form.whatsappNumber || ''}
               onChange={(e) => setForm((f) => ({ ...f, whatsappNumber: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
             />
@@ -490,40 +557,6 @@ export default function Sell() {
             )}
           </Field>
         )}
-
-        {/* Voice note */}
-        <Field label="Voice Note (optional)">
-          <div className="space-y-2">
-            {!isRecording && !audioUrl && (
-              <button
-                type="button"
-                onClick={startRecording}
-                className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors"
-              >
-                🎙 Record voice note
-              </button>
-            )}
-            {isRecording && (
-              <div className="flex items-center gap-3">
-                <span className="flex items-center gap-1.5 text-red-600 text-sm font-medium">
-                  <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse" />
-                  Recording {recordingSeconds}s
-                </span>
-                <button type="button" onClick={stopRecording} className="px-3 py-1.5 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-colors">
-                  Stop
-                </button>
-              </div>
-            )}
-            {audioUrl && !isRecording && (
-              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                <audio src={audioUrl} controls className="flex-1 h-8" style={{minWidth:0}} />
-                <button type="button" onClick={deleteRecording} className="text-red-500 hover:text-red-700 text-sm flex-shrink-0">
-                  🗑 Delete
-                </button>
-              </div>
-            )}
-          </div>
-        </Field>
 
         {error && <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3">{error}</p>}
 

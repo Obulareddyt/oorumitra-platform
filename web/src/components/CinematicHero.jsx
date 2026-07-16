@@ -160,12 +160,6 @@ export default function CinematicHero({ isLoggedIn, userName, isInsideSlider }) 
                 >
                   {isLoggedIn ? t('home.post_ad', 'Post a Listing →') : 'Join OoruMitra →'}
                 </Link>
-                <Link
-                  to="/banner"
-                  className="bg-white/10 hover:bg-white/20 text-white font-semibold px-5 py-2.5 rounded-xl transition-all backdrop-blur-sm text-sm border border-white/20 active:scale-95"
-                >
-                  🎥 {t('home.watch_promo', 'Watch Cinematic Promo')}
-                </Link>
               </div>
             </div>
           )}

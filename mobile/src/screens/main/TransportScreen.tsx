@@ -9,11 +9,11 @@ import {Colors, FontSize, Spacing, BorderRadius} from '../../theme';
 
 const VEHICLE_TYPES: {label: string; value: TransportVehicleType | undefined; icon: string}[] = [
   {label: 'All', value: undefined, icon: 'truck'},
-  {label: 'Mini', value: 'MINI_TRUCK', icon: 'truck'},
-  {label: 'Large', value: 'LARGE_TRUCK', icon: 'truck-flatbed'},
-  {label: 'Tractor', value: 'TRACTOR_TRAILER', icon: 'tractor'},
-  {label: 'Pickup', value: 'PICKUP', icon: 'car-pickup'},
-  {label: 'Auto', value: 'AUTO_RICKSHAW', icon: 'rickshaw'},
+  {label: 'Auto', value: 'AUTO', icon: 'rickshaw'},
+  {label: 'Tractor', value: 'TRACTOR', icon: 'tractor'},
+  {label: 'Mini Truck', value: 'MINI_TRUCK', icon: 'truck'},
+  {label: 'Lorry', value: 'LORRY', icon: 'truck-flatbed'},
+  {label: 'Bus', value: 'BUS', icon: 'bus'},
 ];
 
 const TransportCard: React.FC<{item: TransportListing; onPress: () => void}> = ({item, onPress}) => (
@@ -22,7 +22,7 @@ const TransportCard: React.FC<{item: TransportListing; onPress: () => void}> = (
       <Icon name="truck" size={28} color={Colors.livestock} />
     </View>
     <View style={styles.info}>
-      <Text style={styles.title} numberOfLines={1}>{item.title}</Text>
+      <Text style={styles.title} numberOfLines={1}>{item.ownerName ?? item.vehicleType?.replace(/_/g, ' ')}</Text>
       <Text style={styles.subType}>{item.vehicleType?.replace(/_/g, ' ')}</Text>
       <View style={styles.row}>
         <Icon name="map-marker" size={13} color={Colors.textHint} />
@@ -30,7 +30,7 @@ const TransportCard: React.FC<{item: TransportListing; onPress: () => void}> = (
       </View>
       <View style={styles.footer}>
         <Text style={styles.price}>₹{item.ratePerKm}<Text style={styles.unit}>/km</Text></Text>
-        {item.capacityTons && <Text style={styles.cap}>{item.capacityTons}T</Text>}
+        {item.weightCapacity && <Text style={styles.cap}>{item.weightCapacity}</Text>}
       </View>
     </View>
   </TouchableOpacity>

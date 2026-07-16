@@ -26,9 +26,7 @@ const TicketCard: React.FC<{item: RequestTicket; onPress: () => void}> = ({item,
       <Text style={styles.desc} numberOfLines={2}>{item.description}</Text>
       <View style={styles.row}>
         <Icon name="map-marker" size={12} color={Colors.textHint} />
-        <Text style={styles.village}>{item.village}</Text>
-        <Text style={styles.dot}>•</Text>
-        <Text style={styles.type}>{item.workType?.replace(/_/g, ' ')}</Text>
+        <Text style={styles.village}>{item.location}</Text>
       </View>
     </View>
   </TouchableOpacity>

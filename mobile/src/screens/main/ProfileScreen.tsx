@@ -24,6 +24,21 @@ const ProfileScreen: React.FC = () => {
   const [email, setEmail] = useState(user?.email ?? '');
   const [saving, setSaving] = useState(false);
 
+  if (!user) {
+    return (
+      <View style={styles.guestContainer}>
+        <View style={styles.avatar}>
+          <Icon name="account-outline" size={48} color={Colors.textOnPrimary} />
+        </View>
+        <Text style={styles.guestTitle}>You're browsing as a guest</Text>
+        <Text style={styles.guestSubtitle}>Sign in to manage your profile, post listings, and message sellers.</Text>
+        <TouchableOpacity style={styles.signInBtn} onPress={() => navigation.navigate('Auth')}>
+          <Text style={styles.signInText}>Sign In / Register</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -43,6 +58,7 @@ const ProfileScreen: React.FC = () => {
     {icon: 'star', label: 'My Bookings', onPress: () => navigation.navigate('MyBookings')},
     {icon: 'translate', label: 'Language', onPress: () => navigation.navigate('LanguageVoice')},
     {icon: 'account-hard-hat', label: 'My Listings', onPress: () => navigation.navigate('WorkerServices')},
+    {icon: 'shopping', label: 'My Products', onPress: () => navigation.navigate('MyProducts')},
   ];
 
   return (
@@ -120,6 +136,11 @@ const ProfileScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {flex: 1, backgroundColor: Colors.background},
+  guestContainer: {flex: 1, backgroundColor: Colors.background, alignItems: 'center', justifyContent: 'center', padding: Spacing.xxl},
+  guestTitle: {fontSize: FontSize.lg, fontWeight: 'bold', color: Colors.text, marginTop: Spacing.lg, textAlign: 'center'},
+  guestSubtitle: {fontSize: FontSize.base, color: Colors.textSecondary, marginTop: Spacing.sm, textAlign: 'center', marginBottom: Spacing.xl},
+  signInBtn: {backgroundColor: Colors.primary, paddingVertical: Spacing.md, paddingHorizontal: Spacing.xxl, borderRadius: BorderRadius.xl},
+  signInText: {color: Colors.textOnPrimary, fontSize: FontSize.md, fontWeight: 'bold'},
   hero: {backgroundColor: Colors.primary, padding: Spacing.xxxl, alignItems: 'center'},
   avatar: {width: 88, height: 88, borderRadius: 44, backgroundColor: 'rgba(255,255,255,0.25)', justifyContent: 'center', alignItems: 'center', marginBottom: Spacing.md},
   name: {fontSize: FontSize.xl, fontWeight: 'bold', color: Colors.textOnPrimary},

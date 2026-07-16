@@ -9,6 +9,12 @@ interface Props {
   onPress: () => void;
 }
 
+const PRICE_TYPE_UNIT: Record<string, string> = {
+  PERSON: '/person',
+  ACRE: '/acre',
+  HOUR: '/hour',
+};
+
 const WorkerCard: React.FC<Props> = ({item, onPress}) => (
   <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.85}>
     <View style={styles.avatar}>
@@ -16,8 +22,8 @@ const WorkerCard: React.FC<Props> = ({item, onPress}) => (
     </View>
     <View style={styles.content}>
       <View style={styles.topRow}>
-        <Text style={styles.title} numberOfLines={1}>{item.title}</Text>
-        {item.isAvailable && (
+        <Text style={styles.title} numberOfLines={1}>{item.groupName}</Text>
+        {item.availableStatus && (
           <View style={styles.availBadge}>
             <Text style={styles.availText}>Available</Text>
           </View>
@@ -29,7 +35,7 @@ const WorkerCard: React.FC<Props> = ({item, onPress}) => (
         <Text style={styles.village}>{item.village}</Text>
       </View>
       <View style={styles.footer}>
-        <Text style={styles.price}>₹{item.pricePerDay}<Text style={styles.unit}>/day</Text></Text>
+        <Text style={styles.price}>₹{item.amount}<Text style={styles.unit}>{PRICE_TYPE_UNIT[item.priceType] ?? ''}</Text></Text>
         {item.averageRating != null && (
           <View style={styles.ratingRow}>
             <Icon name="star" size={13} color={Colors.star} />

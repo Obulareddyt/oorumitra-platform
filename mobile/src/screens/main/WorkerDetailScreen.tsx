@@ -10,12 +10,18 @@ import {workerService} from '../../services/listingService';
 import {chatService} from '../../services/chatService';
 import {favouriteService, ratingService} from '../../services/userService';
 import {useAppSelector} from '../../store';
+import {useRequireAuth} from '../../hooks/useRequireAuth';
 import {WorkerListing} from '../../types';
 import {Colors, FontSize, Spacing, BorderRadius} from '../../theme';
+
+const PRICE_TYPE_LABEL: Record<string, string> = {
+  PERSON: 'Per Person', ACRE: 'Per Acre', HOUR: 'Per Hour',
+};
 
 const WorkerDetailScreen: React.FC = () => {
   const {t} = useTranslation();
   const navigation = useNavigation<any>();
+  const {requireAuth} = useRequireAuth();
   const route = useRoute<any>();
   const {id} = route.params;
   const currentUser = useAppSelector(s => s.auth.user);
@@ -42,7 +48,7 @@ const WorkerDetailScreen: React.FC = () => {
         listingType: 'WORKER',
         listingId: worker.id,
       });
-      navigation.navigate('Chat', {conversationId: convo.id, otherUserName: `${worker.title}`});
+      navigation.navigate('Chat', {conversationId: convo.id, otherUserName: `${worker.groupName}`});
     } catch (_) {Alert.alert('Error', 'Failed to start chat');}
   };
 
@@ -59,7 +65,7 @@ const WorkerDetailScreen: React.FC = () => {
   };
 
   const handleRate = () => {
-    navigation.navigate('RateReview', {listingType: 'WORKER', listingId: id, title: worker?.title});
+    navigation.navigate('RateReview', {listingType: 'WORKER', listingId: id, title: worker?.groupName});
   };
 
   if (loading) return <ActivityIndicator style={styles.center} color={Colors.primary} size="large" />;
@@ -76,7 +82,7 @@ const WorkerDetailScreen: React.FC = () => {
 
       <View style={styles.body}>
         <View style={styles.titleRow}>
-          <Text style={styles.title}>{worker.title}</Text>
+          <Text style={styles.title}>{worker.groupName}</Text>
           <TouchableOpacity onPress={handleFavourite}>
             <Icon name={isFav ? 'heart' : 'heart-outline'} size={26} color={Colors.error} />
           </TouchableOpacity>
@@ -97,13 +103,13 @@ const WorkerDetailScreen: React.FC = () => {
         )}
 
         <View style={styles.availRow}>
-          <View style={[styles.availDot, {backgroundColor: worker.isAvailable ? Colors.success : Colors.error}]} />
-          <Text style={styles.availText}>{worker.isAvailable ? 'Available' : 'Not Available'}</Text>
+          <View style={[styles.availDot, {backgroundColor: worker.availableStatus ? Colors.success : Colors.error}]} />
+          <Text style={styles.availText}>{worker.availableStatus ? 'Available' : 'Not Available'}</Text>
         </View>
 
         <View style={styles.priceCard}>
-          <Text style={styles.priceLabel}>Price Per Day</Text>
-          <Text style={styles.price}>₹{worker.pricePerDay}</Text>
+          <Text style={styles.priceLabel}>Price{PRICE_TYPE_LABEL[worker.priceType] ? ` (${PRICE_TYPE_LABEL[worker.priceType]})` : ''}</Text>
+          <Text style={styles.price}>₹{worker.amount}</Text>
         </View>
 
         {worker.description ? (
@@ -116,7 +122,7 @@ const WorkerDetailScreen: React.FC = () => {
         {/* Actions */}
         {!isOwner && (
           <View style={styles.actions}>
-            <TouchableOpacity style={styles.chatBtn} onPress={handleChat}>
+            <TouchableOpacity style={styles.chatBtn} onPress={() => requireAuth(handleChat)}>
               <Icon name="chat" size={20} color={Colors.textOnPrimary} />
               <Text style={styles.btnText}>Chat</Text>
             </TouchableOpacity>

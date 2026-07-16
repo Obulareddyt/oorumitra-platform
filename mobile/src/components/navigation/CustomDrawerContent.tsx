@@ -24,7 +24,7 @@ const MENU_ITEMS = [
 const CustomDrawerContent: React.FC<any> = (props) => {
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
-  const user = useAppSelector(s => s.auth.user);
+  const {user, isAuthenticated} = useAppSelector(s => s.auth);
 
   const handleLogout = () => {
     Alert.alert(
@@ -44,12 +44,23 @@ const CustomDrawerContent: React.FC<any> = (props) => {
         <View style={styles.avatar}>
           <Icon name="account" size={36} color={Colors.textOnPrimary} />
         </View>
-        <Text style={styles.name}>{user?.firstName} {user?.lastName}</Text>
-        <Text style={styles.mobile}>+91 {user?.mobileNumber}</Text>
-        <Text style={styles.village}>
-          <Icon name="map-marker" size={12} color="rgba(255,255,255,0.8)" />
-          {' '}{user?.village ?? 'Village'}
-        </Text>
+        {isAuthenticated ? (
+          <>
+            <Text style={styles.name}>{user?.firstName} {user?.lastName}</Text>
+            <Text style={styles.mobile}>+91 {user?.mobileNumber}</Text>
+            <Text style={styles.village}>
+              <Icon name="map-marker" size={12} color="rgba(255,255,255,0.8)" />
+              {' '}{user?.village ?? 'Village'}
+            </Text>
+          </>
+        ) : (
+          <>
+            <Text style={styles.name}>Guest</Text>
+            <TouchableOpacity onPress={() => props.navigation.navigate('Auth')}>
+              <Text style={styles.signInLink}>Sign In / Register</Text>
+            </TouchableOpacity>
+          </>
+        )}
       </View>
 
       {/* Menu items */}
@@ -65,11 +76,18 @@ const CustomDrawerContent: React.FC<any> = (props) => {
         ))}
       </View>
 
-      {/* Logout */}
-      <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-        <Icon name="logout" size={22} color={Colors.error} />
-        <Text style={styles.logoutText}>{t('common.logout')}</Text>
-      </TouchableOpacity>
+      {/* Logout / Sign in */}
+      {isAuthenticated ? (
+        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+          <Icon name="logout" size={22} color={Colors.error} />
+          <Text style={styles.logoutText}>{t('common.logout')}</Text>
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity style={styles.logoutBtn} onPress={() => props.navigation.navigate('Auth')}>
+          <Icon name="login" size={22} color={Colors.primary} />
+          <Text style={[styles.logoutText, {color: Colors.primary}]}>Sign In / Register</Text>
+        </TouchableOpacity>
+      )}
     </DrawerContentScrollView>
   );
 };
@@ -88,6 +106,7 @@ const styles = StyleSheet.create({
   name: {fontSize: FontSize.lg, fontWeight: 'bold', color: Colors.textOnPrimary},
   mobile: {fontSize: FontSize.sm, color: 'rgba(255,255,255,0.85)', marginTop: 2},
   village: {fontSize: FontSize.xs, color: 'rgba(255,255,255,0.7)', marginTop: 4},
+  signInLink: {fontSize: FontSize.sm, color: Colors.textOnPrimary, fontWeight: '600', marginTop: 4, textDecorationLine: 'underline'},
   menu: {paddingTop: Spacing.sm},
   menuItem: {
     flexDirection: 'row', alignItems: 'center', paddingVertical: Spacing.md,

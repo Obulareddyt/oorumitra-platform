@@ -4,6 +4,7 @@ import {useNavigation, useRoute} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {ticketService} from '../../services/userService';
 import {chatService} from '../../services/chatService';
+import {useRequireAuth} from '../../hooks/useRequireAuth';
 import {useAppSelector} from '../../store';
 import {RequestTicket} from '../../types';
 import {Colors, FontSize, Spacing, BorderRadius} from '../../theme';
@@ -12,6 +13,7 @@ const STATUS_COLORS: Record<string, string> = {OPEN: Colors.success, IN_PROGRESS
 
 const TicketDetailScreen: React.FC = () => {
   const navigation = useNavigation<any>();
+  const {requireAuth} = useRequireAuth();
   const route = useRoute<any>();
   const {id} = route.params;
   const currentUser = useAppSelector(s => s.auth.user);
@@ -50,9 +52,8 @@ const TicketDetailScreen: React.FC = () => {
 
       <View style={styles.body}>
         <Text style={styles.title}>{ticket.title}</Text>
-        <Text style={styles.workType}>{ticket.workType?.replace(/_/g, ' ')}</Text>
 
-        <View style={styles.infoRow}><Icon name="map-marker" size={16} color={Colors.textHint} /><Text style={styles.infoText}>{ticket.village}</Text></View>
+        <View style={styles.infoRow}><Icon name="map-marker" size={16} color={Colors.textHint} /><Text style={styles.infoText}>{ticket.location}</Text></View>
         {ticket.budget && <View style={styles.infoRow}><Icon name="currency-inr" size={16} color={Colors.textHint} /><Text style={styles.infoText}>Budget: ₹{ticket.budget}</Text></View>}
 
         <View style={styles.section}>
@@ -61,7 +62,7 @@ const TicketDetailScreen: React.FC = () => {
         </View>
 
         {!isOwner && (
-          <TouchableOpacity style={styles.chatBtn} onPress={handleChat}>
+          <TouchableOpacity style={styles.chatBtn} onPress={() => requireAuth(handleChat)}>
             <Icon name="chat" size={20} color={Colors.textOnPrimary} />
             <Text style={styles.chatText}>Respond to Request</Text>
           </TouchableOpacity>
