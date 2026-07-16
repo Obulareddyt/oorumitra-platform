@@ -2,68 +2,6 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 
-const MAPS_KEY = import.meta.env.VITE_GOOGLE_MAPS_KEY
-
-function LocationBadge() {
-  const [location, setLocation] = useState(null)
-  const [status, setStatus] = useState('idle')
-
-  useEffect(() => {
-    if (!navigator.geolocation) return
-    setStatus('loading')
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const { latitude: lat, longitude: lng } = pos.coords
-        try {
-          const res = await fetch(
-            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${MAPS_KEY}&result_type=locality|sublocality|neighborhood|administrative_area_level_3`
-          )
-          const data = await res.json()
-          const name = data.results?.[0]?.address_components?.find(c =>
-            c.types.some(t => ['locality','sublocality','sublocality_level_1','neighborhood','administrative_area_level_3'].includes(t))
-          )?.long_name || data.results?.[0]?.formatted_address?.split(',')[0]
-          setLocation(name || 'Location found')
-          setStatus('done')
-        } catch {
-          setLocation(`${lat.toFixed(3)}°N, ${lng.toFixed(3)}°E`)
-          setStatus('done')
-        }
-      },
-      () => setStatus('denied'),
-      { timeout: 8000 }
-    )
-  }, [])
-
-  if (status === 'idle' || status === 'loading') {
-    return (
-      <div className="flex items-center gap-1.5 text-white/80 text-xs mt-1.5">
-        <svg className="w-3.5 h-3.5 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
-          <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-        </svg>
-        <span>Detecting location…</span>
-      </div>
-    )
-  }
-  if (status === 'denied') {
-    return (
-      <div className="flex items-center gap-1.5 text-white/60 text-xs mt-1.5">
-        <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-          <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-        </svg>
-        <span>Location disabled</span>
-      </div>
-    )
-  }
-  return (
-    <div className="flex items-center gap-1.5 text-white/90 text-xs mt-1.5 drop-shadow">
-      <svg className="w-3.5 h-3.5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-        <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-      </svg>
-      <span>{location}</span>
-    </div>
-  )
-}
-
 export default function CinematicHero({ isLoggedIn, userName, isInsideSlider }) {
   const { t } = useTranslation()
   const [time, setTime] = useState(0)
@@ -142,8 +80,7 @@ export default function CinematicHero({ isLoggedIn, userName, isInsideSlider }) 
           ) : (
             <div className="text-left animate-fadeIn">
               <img src="/Ooru_mitra_logo_2.png" alt="OoruMitra" className="h-12 sm:h-14 w-auto mb-1 drop-shadow-lg" />
-              <LocationBadge />
-              
+
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white leading-tight mt-4 mb-2.5 drop-shadow" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.6)' }}>
                 {isLoggedIn ? t('home.welcome_back', 'Welcome back, {{name}}!', { name: userName }) : t('home.hero_title', 'Connecting Villages, Empowering Communities')}
               </h1>
