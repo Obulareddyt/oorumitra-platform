@@ -22,6 +22,7 @@ export const authApi = {
   login: (mobileNumber, otp) => api.post('/auth/login', { mobileNumber, otp }),
   loginWithCredentials: (username, password) => api.post('/auth/login-credentials', { username, password }),
   register: (data) => api.post('/auth/register', data),
+  checkMobile: (mobileNumber) => api.get('/auth/check-mobile', { params: { mobileNumber } }),
 }
 
 function multipartCreate(url, data, images, voiceBlob) {
@@ -91,6 +92,11 @@ export const userApi = {
   getProfile: () => api.get('/users/profile'),
   updateProfile: (data) => api.put('/users/profile', data),
   updateLanguage: (language) => api.patch('/users/language', { language }),
+  uploadProfilePhoto: (file) => {
+    const form = new FormData()
+    form.append('photo', file)
+    return api.post('/users/profile/photo', form, { headers: { 'Content-Type': 'multipart/form-data' } })
+  },
 }
 
 export const emergencyApi = {
@@ -170,7 +176,7 @@ export const adApi = {
 export const translationsApi = {
   getActiveLanguages: () => api.get('/translations/languages'),
   getAllLanguages: () => api.get('/translations/languages/all'),
-  getMap: (langCode) => api.get(`/translations/${langCode}`),
+  getMap: (langCode, config) => api.get(`/translations/${langCode}`, config),
   addKey: (key, defaultValue) => api.post('/translations/add-key', null, { params: { key, defaultValue } }),
   updateEntry: (key, langCode, value) => api.put('/translations/update', null, { params: { key, langCode, value } }),
   toggleLanguage: (code, active) => api.put(`/translations/languages/${code}/toggle`, null, { params: { active } }),

@@ -6,6 +6,13 @@ import { useAuth } from '../context/AuthContext'
 import { useTranslation } from 'react-i18next'
 import Toast, { useToast } from '../components/Toast'
 
+const NO_PHOTO_BANNER = {
+  products: { icon: '🛒', label: 'Product Listing', gradient: 'from-emerald-100 to-green-50' },
+  workers: { icon: '👷', label: 'Worker Service', gradient: 'from-blue-100 to-sky-50' },
+  transport: { icon: '🚛', label: 'Transport Service', gradient: 'from-amber-100 to-orange-50' },
+  'vehicle-work': { icon: '🚜', label: 'Vehicle Work Service', gradient: 'from-purple-100 to-violet-50' },
+}
+
 function haversine(lat1, lon1, lat2, lon2) {
   const R = 6371
   const dLat = (lat2 - lat1) * Math.PI / 180
@@ -17,6 +24,10 @@ function haversine(lat1, lon1, lat2, lon2) {
 function fmt(iso) {
   if (!iso) return '—'
   return new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+}
+
+function fmtAmount(n) {
+  return Number(n).toLocaleString('en-IN')
 }
 
 const STATUS_BADGE = {
@@ -44,7 +55,7 @@ const TYPE_CONFIG = {
     rows: d => [
       ['Category', d.category],
       ['Sub Category', d.subCategory],
-      ['Price', d.amount != null ? `₹${d.amount}${d.negotiable ? ' (Negotiable)' : ''}` : null],
+      ['Price', d.amount != null ? `₹${fmtAmount(d.amount)}${d.negotiable ? ' (Negotiable)' : ''}` : null],
       ['Location', d.location],
       ['Description', d.description],
     ],
@@ -56,7 +67,7 @@ const TYPE_CONFIG = {
     rows: d => [
       ['Work Type', d.workType],
       ['Available Workers', d.availableWorkers],
-      ['Price', d.amount != null ? `₹${d.amount} / ${d.priceType}` : null],
+      ['Price', d.amount != null ? `₹${fmtAmount(d.amount)} / ${d.priceType}` : null],
       ['Village', d.village],
       ['Description', d.description],
     ],
@@ -67,8 +78,7 @@ const TYPE_CONFIG = {
     getVillage: d => d.village,
     rows: d => [
       ['Vehicle Type', d.vehicleType],
-      ['Rate per KM', d.ratePerKm != null ? `₹${d.ratePerKm}` : null],
-      ['Rate per Hour', d.ratePerHour != null ? `₹${d.ratePerHour}` : null],
+      ['Price', d.amount != null ? `₹${fmtAmount(d.amount)} / ${d.priceType}` : null],
       ['Weight Capacity', d.weightCapacity],
       ['Availability', d.availability],
       ['Village', d.village],
@@ -82,8 +92,7 @@ const TYPE_CONFIG = {
     getVillage: d => d.village,
     rows: d => [
       ['Vehicle Type', d.vehicleType],
-      ['Price per Acre', d.pricePerAcre != null ? `₹${d.pricePerAcre}` : null],
-      ['Price per Hour', d.pricePerHour != null ? `₹${d.pricePerHour}` : null],
+      ['Price', d.amount != null ? `₹${fmtAmount(d.amount)} / ${d.priceType}` : null],
       ['Village', d.village],
       ['Available Until', d.availableUntil],
       ['Description', d.description],
@@ -229,8 +238,9 @@ export default function ListingDetail() {
             )}
           </div>
         ) : (
-          <div className="w-full h-48 bg-gray-100 flex items-center justify-center text-gray-300 text-5xl relative">
-            📷
+          <div className={`w-full h-48 bg-gradient-to-br ${NO_PHOTO_BANNER[type]?.gradient || 'from-gray-100 to-gray-50'} flex flex-col items-center justify-center gap-2 relative`}>
+            <span className="text-6xl">{NO_PHOTO_BANNER[type]?.icon || '🛍️'}</span>
+            <span className="text-gray-500 text-sm font-semibold uppercase tracking-wide">{NO_PHOTO_BANNER[type]?.label || 'Listing'}</span>
             {isSold && (
               <div className="absolute inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center">
                 <span className="border-4 border-red-500 text-red-500 font-black tracking-widest text-2xl uppercase px-5 py-2.5 rounded-xl rotate-[-8deg] shadow-lg">

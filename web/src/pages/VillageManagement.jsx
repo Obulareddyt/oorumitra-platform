@@ -150,7 +150,6 @@ function AssignAdminModal({ village, onClose, onSaved, toast }) {
             <input
               type="text"
               className="input mb-2"
-              placeholder="Search users by name or mobile…"
               value={search}
               onChange={e => setSearch(e.target.value)}
             />
@@ -291,7 +290,7 @@ export default function VillageManagement() {
         <>
           <div className="flex flex-wrap gap-3 items-center justify-between mb-4">
             <div className="flex flex-wrap gap-3 flex-1">
-              <input type="text" placeholder="Search village or district…" className="input max-w-xs"
+              <input type="text" className="input max-w-xs"
                 value={search} onChange={e => { setSearch(e.target.value); setPage(0) }} />
               <select className="input max-w-[160px]" value={filterStatus}
                 onChange={e => { setFilterStatus(e.target.value); setPage(0) }}>

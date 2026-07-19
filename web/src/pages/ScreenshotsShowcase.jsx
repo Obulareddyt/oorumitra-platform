@@ -88,11 +88,11 @@ export default function ScreenshotsShowcase() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1">Username / Mobile</label>
-                  <input type="text" className="input text-xs h-10 w-full" placeholder="e.g. obulareddy" defaultValue="obulareddy" readOnly />
+                  <input type="text" className="input text-xs h-10 w-full" defaultValue="obulareddy" readOnly />
                 </div>
                 <div>
                   <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1">Password</label>
-                  <input type="password" className="input text-xs h-10 w-full" placeholder="••••••••" defaultValue="password123" readOnly />
+                  <input type="password" className="input text-xs h-10 w-full" defaultValue="password123" readOnly />
                 </div>
                 <p className="text-right text-[10px] text-indigo-400 font-bold cursor-pointer">Forgot Password?</p>
               </div>
@@ -557,7 +557,7 @@ export default function ScreenshotsShowcase() {
                   
                   <div>
                     <label className="block text-[8px] uppercase font-bold text-slate-400 mb-1">Admin Remarks</label>
-                    <textarea className="input text-[10px] py-1.5 w-full resize-none bg-slate-900" rows={2} placeholder="Add remarks..." defaultValue="Valid documentation verified." readOnly />
+                    <textarea className="input text-[10px] py-1.5 w-full resize-none bg-slate-900" rows={2} defaultValue="Valid documentation verified." readOnly />
                   </div>
 
                   <div className="flex gap-2">

@@ -13,10 +13,12 @@ const TYPES = [
 ]
 
 const PRODUCT_CATEGORIES = ['AGRICULTURE', 'HARDWARE', 'LIVESTOCK', 'VEHICLES', 'SEEDS', 'FRUITS', 'FLOWERS']
-const PRICE_TYPES = ['PERSON', 'ACRE', 'HOUR']
+const PRICE_TYPES = ['PERSON', 'ACRE', 'DAY']
 const WORK_TYPES = ['HARVESTING', 'PLANTING', 'CONSTRUCTION', 'MASON_WORK', 'PAINTING', 'PLUMBING', 'ELECTRICAL', 'CARPENTER', 'BOREWELL_WORK', 'ROAD_WORK', 'CLEANING', 'LOADING_UNLOADING', 'AGRICULTURE_WORK', 'OTHERS']
 const TRANSPORT_VEHICLE_TYPES = ['AUTO', 'TRACTOR', 'MINI_TRUCK', 'LORRY', 'BUS']
 const VEHICLE_WORK_TYPES = ['TRACTOR', 'JCB', 'CRANE', 'BOREWELL_MACHINE', 'EXCAVATOR', 'HARVESTER']
+const TRANSPORT_PRICE_TYPES = ['HOUR', 'DAY', 'KM']
+const VEHICLE_WORK_PRICE_TYPES = ['HOUR', 'DAY', 'ACRE']
 
 const Req = () => <span className="text-red-500 ml-0.5">*</span>
 const titleCase = (s) => s.charAt(0) + s.slice(1).toLowerCase().replace(/_/g, ' ')
@@ -148,6 +150,10 @@ export default function Sell() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (type === 'PRODUCT' && !form.category) { setError('Category is required.'); return }
+    if (type === 'WORKER' && (!form.workType || !form.priceType)) { setError('Work Type and Price Type are required.'); return }
+    if ((type === 'TRANSPORT' || type === 'VEHICLE_WORK') && !form.vehicleType) { setError('Vehicle Type is required.'); return }
+    if ((type === 'TRANSPORT' || type === 'VEHICLE_WORK') && (!form.priceType || !form.amount)) { setError('Price Type and Amount are required.'); return }
     if (!form.location && !form.village) { setError('Location is required. Please enter or use your current location.'); return }
     setLoading(true)
     setError('')
@@ -164,7 +170,7 @@ export default function Sell() {
         await productsApi.create({
           ...base,
           productName: form.productName,
-          category: form.category || 'AGRICULTURE',
+          category: form.category,
           subCategory: form.subCategory,
           amount: Number(form.amount),
           negotiable: !!form.negotiable,
@@ -177,17 +183,17 @@ export default function Sell() {
           groupName: form.groupName,
           village: form.village,
           availableWorkers: Number(form.availableWorkers),
-          priceType: form.priceType || 'HOUR',
+          priceType: form.priceType,
           amount: Number(form.amount),
-          workType: form.workType || 'OTHERS',
+          workType: form.workType,
           description: `Available: ${form.fromDate} to ${form.toDate}\n\n${form.description || ''}`,
         }, images, audioBlob)
       } else if (type === 'TRANSPORT') {
         await transportApi.create({
           ...base,
-          vehicleType: form.vehicleType || 'AUTO',
-          ratePerKm: form.ratePerKm ? Number(form.ratePerKm) : undefined,
-          ratePerHour: form.ratePerHour ? Number(form.ratePerHour) : undefined,
+          vehicleType: form.vehicleType,
+          priceType: form.priceType,
+          amount: Number(form.amount),
           weightCapacity: form.weightCapacity,
           negotiable: !!form.negotiable,
           availability: `From ${form.fromDate} to ${form.toDate}`,
@@ -197,9 +203,9 @@ export default function Sell() {
       } else {
         await vehicleWorkApi.create({
           ...base,
-          vehicleType: form.vehicleType || 'TRACTOR',
-          pricePerAcre: form.pricePerAcre ? Number(form.pricePerAcre) : undefined,
-          pricePerHour: form.pricePerHour ? Number(form.pricePerHour) : undefined,
+          vehicleType: form.vehicleType,
+          priceType: form.priceType,
+          amount: Number(form.amount),
           village: form.village,
           availableStatus: form.availableStatus ?? true,
           availableUntil: form.toDate,
@@ -255,12 +261,10 @@ export default function Sell() {
         {/* PRODUCT fields */}
         {type === 'PRODUCT' && (
           <>
-            <Field label={<>Product Name<Req /></>}>
-              <input className="input" value={form.productName || ''} onChange={update('productName')} required placeholder="e.g. Fresh Tomatoes" />
-            </Field>
             <div className="grid grid-cols-2 gap-4">
-              <Field label="Category">
-                <select className="input" value={form.category || 'AGRICULTURE'} onChange={update('category')}>
+              <Field label={<>Category<Req /></>}>
+                <select className="input" value={form.category || ''} onChange={update('category')} required>
+                  <option value="" disabled>Select a category</option>
                   {PRODUCT_CATEGORIES.map((c) => <option key={c} value={c}>{categoryLabel(c)}</option>)}
                 </select>
               </Field>
@@ -268,6 +272,9 @@ export default function Sell() {
                 <input className="input" value={form.subCategory || ''} onChange={update('subCategory')} />
               </Field>
             </div>
+            <Field label={<>Product Name<Req /></>}>
+              <input className="input" value={form.productName || ''} onChange={update('productName')} required />
+            </Field>
             <div className="grid grid-cols-2 gap-4">
               <Field label={<>Amount (₹)<Req /></>}>
                 <input
@@ -277,7 +284,7 @@ export default function Sell() {
                   value={formatAmount(form.amount)}
                   onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value.replace(/\D/g, '') }))}
                   required
-                  placeholder="0"
+                 
                 />
               </Field>
               <Field label="Availability">
@@ -309,21 +316,23 @@ export default function Sell() {
         {type === 'WORKER' && (
           <>
             <Field label={<>Group / Team Name<Req /></>}>
-              <input className="input" value={form.groupName || ''} onChange={update('groupName')} required placeholder="e.g. Kumar Harvesting Group" />
+              <input className="input" value={form.groupName || ''} onChange={update('groupName')} required />
             </Field>
             <div className="grid grid-cols-2 gap-4">
-              <Field label="Work Type">
-                <select className="input" value={form.workType || 'OTHERS'} onChange={update('workType')}>
+              <Field label={<>Work Type<Req /></>}>
+                <select className="input" value={form.workType || ''} onChange={update('workType')} required>
+                  <option value="" disabled>Select work type</option>
                   {WORK_TYPES.map((w) => <option key={w} value={w}>{titleCase(w)}</option>)}
                 </select>
               </Field>
               <Field label={<>Available Workers<Req /></>}>
-                <input type="number" min="1" className="input" value={form.availableWorkers || ''} onChange={update('availableWorkers')} required placeholder="1" />
+                <input type="number" min="1" className="input" value={form.availableWorkers || ''} onChange={update('availableWorkers')} required />
               </Field>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <Field label="Price Type">
-                <select className="input" value={form.priceType || 'HOUR'} onChange={update('priceType')}>
+              <Field label={<>Price Type<Req /></>}>
+                <select className="input" value={form.priceType || ''} onChange={update('priceType')} required>
+                  <option value="" disabled>Select price type</option>
                   {PRICE_TYPES.map((p) => <option key={p} value={p}>{titleCase(p)}</option>)}
                 </select>
               </Field>
@@ -335,7 +344,7 @@ export default function Sell() {
                   value={formatAmount(form.amount)}
                   onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value.replace(/\D/g, '') }))}
                   required
-                  placeholder="0"
+                 
                 />
               </Field>
             </div>
@@ -358,21 +367,32 @@ export default function Sell() {
         {/* TRANSPORT fields */}
         {type === 'TRANSPORT' && (
           <>
-            <Field label="Vehicle Type">
-              <select className="input" value={form.vehicleType || 'AUTO'} onChange={update('vehicleType')}>
+            <Field label={<>Vehicle Type<Req /></>}>
+              <select className="input" value={form.vehicleType || ''} onChange={update('vehicleType')} required>
+                <option value="" disabled>Select vehicle type</option>
                 {TRANSPORT_VEHICLE_TYPES.map((v) => <option key={v} value={v}>{titleCase(v)}</option>)}
               </select>
             </Field>
             <div className="grid grid-cols-2 gap-4">
-              <Field label="Rate per KM (₹)">
-                <input type="number" className="input" value={form.ratePerKm || ''} onChange={update('ratePerKm')} />
+              <Field label={<>Price Type<Req /></>}>
+                <select className="input" value={form.priceType || ''} onChange={update('priceType')} required>
+                  <option value="" disabled>Select price type</option>
+                  {TRANSPORT_PRICE_TYPES.map((p) => <option key={p} value={p}>{titleCase(p)}</option>)}
+                </select>
               </Field>
-              <Field label="Rate per Hour (₹)">
-                <input type="number" className="input" value={form.ratePerHour || ''} onChange={update('ratePerHour')} />
+              <Field label={<>Amount (₹)<Req /></>}>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  className="input"
+                  value={formatAmount(form.amount)}
+                  onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value.replace(/\D/g, '') }))}
+                  required
+                />
               </Field>
             </div>
             <Field label="Weight Capacity">
-              <input className="input" value={form.weightCapacity || ''} onChange={update('weightCapacity')} placeholder="e.g. 2 Tonnes" />
+              <input className="input" value={form.weightCapacity || ''} onChange={update('weightCapacity')} />
             </Field>
             <div className="flex flex-col gap-1 w-full text-left mb-2">
               <label className="text-xs font-bold text-gray-700">Available Date Range (From - To)<Req /></label>
@@ -396,17 +416,28 @@ export default function Sell() {
         {/* VEHICLE_WORK fields */}
         {type === 'VEHICLE_WORK' && (
           <>
-            <Field label="Vehicle Type">
-              <select className="input" value={form.vehicleType || 'TRACTOR'} onChange={update('vehicleType')}>
+            <Field label={<>Vehicle Type<Req /></>}>
+              <select className="input" value={form.vehicleType || ''} onChange={update('vehicleType')} required>
+                <option value="" disabled>Select vehicle type</option>
                 {VEHICLE_WORK_TYPES.map((v) => <option key={v} value={v}>{titleCase(v)}</option>)}
               </select>
             </Field>
             <div className="grid grid-cols-2 gap-4">
-              <Field label="Price per Acre (₹)">
-                <input type="number" className="input" value={form.pricePerAcre || ''} onChange={update('pricePerAcre')} />
+              <Field label={<>Price Type<Req /></>}>
+                <select className="input" value={form.priceType || ''} onChange={update('priceType')} required>
+                  <option value="" disabled>Select price type</option>
+                  {VEHICLE_WORK_PRICE_TYPES.map((p) => <option key={p} value={p}>{titleCase(p)}</option>)}
+                </select>
               </Field>
-              <Field label="Price per Hour (₹)">
-                <input type="number" className="input" value={form.pricePerHour || ''} onChange={update('pricePerHour')} />
+              <Field label={<>Amount (₹)<Req /></>}>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  className="input"
+                  value={formatAmount(form.amount)}
+                  onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value.replace(/\D/g, '') }))}
+                  required
+                />
               </Field>
             </div>
             <div className="flex flex-col gap-1 w-full text-left mt-2">
@@ -432,7 +463,7 @@ export default function Sell() {
             rows={3}
             value={form.description || ''}
             onChange={update('description')}
-            placeholder="Describe your listing in detail…"
+           
           />
         </Field>
 
@@ -482,7 +513,7 @@ export default function Sell() {
                 latitude: lat ?? f.latitude,
                 longitude: lng ?? f.longitude,
               }))}
-              placeholder="Type village or area name…"
+             
             />
             <button
               type="button"

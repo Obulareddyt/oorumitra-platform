@@ -2,6 +2,7 @@ package com.ooumitra.dto.response;
 
 import com.ooumitra.entity.VehicleWorkListing;
 import com.ooumitra.enums.ApprovalStatus;
+import com.ooumitra.enums.PriceType;
 import com.ooumitra.enums.VehicleWorkType;
 import lombok.Builder;
 import lombok.Data;
@@ -18,8 +19,8 @@ public class VehicleWorkResponse {
     private VehicleWorkType vehicleType;
     private String ownerName;
     private String mobileNumber;
-    private BigDecimal pricePerAcre;
-    private BigDecimal pricePerHour;
+    private PriceType priceType;
+    private BigDecimal amount;
     private String village;
     private boolean availableStatus;
     private LocalDate availableUntil;
@@ -39,8 +40,8 @@ public class VehicleWorkResponse {
         return VehicleWorkResponse.builder()
                 .id(v.getId()).userId(v.getUser().getId())
                 .vehicleType(v.getVehicleType()).ownerName(v.getOwnerName())
-                .mobileNumber(v.getMobileNumber()).pricePerAcre(v.getPricePerAcre())
-                .pricePerHour(v.getPricePerHour()).village(v.getVillage())
+                .mobileNumber(v.getMobileNumber()).priceType(v.getPriceType())
+                .amount(v.getAmount()).village(v.getVillage())
                 .availableStatus(v.isAvailableStatus()).availableUntil(v.getAvailableUntil())
                 .description(v.getDescription())
                 .latitude(v.getLatitude()).longitude(v.getLongitude())

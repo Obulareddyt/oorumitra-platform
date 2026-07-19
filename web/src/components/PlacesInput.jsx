@@ -21,13 +21,16 @@ function loadMapsScript() {
   return scriptPromise
 }
 
-export default function PlacesInput({ value, onChange, placeholder = 'Type village or area…', required, className = 'input' }) {
+export default function PlacesInput({ value, onChange, required, className = 'input' }) {
   const inputRef = useRef(null)
   const acRef = useRef(null)
-  const [ready, setReady] = useState(false)
+  const [status, setStatus] = useState('loading') // loading | ready | failed
+  const ready = status === 'ready'
 
   useEffect(() => {
-    loadMapsScript().then(() => setReady(true)).catch(() => setReady(false))
+    loadMapsScript()
+      .then(() => setStatus('ready'))
+      .catch(() => setStatus('failed'))
   }, [])
 
   useEffect(() => {
@@ -59,12 +62,16 @@ export default function PlacesInput({ value, onChange, placeholder = 'Type villa
         className={className}
         value={value}
         onChange={handleChange}
-        placeholder={placeholder}
         required={required}
         autoComplete="off"
       />
-      {!ready && (
+      {status === 'loading' && (
         <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">Loading…</span>
+      )}
+      {status === 'failed' && (
+        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-amber-500" title="Map search unavailable — you can still type your location manually">
+          ✎ Manual entry
+        </span>
       )}
     </div>
   )

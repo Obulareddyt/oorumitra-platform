@@ -52,12 +52,32 @@ export default function Register() {
   const [timer, setTimer] = useState(0)
   const [resends, setResends] = useState(0)
 
+  // Live mobile-number uniqueness check
+  const [mobileStatus, setMobileStatus] = useState('idle') // idle | checking | available | taken
+
   useEffect(() => {
     if (timer > 0) {
       const t = setTimeout(() => setTimer(timer - 1), 1000)
       return () => clearTimeout(t)
     }
   }, [timer])
+
+  useEffect(() => {
+    if (form.mobileNumber.length !== 10) {
+      setMobileStatus('idle')
+      return
+    }
+    setMobileStatus('checking')
+    const handle = setTimeout(async () => {
+      try {
+        const taken = await authApi.checkMobile(form.mobileNumber)
+        setMobileStatus(taken ? 'taken' : 'available')
+      } catch {
+        setMobileStatus('idle')
+      }
+    }, 400)
+    return () => clearTimeout(handle)
+  }, [form.mobileNumber])
 
   if (isLoggedIn) {
     navigate('/')
@@ -83,7 +103,9 @@ export default function Register() {
     if (e) e.preventDefault()
     const err = validate(form)
     if (err) { setError(err); return }
-    
+    if (mobileStatus === 'taken') { setError('This mobile number is already registered. Please sign in.'); return }
+    if (mobileStatus === 'checking') { setError('Still checking your mobile number, please wait a moment.'); return }
+
     if (resends >= 3) {
       setError('Maximum resend attempts reached. Please wait or try again in 5 minutes.')
       return
@@ -177,7 +199,6 @@ export default function Register() {
                     <input
                       type="text"
                       className="input"
-                      placeholder="Ravi"
                       value={form.firstName}
                       onChange={update('firstName')}
                       autoFocus
@@ -188,7 +209,6 @@ export default function Register() {
                     <input
                       type="text"
                       className="input"
-                      placeholder="Kumar"
                       value={form.lastName}
                       onChange={update('lastName')}
                     />
@@ -203,8 +223,7 @@ export default function Register() {
                     <input
                       type="tel"
                       maxLength={10}
-                      className="input rounded-l-none"
-                      placeholder="9000000000"
+                      className={`input rounded-l-none ${mobileStatus === 'taken' ? 'border-red-400' : ''}`}
                       value={form.mobileNumber}
                       onChange={(e) => {
                         update('mobileNumber')(e)
@@ -212,6 +231,17 @@ export default function Register() {
                       }}
                     />
                   </div>
+                  {mobileStatus === 'checking' && (
+                    <p className="text-xs text-gray-400 mt-1">Checking availability…</p>
+                  )}
+                  {mobileStatus === 'taken' && (
+                    <p className="text-xs text-red-600 mt-1">
+                      This mobile number is already registered. Please sign in instead.
+                    </p>
+                  )}
+                  {mobileStatus === 'available' && (
+                    <p className="text-xs text-green-600 mt-1">Available</p>
+                  )}
                 </div>
 
                 {/* WhatsApp */}
@@ -223,7 +253,6 @@ export default function Register() {
                       type="tel"
                       maxLength={10}
                       className="input rounded-l-none"
-                      placeholder="9000000000"
                       value={form.whatsappNumber}
                       onChange={update('whatsappNumber')}
                       disabled={sameAsPhone}
@@ -246,7 +275,6 @@ export default function Register() {
                   <input
                     type="text"
                     className="input"
-                    placeholder="min 8 characters (e.g. ravi_kumar)"
                     value={form.username}
                     onChange={update('username')}
                     autoComplete="username"
@@ -263,7 +291,6 @@ export default function Register() {
                     <input
                       type={showPassword ? 'text' : 'password'}
                       className="input pr-10"
-                      placeholder="Min 8 characters"
                       value={form.password}
                       onChange={update('password')}
                       autoComplete="new-password"
@@ -296,7 +323,6 @@ export default function Register() {
                     <input
                       type="text"
                       className="input"
-                      placeholder="Your village"
                       value={form.village}
                       onChange={update('village')}
                     />
@@ -306,7 +332,7 @@ export default function Register() {
                 {/* Email (optional) */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Email <span className="text-gray-400 font-normal">(optional)</span></label>
-                  <input type="email" className="input" placeholder="you@email.com" value={form.email} onChange={update('email')} />
+                  <input type="email" className="input" value={form.email} onChange={update('email')} />
                 </div>
 
                 {/* OTP Delivery Method Option */}
@@ -349,7 +375,11 @@ export default function Register() {
                   </div>
                 )}
 
-                <button type="submit" disabled={loading} className="btn-primary w-full py-2.5">
+                <button
+                  type="submit"
+                  disabled={loading || mobileStatus === 'taken' || mobileStatus === 'checking'}
+                  className="btn-primary w-full py-2.5"
+                >
                   {loading ? 'Sending OTP...' : 'Send OTP & Verify'}
                 </button>
               </form>
@@ -375,7 +405,6 @@ export default function Register() {
                     inputMode="numeric"
                     maxLength={6}
                     className="input text-center text-xl tracking-widest font-mono"
-                    placeholder="• • • • • •"
                     value={otp}
                     onChange={(e) => { setOtp(e.target.value.replace(/\D/g, '')); setError('') }}
                     autoFocus

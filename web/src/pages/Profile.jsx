@@ -19,6 +19,7 @@ export default function Profile() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
+  const [uploadingPhoto, setUploadingPhoto] = useState(false)
 
   // Seller dashboard tab states
   const [activeTab, setActiveTab] = useState('profile')
@@ -31,7 +32,7 @@ export default function Profile() {
     if (!isLoggedIn) { navigate('/login'); return }
     userApi.getProfile()
       .then((data) => { setProfile(data); setForm(data) })
-      .catch(() => {})
+      .catch((ex) => toast.add(`Failed to load profile: ${ex.message}`, 'error'))
       .finally(() => setLoading(false))
   }, [isLoggedIn])
 
@@ -77,6 +78,23 @@ export default function Profile() {
     return new Date(dateStr).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
   }
 
+  const handlePhotoChange = async (e) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setUploadingPhoto(true)
+    try {
+      const url = await userApi.uploadProfilePhoto(file)
+      setProfile((p) => ({ ...p, profilePhotoUrl: url }))
+      login({ ...authUser, profilePhotoUrl: url })
+      toast.add('Profile photo updated', 'success')
+    } catch (err) {
+      toast.add(err.message || 'Failed to upload photo', 'error')
+    } finally {
+      setUploadingPhoto(false)
+    }
+  }
+
   const handleSave = async (e) => {
     e.preventDefault()
     setSaving(true)
@@ -93,7 +111,7 @@ export default function Profile() {
         await changeAppLanguage(form.language.toLowerCase())
       }
       setProfile({ ...profile, ...form })
-      login({ ...authUser, firstName: form.firstName, lastName: form.lastName, language: form.language })
+      login({ ...authUser, firstName: form.firstName, lastName: form.lastName, email: form.email, gender: form.gender, village: form.village, language: form.language })
       setEditing(false)
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
@@ -105,6 +123,18 @@ export default function Profile() {
   }
 
   if (loading) return <PageSpinner />
+
+  if (!profile) {
+    return (
+      <div className="max-w-xl mx-auto px-4 py-16 text-center">
+        <Toast toasts={toast.toasts} remove={toast.remove} />
+        <p className="text-4xl mb-4">😕</p>
+        <h2 className="text-xl font-bold text-gray-800 mb-2">Couldn't load your profile</h2>
+        <p className="text-gray-500 mb-6">Check your connection and try again.</p>
+        <button onClick={() => window.location.reload()} className="btn-primary">Retry</button>
+      </div>
+    )
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-left">
@@ -138,9 +168,19 @@ export default function Profile() {
       {activeTab === 'profile' ? (
         <div className="card p-6 max-w-2xl mx-auto bg-white rounded-2xl border border-gray-100 shadow-sm">
           <div className="flex items-center gap-4 mb-6 pb-6 border-b border-gray-100">
-            <div className="w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center text-3xl font-bold text-primary-700">
-              {profile?.firstName?.[0]?.toUpperCase() ?? '?'}
-            </div>
+            <label className="relative w-16 h-16 shrink-0 cursor-pointer group">
+              {profile?.profilePhotoUrl ? (
+                <img src={profile.profilePhotoUrl} alt="Profile" className="w-16 h-16 rounded-full object-cover" />
+              ) : (
+                <div className="w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center text-3xl font-bold text-primary-700">
+                  {profile?.firstName?.[0]?.toUpperCase() ?? '?'}
+                </div>
+              )}
+              <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px] font-semibold">
+                {uploadingPhoto ? '…' : 'Change'}
+              </div>
+              <input type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} disabled={uploadingPhoto} />
+            </label>
             <div>
               <p className="text-xl font-bold text-gray-800">{profile?.firstName} {profile?.lastName}</p>
               <p className="text-gray-500 text-sm">{profile?.mobileNumber}</p>

@@ -42,6 +42,12 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.ok(authService.register(req)));
     }
 
+    @GetMapping("/check-mobile")
+    @Operation(summary = "Check whether a mobile number is already registered")
+    public ResponseEntity<ApiResponse<Boolean>> checkMobile(@RequestParam String mobileNumber) {
+        return ResponseEntity.ok(ApiResponse.ok(authService.isMobileRegistered(mobileNumber)));
+    }
+
     @PostMapping("/login")
     @Operation(summary = "Login with OTP")
     public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest req) {

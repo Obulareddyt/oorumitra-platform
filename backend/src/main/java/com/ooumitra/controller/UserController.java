@@ -5,13 +5,16 @@ import com.ooumitra.enums.Language;
 import com.ooumitra.entity.UserLanguagePreference;
 import com.ooumitra.repository.UserLanguagePreferenceRepository;
 import com.ooumitra.repository.UserRepository;
+import com.ooumitra.service.S3Service;
 import com.ooumitra.util.ApiResponse;
 import com.ooumitra.util.SecurityUtils;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Map;
 
 @RestController
@@ -22,6 +25,7 @@ public class UserController {
 
     private final UserRepository userRepo;
     private final UserLanguagePreferenceRepository langPrefRepo;
+    private final S3Service s3Service;
 
     @GetMapping("/profile")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getProfile() {
@@ -50,6 +54,18 @@ public class UserController {
         if (body.containsKey("village")) user.setVillage(body.get("village"));
         userRepo.save(user);
         return ResponseEntity.ok(ApiResponse.ok("Profile updated"));
+    }
+
+    @PostMapping(value = "/profile/photo", consumes = "multipart/form-data")
+    public ResponseEntity<ApiResponse<String>> uploadProfilePhoto(@RequestPart("photo") MultipartFile photo) throws IOException {
+        User user = SecurityUtils.currentUser();
+        if (user.getProfilePhotoUrl() != null) {
+            s3Service.deleteFile(user.getProfilePhotoUrl());
+        }
+        String url = s3Service.uploadFile(photo, "profile-photos");
+        user.setProfilePhotoUrl(url);
+        userRepo.save(user);
+        return ResponseEntity.ok(ApiResponse.ok("Profile photo updated", url));
     }
 
     @PatchMapping("/fcm-token")

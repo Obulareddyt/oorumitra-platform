@@ -5,6 +5,7 @@ import { workersApi } from '../api/client'
 import { PageSpinner } from '../components/Spinner'
 import EmptyState from '../components/EmptyState'
 import BookingModal from '../components/BookingModal'
+import { useAuth } from '../context/AuthContext'
 
 const WORK_TYPES = [
   'ALL', 'HARVESTING', 'PLANTING', 'CONSTRUCTION', 'MASON_WORK', 'PAINTING',
@@ -23,6 +24,7 @@ const workTypeIcon = {
 
 export default function Workers() {
   const { t } = useTranslation()
+  const { user } = useAuth()
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [workType, setWorkType] = useState('ALL')
@@ -75,7 +77,7 @@ export default function Workers() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {items.map((w, i) => (
               <div key={w.id} className="animate-fadeInUp" style={{ animationDelay: `${Math.min(i, 8) * 0.05}s` }}>
-                <WorkerCard worker={w} onBook={() => setBooking(w)} />
+                <WorkerCard worker={w} onBook={() => setBooking(w)} isOwner={user && Number(user.userId || user.id) === Number(w.userId)} />
               </div>
             ))}
           </div>
@@ -90,7 +92,7 @@ export default function Workers() {
   )
 }
 
-function WorkerCard({ worker, onBook }) {
+function WorkerCard({ worker, onBook, isOwner }) {
   const navigate = useNavigate()
   const { t } = useTranslation()
   return (
@@ -123,7 +125,9 @@ function WorkerCard({ worker, onBook }) {
         )}
         <div className="flex gap-2 mt-auto">
           <a href={`tel:${worker.mobileNumber}`} className="btn-outline text-xs py-1.5 flex-1 text-center">📞 {t('products.call_seller', 'Call')}</a>
-          <button onClick={onBook} className="btn-primary text-xs py-1.5 flex-1">{t('vehicles.book', 'Book')}</button>
+          {!isOwner && (
+            <button onClick={onBook} className="btn-primary text-xs py-1.5 flex-1">{t('vehicles.book', 'Book')}</button>
+          )}
         </div>
       </div>
     </div>

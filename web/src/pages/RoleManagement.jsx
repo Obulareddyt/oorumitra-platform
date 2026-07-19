@@ -115,7 +115,6 @@ function RoleModal({ role, allPerms, onClose, onSaved, toast }) {
               className="input"
               value={name}
               onChange={e => { setName(e.target.value); setErr('') }}
-              placeholder="e.g. District Manager"
               maxLength={50}
               disabled={role?.isSystem}
             />
@@ -127,7 +126,6 @@ function RoleModal({ role, allPerms, onClose, onSaved, toast }) {
               rows={2}
               value={desc}
               onChange={e => setDesc(e.target.value)}
-              placeholder="Optional description"
               maxLength={500}
             />
           </div>
@@ -332,7 +330,6 @@ export default function RoleManagement() {
             <div className="flex flex-wrap gap-3 flex-1">
               <input
                 type="text"
-                placeholder="Search by role name…"
                 className="input max-w-xs"
                 value={search}
                 onChange={e => { setSearch(e.target.value); setPage(0) }}

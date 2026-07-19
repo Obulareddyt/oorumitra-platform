@@ -1,6 +1,7 @@
 package com.ooumitra.entity;
 
 import com.ooumitra.enums.ApprovalStatus;
+import com.ooumitra.enums.PriceType;
 import com.ooumitra.enums.VehicleWorkType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -41,11 +42,12 @@ public class VehicleWorkListing {
     @Column(name = "mobile_number", nullable = false, length = 15)
     private String mobileNumber;
 
-    @Column(name = "price_per_acre", precision = 10, scale = 2)
-    private BigDecimal pricePerAcre;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "price_type", nullable = false, length = 10)
+    private PriceType priceType;
 
-    @Column(name = "price_per_hour", precision = 10, scale = 2)
-    private BigDecimal pricePerHour;
+    @Column(name = "amount", nullable = false, precision = 10, scale = 2)
+    private BigDecimal amount;
 
     @Column(name = "village", nullable = false, length = 100)
     private String village;

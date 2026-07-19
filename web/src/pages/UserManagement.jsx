@@ -154,7 +154,8 @@ export default function UserManagement() {
   const [assignUser, setAssignUser] = useState(null)
 
   const loadVillages = useCallback(async () => {
-    try { setVillages(await villageApi.getAll()) } catch {}
+    try { setVillages(await villageApi.getAll()) }
+    catch (ex) { toast.add(`Failed to load villages: ${ex.message}`, 'error') }
   }, [])
 
   const loadUsers = useCallback(async () => {
@@ -204,7 +205,6 @@ export default function UserManagement() {
       <div className="flex flex-wrap gap-3 items-center mb-4">
         <input
           type="text"
-          placeholder="Search name, username, mobile…"
           className="input max-w-xs"
           value={search}
           onChange={e => { setSearch(e.target.value); setPage(0) }}

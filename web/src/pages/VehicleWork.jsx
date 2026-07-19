@@ -5,6 +5,7 @@ import { vehicleWorkApi } from '../api/client'
 import { PageSpinner } from '../components/Spinner'
 import EmptyState from '../components/EmptyState'
 import BookingModal from '../components/BookingModal'
+import { useAuth } from '../context/AuthContext'
 
 const VEHICLE_TYPES = ['ALL', 'TRACTOR', 'ROTAVATOR', 'HARVESTER', 'THRESHER', 'POWER_TILLER', 'OTHERS']
 const typeIcon = { TRACTOR: '🚜', ROTAVATOR: '⚙️', HARVESTER: '🌾', THRESHER: '🌀', POWER_TILLER: '🔩', OTHERS: '🚛' }
@@ -12,6 +13,7 @@ const typeLabel = (t) => t.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (c)
 
 export default function VehicleWork() {
   const { t } = useTranslation()
+  const { user } = useAuth()
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [vehicleType, setVehicleType] = useState('ALL')
@@ -64,7 +66,7 @@ export default function VehicleWork() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {items.map((v, i) => (
               <div key={v.id} className="animate-fadeInUp" style={{ animationDelay: `${Math.min(i, 8) * 0.05}s` }}>
-                <VehicleWorkCard item={v} onBook={() => setBooking(v)} />
+                <VehicleWorkCard item={v} onBook={() => setBooking(v)} isOwner={user && Number(user.userId || user.id) === Number(v.userId)} />
               </div>
             ))}
           </div>
@@ -79,7 +81,7 @@ export default function VehicleWork() {
   )
 }
 
-function VehicleWorkCard({ item, onBook }) {
+function VehicleWorkCard({ item, onBook, isOwner }) {
   const navigate = useNavigate()
   const { t } = useTranslation()
   return (
@@ -100,16 +102,10 @@ function VehicleWorkCard({ item, onBook }) {
           </div>
         </div>
         <div className="grid grid-cols-2 gap-2 text-sm">
-          {item.pricePerAcre && (
-            <div className="bg-gray-50 rounded-lg p-2 text-center">
-              <p className="text-gray-400 text-xs">{t('vehicles.per_acre', 'Per Acre')}</p>
-              <p className="font-bold text-gray-800">₹{item.pricePerAcre}</p>
-            </div>
-          )}
-          {item.pricePerHour && (
-            <div className="bg-gray-50 rounded-lg p-2 text-center">
-              <p className="text-gray-400 text-xs">{t('transport.rate_per_hour', 'Per Hour')}</p>
-              <p className="font-bold text-gray-800">₹{item.pricePerHour}</p>
+          {item.amount != null && (
+            <div className="bg-gray-50 rounded-lg p-2 text-center col-span-2">
+              <p className="text-gray-400 text-xs">Per {item.priceType}</p>
+              <p className="font-bold text-gray-800">₹{item.amount?.toLocaleString('en-IN')}</p>
             </div>
           )}
         </div>
@@ -125,7 +121,9 @@ function VehicleWorkCard({ item, onBook }) {
         )}
         <div className="flex gap-2 mt-auto">
           <a href={`tel:${item.mobileNumber}`} className="btn-outline text-xs py-1.5 flex-1 text-center">📞 {t('products.call_seller', 'Call')}</a>
-          <button onClick={onBook} disabled={!item.availableStatus} className="btn-primary text-xs py-1.5 flex-1 disabled:opacity-50">{t('vehicles.book', 'Book')}</button>
+          {!isOwner && (
+            <button onClick={onBook} disabled={!item.availableStatus} className="btn-primary text-xs py-1.5 flex-1 disabled:opacity-50">{t('vehicles.book', 'Book')}</button>
+          )}
         </div>
       </div>
     </div>

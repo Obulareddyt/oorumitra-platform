@@ -86,7 +86,7 @@ public class TransportService {
         TransportListing listing = TransportListing.builder()
                 .user(user).vehicleType(req.getVehicleType())
                 .ownerName(req.getOwnerName()).mobileNumber(req.getMobileNumber())
-                .ratePerKm(req.getRatePerKm()).ratePerHour(req.getRatePerHour())
+                .priceType(req.getPriceType()).amount(req.getAmount())
                 .weightCapacity(req.getWeightCapacity()).negotiable(req.isNegotiable())
                 .availability(req.getAvailability())
                 .village(req.getVillage())
@@ -103,7 +103,7 @@ public class TransportService {
         TransportListing listing = getOwned(id);
         listing.setVehicleType(req.getVehicleType());
         listing.setOwnerName(req.getOwnerName()); listing.setMobileNumber(req.getMobileNumber());
-        listing.setRatePerKm(req.getRatePerKm()); listing.setRatePerHour(req.getRatePerHour());
+        listing.setPriceType(req.getPriceType()); listing.setAmount(req.getAmount());
         listing.setWeightCapacity(req.getWeightCapacity()); listing.setNegotiable(req.isNegotiable());
         listing.setAvailability(req.getAvailability());
         listing.setLatitude(req.getLatitude()); listing.setLongitude(req.getLongitude());
@@ -134,7 +134,7 @@ public class TransportService {
 
     private Sort resolveSort(String sortBy) {
         return switch (sortBy == null ? "" : sortBy) {
-            case "price_asc" -> Sort.by(Sort.Direction.ASC, "ratePerKm");
+            case "price_asc" -> Sort.by(Sort.Direction.ASC, "amount");
             case "rating" -> Sort.by(Sort.Direction.DESC, "averageRating");
             default -> Sort.by(Sort.Direction.DESC, "createdAt");
         };

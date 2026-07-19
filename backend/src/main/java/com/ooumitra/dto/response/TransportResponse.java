@@ -2,6 +2,7 @@ package com.ooumitra.dto.response;
 
 import com.ooumitra.entity.TransportListing;
 import com.ooumitra.enums.ApprovalStatus;
+import com.ooumitra.enums.PriceType;
 import com.ooumitra.enums.TransportVehicleType;
 import lombok.Builder;
 import lombok.Data;
@@ -17,8 +18,8 @@ public class TransportResponse {
     private TransportVehicleType vehicleType;
     private String ownerName;
     private String mobileNumber;
-    private BigDecimal ratePerKm;
-    private BigDecimal ratePerHour;
+    private PriceType priceType;
+    private BigDecimal amount;
     private String weightCapacity;
     private boolean negotiable;
     private String availability;
@@ -40,8 +41,8 @@ public class TransportResponse {
         return TransportResponse.builder()
                 .id(t.getId()).userId(t.getUser().getId())
                 .vehicleType(t.getVehicleType()).ownerName(t.getOwnerName())
-                .mobileNumber(t.getMobileNumber()).ratePerKm(t.getRatePerKm())
-                .ratePerHour(t.getRatePerHour()).weightCapacity(t.getWeightCapacity())
+                .mobileNumber(t.getMobileNumber()).priceType(t.getPriceType())
+                .amount(t.getAmount()).weightCapacity(t.getWeightCapacity())
                 .negotiable(t.isNegotiable()).availability(t.getAvailability())
                 .village(t.getVillage()).description(t.getDescription())
                 .latitude(t.getLatitude()).longitude(t.getLongitude())

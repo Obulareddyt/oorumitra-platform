@@ -5,6 +5,7 @@ import { transportApi } from '../api/client'
 import { PageSpinner } from '../components/Spinner'
 import EmptyState from '../components/EmptyState'
 import BookingModal from '../components/BookingModal'
+import { useAuth } from '../context/AuthContext'
 
 const VEHICLE_TYPES = ['ALL', 'AUTO', 'TRACTOR', 'MINI_TRUCK', 'LORRY', 'BUS']
 const vehicleIcon = { AUTO: '🛺', TRACTOR: '🚜', MINI_TRUCK: '🚐', LORRY: '🚛', BUS: '🚌' }
@@ -12,6 +13,7 @@ const vehicleLabel = { AUTO: 'Auto', TRACTOR: 'Tractor', MINI_TRUCK: 'Mini Truck
 
 export default function Transport() {
   const { t } = useTranslation()
+  const { user } = useAuth()
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [vehicleType, setVehicleType] = useState('ALL')
@@ -64,7 +66,7 @@ export default function Transport() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {items.map((tItem, i) => (
               <div key={tItem.id} className="animate-fadeInUp" style={{ animationDelay: `${Math.min(i, 8) * 0.05}s` }}>
-                <TransportCard transport={tItem} onBook={() => setBooking(tItem)} />
+                <TransportCard transport={tItem} onBook={() => setBooking(tItem)} isOwner={user && Number(user.userId || user.id) === Number(tItem.userId)} />
               </div>
             ))}
           </div>
@@ -79,7 +81,7 @@ export default function Transport() {
   )
 }
 
-function TransportCard({ transport, onBook }) {
+function TransportCard({ transport, onBook, isOwner }) {
   const navigate = useNavigate()
   const { t } = useTranslation()
   return (
@@ -100,16 +102,10 @@ function TransportCard({ transport, onBook }) {
           </div>
         </div>
         <div className="grid grid-cols-2 gap-2 text-sm">
-          {transport.ratePerKm && (
-            <div className="bg-gray-50 rounded-lg p-2 text-center">
-              <p className="text-gray-400 text-xs">{t('transport.rate_per_km', 'Per KM')}</p>
-              <p className="font-bold text-gray-800">₹{transport.ratePerKm}</p>
-            </div>
-          )}
-          {transport.ratePerHour && (
-            <div className="bg-gray-50 rounded-lg p-2 text-center">
-              <p className="text-gray-400 text-xs">{t('transport.rate_per_hour', 'Per Hour')}</p>
-              <p className="font-bold text-gray-800">₹{transport.ratePerHour}</p>
+          {transport.amount != null && (
+            <div className="bg-gray-50 rounded-lg p-2 text-center col-span-2">
+              <p className="text-gray-400 text-xs">Per {transport.priceType}</p>
+              <p className="font-bold text-gray-800">₹{transport.amount?.toLocaleString('en-IN')}</p>
             </div>
           )}
         </div>
@@ -123,7 +119,9 @@ function TransportCard({ transport, onBook }) {
         )}
         <div className="flex gap-2 mt-auto">
           <a href={`tel:${transport.mobileNumber}`} className="btn-outline text-xs py-1.5 flex-1 text-center">📞 {t('products.call_seller', 'Call')}</a>
-          <button onClick={onBook} className="btn-primary text-xs py-1.5 flex-1">{t('vehicles.book', 'Book')}</button>
+          {!isOwner && (
+            <button onClick={onBook} className="btn-primary text-xs py-1.5 flex-1">{t('vehicles.book', 'Book')}</button>
+          )}
         </div>
       </div>
     </div>

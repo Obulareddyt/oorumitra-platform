@@ -314,7 +314,6 @@ function TranslationManagementSubPanel({ toast }) {
           <input
             type="text"
             className="input max-w-xs text-xs py-1.5"
-            placeholder="Search keys or values..."
             value={filterText}
             onChange={e => setFilterText(e.target.value)}
           />
@@ -381,11 +380,11 @@ function TranslationManagementSubPanel({ toast }) {
             <h3 className="text-md font-black text-gray-900 uppercase">Add Translation Key</h3>
             <div>
               <label className="text-[10px] uppercase font-bold text-gray-500 block mb-1">Key Name</label>
-              <input type="text" value={newKey} onChange={e => setNewKey(e.target.value)} className="input text-xs" placeholder="e.g. error.invalid_mobile" required />
+              <input type="text" value={newKey} onChange={e => setNewKey(e.target.value)} className="input text-xs" required />
             </div>
             <div>
               <label className="text-[10px] uppercase font-bold text-gray-500 block mb-1">Default English Value</label>
-              <input type="text" value={newVal} onChange={e => setNewVal(e.target.value)} className="input text-xs" placeholder="e.g. Please enter a valid number" required />
+              <input type="text" value={newVal} onChange={e => setNewVal(e.target.value)} className="input text-xs" required />
             </div>
             <div className="flex gap-2.5 pt-2">
               <button type="button" onClick={() => setShowAddKey(false)} className="btn-outline flex-1 text-xs">Cancel</button>
@@ -402,15 +401,15 @@ function TranslationManagementSubPanel({ toast }) {
             <h3 className="text-md font-black text-gray-900 uppercase">Register New Language</h3>
             <div>
               <label className="text-[10px] uppercase font-bold text-gray-500 block mb-1">Language ISO Code</label>
-              <input type="text" value={newLangCode} onChange={e => setNewLangCode(e.target.value)} className="input text-xs" placeholder="e.g. ml" required />
+              <input type="text" value={newLangCode} onChange={e => setNewLangCode(e.target.value)} className="input text-xs" required />
             </div>
             <div>
               <label className="text-[10px] uppercase font-bold text-gray-500 block mb-1">Language Name</label>
-              <input type="text" value={newLangName} onChange={e => setNewLangName(e.target.value)} className="input text-xs" placeholder="e.g. Malayalam" required />
+              <input type="text" value={newLangName} onChange={e => setNewLangName(e.target.value)} className="input text-xs" required />
             </div>
             <div>
               <label className="text-[10px] uppercase font-bold text-gray-500 block mb-1">Native Name</label>
-              <input type="text" value={newLangNative} onChange={e => setNewLangNative(e.target.value)} className="input text-xs" placeholder="e.g. മലയാളം" required />
+              <input type="text" value={newLangNative} onChange={e => setNewLangNative(e.target.value)} className="input text-xs" required />
             </div>
             <div className="flex gap-2.5 pt-2">
               <button type="button" onClick={() => setShowAddLang(false)} className="btn-outline flex-1 text-xs">Cancel</button>
@@ -662,7 +661,7 @@ function AdvertisementModal({ ad, onClose, onSave }) {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-xs font-bold text-gray-600 block mb-1">Day of Week</label>
-              <input type="text" value={dayOfWeek} onChange={e => setDayOfWeek(e.target.value)} className="input text-sm" placeholder="e.g. MONDAY" />
+              <input type="text" value={dayOfWeek} onChange={e => setDayOfWeek(e.target.value)} className="input text-sm" />
             </div>
             <div>
               <label className="text-xs font-bold text-gray-600 block mb-1">Status</label>
@@ -857,9 +856,6 @@ function RemarksModal({ item, action, listingName, onClose, onConfirm }) {
               rows={4}
               value={remarks}
               onChange={e => setRemarks(e.target.value)}
-              placeholder={action === 'approve'
-                ? 'e.g. Verified — listing looks good, contact info confirmed.'
-                : 'e.g. Incomplete information provided, please resubmit with photos.'}
               autoFocus
             />
             <p className="text-xs text-gray-400 mt-1">This will be sent to the user via SMS.</p>
@@ -885,7 +881,94 @@ function RemarksModal({ item, action, listingName, onClose, onConfirm }) {
   )
 }
 
-function ListingsTable({ items, loading, onApprove, onReject, getName, getVillage, getCategory, tab, onManageAvailability, onViewHistory }) {
+const DETAIL_FIELD_LABELS = {
+  productName: 'Product Name', groupName: 'Group / Team Name', vehicleType: 'Vehicle Type',
+  category: 'Category', subCategory: 'Sub Category', workType: 'Work Type',
+  ownerName: 'Owner Name', mobileNumber: 'Mobile Number', whatsappNumber: 'WhatsApp Number',
+  village: 'Village', location: 'Location', latitude: 'Latitude', longitude: 'Longitude',
+  amount: 'Amount (₹)', priceType: 'Price Type', negotiable: 'Negotiable',
+  availableWorkers: 'Available Workers', weightCapacity: 'Weight Capacity',
+  availability: 'Availability', availableUntil: 'Available Until',
+  quantity: 'Quantity', description: 'Description',
+}
+
+const DETAIL_FIELD_ORDER = [
+  'productName', 'groupName', 'vehicleType', 'category', 'subCategory', 'workType',
+  'ownerName', 'mobileNumber', 'whatsappNumber', 'village', 'location',
+  'amount', 'priceType', 'quantity', 'negotiable', 'availableWorkers', 'weightCapacity',
+  'availability', 'availableUntil', 'latitude', 'longitude', 'description',
+]
+
+function ListingDetailsModal({ item, onClose }) {
+  const rows = DETAIL_FIELD_ORDER
+    .filter(k => item[k] !== undefined && item[k] !== null && item[k] !== '')
+    .map(k => [DETAIL_FIELD_LABELS[k] || k, typeof item[k] === 'boolean' ? (item[k] ? 'Yes' : 'No') : String(item[k])])
+
+  const hasCoords = item.latitude != null && item.longitude != null
+
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between p-5 border-b bg-gray-50 rounded-t-2xl sticky top-0">
+          <h2 className="text-lg font-bold text-gray-800">Listing Details</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+        </div>
+        <div className="p-5 space-y-5">
+          {item.imageUrls?.length > 0 && (
+            <div>
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Photos</p>
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                {item.imageUrls.map((url, i) => (
+                  <a key={i} href={url} target="_blank" rel="noreferrer">
+                    <img src={url} alt={`Listing photo ${i + 1}`} className="w-full aspect-square object-cover rounded-lg border border-gray-100" />
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {item.voiceNoteUrl && (
+            <div>
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Voice Description</p>
+              <audio src={item.voiceNoteUrl} controls className="w-full" />
+            </div>
+          )}
+
+          <div>
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Submitted Details</p>
+            <div className="divide-y divide-gray-50">
+              {rows.map(([label, value]) => (
+                <div key={label} className="flex gap-3 py-2 text-sm">
+                  <span className="text-gray-500 w-40 shrink-0">{label}</span>
+                  <span className="text-gray-800 font-medium flex-1 break-words">{value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {hasCoords && (
+            <a
+              href={`https://www.google.com/maps?q=${item.latitude},${item.longitude}`}
+              target="_blank" rel="noreferrer"
+              className="inline-block text-sm text-primary-600 hover:underline font-medium"
+            >
+              📍 Open location in Google Maps →
+            </a>
+          )}
+
+          {item.adminRemarks && (
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
+              <p className="text-xs font-bold text-amber-700 uppercase tracking-wide mb-1">Admin Remarks</p>
+              <p className="text-sm text-amber-800">{item.adminRemarks}</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ListingsTable({ items, loading, onApprove, onReject, onView, getName, getVillage, getCategory, tab, onManageAvailability, onViewHistory }) {
   if (loading) return <div className="py-12 text-center text-gray-400">Loading…</div>
   if (!items?.length) return <div className="py-12 text-center text-gray-400">No listings found</div>
 
@@ -908,7 +991,9 @@ function ListingsTable({ items, loading, onApprove, onReject, getName, getVillag
         <tbody className="divide-y divide-gray-50">
           {items.map(item => (
             <tr key={item.id} className="hover:bg-gray-50">
-              <td className="px-4 py-3 font-medium text-gray-900 max-w-[160px] truncate">{getName(item)}</td>
+              <td className="px-4 py-3 font-medium max-w-[160px] truncate">
+                <button onClick={() => onView(item)} className="text-primary-700 hover:underline text-left">{getName(item)}</button>
+              </td>
               <td className="px-4 py-3 text-gray-700 whitespace-nowrap">{item.ownerName}</td>
               <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{item.mobileNumber}</td>
               <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{getVillage(item) || '—'}</td>
@@ -1004,6 +1089,7 @@ export default function Admin() {
   const [auditHistoryModal, setAuditHistoryModal] = useState(null)
 
   const [modal, setModal] = useState(null)
+  const [viewingItem, setViewingItem] = useState(null)
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN'
 
   useEffect(() => {
@@ -1199,6 +1285,7 @@ export default function Admin() {
             loading={loading}
             onApprove={item => openModal(item, 'approve')}
             onReject={item => openModal(item, 'reject')}
+            onView={item => setViewingItem(item)}
             getName={cfg?.getName || (i => i.id)}
             getVillage={cfg?.getVillage || (() => '')}
             getCategory={cfg?.getCategory || (() => '')}
@@ -1216,6 +1303,10 @@ export default function Admin() {
 
           <Pagination page={page} totalPages={data.totalPages} onPage={setPage} />
         </div>
+      )}
+
+      {viewingItem && (
+        <ListingDetailsModal item={viewingItem} onClose={() => setViewingItem(null)} />
       )}
 
       {modal && (
@@ -1272,7 +1363,6 @@ export default function Admin() {
                 <textarea
                   className="input text-sm resize-none"
                   rows={3}
-                  placeholder="e.g. Stock replenished / Seller marked as sold out."
                   value={availabilityModal.remarks}
                   onChange={e => setAvailabilityModal(prev => ({ ...prev, remarks: e.target.value }))}
                 />

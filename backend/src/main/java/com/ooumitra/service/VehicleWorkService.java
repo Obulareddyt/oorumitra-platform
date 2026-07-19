@@ -86,7 +86,7 @@ public class VehicleWorkService {
         VehicleWorkListing listing = VehicleWorkListing.builder()
                 .user(user).vehicleType(req.getVehicleType())
                 .ownerName(req.getOwnerName()).mobileNumber(req.getMobileNumber())
-                .pricePerAcre(req.getPricePerAcre()).pricePerHour(req.getPricePerHour())
+                .priceType(req.getPriceType()).amount(req.getAmount())
                 .village(req.getVillage()).availableStatus(req.isAvailableStatus())
                 .availableUntil(req.getAvailableUntil())
                 .description(req.getDescription())
@@ -102,7 +102,7 @@ public class VehicleWorkService {
         VehicleWorkListing listing = getOwned(id);
         listing.setVehicleType(req.getVehicleType());
         listing.setOwnerName(req.getOwnerName()); listing.setMobileNumber(req.getMobileNumber());
-        listing.setPricePerAcre(req.getPricePerAcre()); listing.setPricePerHour(req.getPricePerHour());
+        listing.setPriceType(req.getPriceType()); listing.setAmount(req.getAmount());
         listing.setVillage(req.getVillage()); listing.setAvailableStatus(req.isAvailableStatus());
         listing.setAvailableUntil(req.getAvailableUntil());
         listing.setLatitude(req.getLatitude()); listing.setLongitude(req.getLongitude());
@@ -133,7 +133,7 @@ public class VehicleWorkService {
 
     private Sort resolveSort(String sortBy) {
         return switch (sortBy == null ? "" : sortBy) {
-            case "price_asc" -> Sort.by(Sort.Direction.ASC, "pricePerHour");
+            case "price_asc" -> Sort.by(Sort.Direction.ASC, "amount");
             case "rating" -> Sort.by(Sort.Direction.DESC, "averageRating");
             default -> Sort.by(Sort.Direction.DESC, "createdAt");
         };

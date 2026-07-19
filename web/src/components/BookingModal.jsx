@@ -72,12 +72,12 @@ export default function BookingModal({ listing, listingType, onClose }) {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Offer Amount (₹)</label>
-              <input type="number" className="input" placeholder="Enter amount" value={form.amount}
+              <input type="number" className="input" value={form.amount}
                 onChange={(e) => setForm({ ...form, amount: e.target.value })} />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-              <textarea className="input resize-none" rows={3} placeholder="Any specific requirements..."
+              <textarea className="input resize-none" rows={3}
                 value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
             </div>
             {error && <p className="text-red-600 text-sm">{error}</p>}

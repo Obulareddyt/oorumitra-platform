@@ -31,6 +31,10 @@ public class AuthService {
         otpService.verifyOtpOnly(mobileNumber, otp);
     }
 
+    public boolean isMobileRegistered(String mobileNumber) {
+        return userRepo.existsByMobileNumber(mobileNumber);
+    }
+
     @Transactional
     public AuthResponse register(RegisterRequest req) {
         if (userRepo.existsByMobileNumber(req.getMobileNumber())) {

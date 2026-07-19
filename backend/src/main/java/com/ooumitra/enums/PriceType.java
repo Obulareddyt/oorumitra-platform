@@ -1,5 +1,5 @@
 package com.ooumitra.enums;
 
 public enum PriceType {
-    PERSON, ACRE, HOUR
+    PERSON, ACRE, HOUR, DAY, KM
 }
