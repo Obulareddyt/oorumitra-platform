@@ -5,6 +5,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {transportService} from '../../services/listingService';
 import {chatService} from '../../services/chatService';
 import {useRequireAuth} from '../../hooks/useRequireAuth';
+import BookServiceModal from '../../components/BookServiceModal';
 import {useAppSelector} from '../../store';
 import {TransportListing} from '../../types';
 import {Colors, FontSize, Spacing, BorderRadius} from '../../theme';
@@ -16,6 +17,7 @@ const TransportDetailScreen: React.FC = () => {
   const currentUser = useAppSelector(s => s.auth.user);
   const [item, setItem] = useState<TransportListing | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showBooking, setShowBooking] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -48,19 +50,33 @@ const TransportDetailScreen: React.FC = () => {
         {item.weightCapacity && <View style={styles.row}><Icon name="weight" size={16} color={Colors.textHint} /><Text style={styles.info}>Capacity: {item.weightCapacity}</Text></View>}
 
         <View style={styles.priceCard}>
-          <Text style={styles.priceLabel}>Rate Per Km</Text>
-          <Text style={styles.price}>₹{item.ratePerKm}</Text>
+          <Text style={styles.priceLabel}>Price{item.priceType ? ` (Per ${item.priceType})` : ''}</Text>
+          <Text style={styles.price}>₹{item.amount}</Text>
         </View>
 
         {item.description ? <Text style={styles.desc}>{item.description}</Text> : null}
 
         {currentUser?.id !== item.userId && (
-          <TouchableOpacity style={styles.chatBtn} onPress={() => requireAuth(handleChat)}>
-            <Icon name="chat" size={20} color={Colors.textOnPrimary} />
-            <Text style={styles.chatText}>Contact Driver</Text>
-          </TouchableOpacity>
+          <>
+            <TouchableOpacity style={styles.chatBtn} onPress={() => requireAuth(handleChat)}>
+              <Icon name="chat" size={20} color={Colors.textOnPrimary} />
+              <Text style={styles.chatText}>Contact Driver</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.bookBtn} onPress={() => requireAuth(() => setShowBooking(true))}>
+              <Icon name="calendar-check" size={20} color={Colors.textOnPrimary} />
+              <Text style={styles.chatText}>Book Service</Text>
+            </TouchableOpacity>
+          </>
         )}
       </View>
+
+      <BookServiceModal
+        visible={showBooking}
+        listingId={item.id}
+        listingType="TRANSPORT"
+        listingName={item.ownerName ?? item.vehicleType}
+        onClose={() => setShowBooking(false)}
+      />
     </ScrollView>
   );
 };
@@ -79,6 +95,7 @@ const styles = StyleSheet.create({
   price: {fontSize: FontSize.xxl, fontWeight: 'bold', color: Colors.accent},
   desc: {fontSize: FontSize.base, color: Colors.textSecondary, lineHeight: 22, marginBottom: Spacing.base},
   chatBtn: {backgroundColor: Colors.primary, flexDirection: 'row', padding: Spacing.md + 2, borderRadius: BorderRadius.xl, justifyContent: 'center', alignItems: 'center', gap: Spacing.sm},
+  bookBtn: {backgroundColor: Colors.accent, flexDirection: 'row', padding: Spacing.md + 2, borderRadius: BorderRadius.xl, justifyContent: 'center', alignItems: 'center', gap: Spacing.sm, marginTop: Spacing.sm},
   chatText: {color: Colors.textOnPrimary, fontWeight: '700', fontSize: FontSize.base},
 });
 

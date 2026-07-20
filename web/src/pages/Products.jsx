@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { productsApi } from '../api/client'
+import { productsApi, bookingsApi } from '../api/client'
 import { PageSpinner } from '../components/Spinner'
 import EmptyState from '../components/EmptyState'
-import BookingModal from '../components/BookingModal'
+import { useAuth } from '../context/AuthContext'
 
 const CATEGORIES = ['ALL', 'AGRICULTURE', 'HARDWARE', 'LIVESTOCK', 'VEHICLES', 'SEEDS', 'FRUITS', 'FLOWERS']
 
@@ -32,6 +32,7 @@ function getHaversineDistance(lat1, lon1, lat2, lon2) {
 
 export default function Products() {
   const { t } = useTranslation()
+  const { user } = useAuth()
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [category, setCategory] = useState('ALL')
@@ -105,7 +106,7 @@ export default function Products() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {items.map((product, i) => (
               <div key={product.id} className="animate-fadeInUp" style={{ animationDelay: `${Math.min(i, 8) * 0.05}s` }}>
-                <ProductCard product={product} userCoords={userCoords} />
+                <ProductCard product={product} userCoords={userCoords} isOwner={user && Number(user.userId || user.id) === Number(product.userId)} />
               </div>
             ))}
           </div>
@@ -116,10 +117,24 @@ export default function Products() {
   )
 }
 
-function ProductCard({ product, userCoords }) {
+function ProductCard({ product, userCoords, isOwner }) {
   const navigate = useNavigate()
   const { t } = useTranslation()
+  const { isLoggedIn } = useAuth()
   const isSold = product.approvalStatus === 'SOLD'
+  const [interestState, setInterestState] = useState('idle') // idle | sending | sent | error
+
+  const handleInterested = async (e) => {
+    e.stopPropagation()
+    if (!isLoggedIn) { navigate('/login'); return }
+    setInterestState('sending')
+    try {
+      await bookingsApi.create({ listingId: product.id, listingType: 'PRODUCT' })
+      setInterestState('sent')
+    } catch {
+      setInterestState('error')
+    }
+  }
 
   const getDistanceText = () => {
     if (!userCoords || !product.latitude || !product.longitude) return null
@@ -224,6 +239,20 @@ function ProductCard({ product, userCoords }) {
             💬 {t('products.whatsapp', 'WhatsApp')}
           </a>
         </div>
+
+        {!isOwner && !isSold && (
+          <button
+            onClick={handleInterested}
+            disabled={interestState === 'sending' || interestState === 'sent'}
+            className={`mt-2 w-full text-xs py-2 px-3 text-center font-bold tracking-wider uppercase rounded-lg border transition-colors flex items-center justify-center gap-1 ${
+              interestState === 'sent'
+                ? 'bg-amber-50 text-amber-600 border-amber-200 cursor-default'
+                : 'bg-white text-amber-600 border-amber-300 hover:bg-amber-50'
+            }`}
+          >
+            {interestState === 'sent' ? '✓ Interest Sent' : interestState === 'sending' ? 'Sending…' : `❤️ ${t('products.interested', 'Interested')}`}
+          </button>
+        )}
       </div>
     </div>
   )

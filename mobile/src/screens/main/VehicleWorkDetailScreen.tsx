@@ -5,6 +5,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {vehicleWorkService} from '../../services/listingService';
 import {chatService} from '../../services/chatService';
 import {useRequireAuth} from '../../hooks/useRequireAuth';
+import BookServiceModal from '../../components/BookServiceModal';
 import {useAppSelector} from '../../store';
 import {VehicleWorkListing} from '../../types';
 import {Colors, FontSize, Spacing, BorderRadius} from '../../theme';
@@ -16,6 +17,7 @@ const VehicleWorkDetailScreen: React.FC = () => {
   const currentUser = useAppSelector(s => s.auth.user);
   const [item, setItem] = useState<VehicleWorkListing | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showBooking, setShowBooking] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -48,23 +50,39 @@ const VehicleWorkDetailScreen: React.FC = () => {
           <View style={styles.row}><Icon name="star" size={16} color={Colors.star} /><Text style={styles.info}>{Number(item.averageRating).toFixed(1)} ({item.ratingCount} reviews)</Text></View>
         )}
         <View style={styles.priceCard}>
-          <Text style={styles.priceLabel}>Rate Per Acre</Text>
-          <Text style={styles.price}>₹{item.pricePerAcre}</Text>
+          <Text style={styles.priceLabel}>Price{item.priceType ? ` (Per ${item.priceType})` : ''}</Text>
+          <Text style={styles.price}>₹{item.amount}</Text>
         </View>
         {item.description ? <Text style={styles.desc}>{item.description}</Text> : null}
         {currentUser?.id !== item.userId && (
-          <View style={styles.actions}>
-            <TouchableOpacity style={styles.chatBtn} onPress={() => requireAuth(handleChat)}>
-              <Icon name="chat" size={20} color={Colors.textOnPrimary} />
-              <Text style={styles.chatText}>Chat</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.rateBtn} onPress={() => navigation.navigate('RateReview', {listingType: 'VEHICLE_WORK', listingId: id, title: item.ownerName ?? item.vehicleType})}>
-              <Icon name="star-outline" size={20} color={Colors.primary} />
-              <Text style={styles.rateBtnText}>Rate</Text>
-            </TouchableOpacity>
-          </View>
+          <>
+            <View style={styles.actions}>
+              <TouchableOpacity style={styles.chatBtn} onPress={() => requireAuth(handleChat)}>
+                <Icon name="chat" size={20} color={Colors.textOnPrimary} />
+                <Text style={styles.chatText}>Chat</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.rateBtn} onPress={() => navigation.navigate('RateReview', {listingType: 'VEHICLE_WORK', listingId: id, title: item.ownerName ?? item.vehicleType})}>
+                <Icon name="star-outline" size={20} color={Colors.primary} />
+                <Text style={styles.rateBtnText}>Rate</Text>
+              </TouchableOpacity>
+            </View>
+            {item.availableStatus && (
+              <TouchableOpacity style={styles.bookBtn} onPress={() => requireAuth(() => setShowBooking(true))}>
+                <Icon name="calendar-check" size={20} color={Colors.textOnPrimary} />
+                <Text style={styles.chatText}>Book Service</Text>
+              </TouchableOpacity>
+            )}
+          </>
         )}
       </View>
+
+      <BookServiceModal
+        visible={showBooking}
+        listingId={item.id}
+        listingType="VEHICLE_WORK"
+        listingName={item.ownerName ?? item.vehicleType}
+        onClose={() => setShowBooking(false)}
+      />
     </ScrollView>
   );
 };
@@ -87,6 +105,7 @@ const styles = StyleSheet.create({
   chatText: {color: Colors.textOnPrimary, fontWeight: '700'},
   rateBtn: {flex: 1, flexDirection: 'row', borderWidth: 2, borderColor: Colors.primary, padding: Spacing.md, borderRadius: BorderRadius.xl, justifyContent: 'center', alignItems: 'center', gap: Spacing.sm},
   rateBtnText: {color: Colors.primary, fontWeight: '700'},
+  bookBtn: {flexDirection: 'row', backgroundColor: Colors.accent, padding: Spacing.md, borderRadius: BorderRadius.xl, justifyContent: 'center', alignItems: 'center', gap: Spacing.sm, marginTop: Spacing.md},
 });
 
 export default VehicleWorkDetailScreen;

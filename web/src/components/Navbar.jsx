@@ -158,6 +158,7 @@ export default function Navbar() {
                   <div className="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50 animate-scaleIn origin-top-right">
                     <Link to="/profile" onClick={() => setMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">My Profile</Link>
                     <Link to="/bookings" onClick={() => setMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">My Bookings</Link>
+                    <Link to="/interested-customers" onClick={() => setMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Interested Customers</Link>
                     {isAdmin && (
                       <Link to="/admin" onClick={() => setMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Admin Panel</Link>
                     )}
@@ -194,6 +195,7 @@ export default function Navbar() {
               ...(isLoggedIn ? [
                 ['/profile', 'My Profile'],
                 ['/bookings', 'My Bookings'],
+                ['/interested-customers', 'Interested Customers'],
                 ...(isAdmin ? [['/admin', 'Admin Panel'], ['/admin/users', 'User Management']] : []),
                 ...(isSuperAdmin ? [['/admin/villages', 'Village Management'], ['/admin/roles', 'Role Management']] : []),
               ] : []),

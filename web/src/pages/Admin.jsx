@@ -681,6 +681,128 @@ function AdvertisementModal({ ad, onClose, onSave }) {
   )
 }
 
+const BOOKING_STATUS_OPTIONS = ['INTERESTED', 'CONTACTED', 'PURCHASED', 'PENDING', 'ACCEPTED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']
+
+function csvEscape(value) {
+  const s = String(value ?? '')
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
+}
+
+function exportBookingsCsv(bookings) {
+  const headers = ['ID', 'Listing Type', 'Listing Name', 'Customer Name', 'Customer Mobile', 'Owner Name', 'Owner Mobile', 'Status', 'Service Date', 'Service Time', 'Notes', 'Created At']
+  const rows = bookings.map(b => [
+    b.id, b.listingType, b.listingName, b.customerName, b.customerMobile,
+    b.ownerName, b.ownerMobile, b.status, b.requiredDate, b.serviceTime, b.notes, b.createdAt,
+  ])
+  const csv = [headers, ...rows].map(row => row.map(csvEscape).join(',')).join('\n')
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `bookings-${new Date().toISOString().slice(0, 10)}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+function BookingsSubPanel({ toast }) {
+  const [bookings, setBookings] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [search, setSearch] = useState('')
+  const [status, setStatus] = useState('')
+  const [page, setPage] = useState(0)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalElements, setTotalElements] = useState(0)
+
+  const load = async () => {
+    setLoading(true)
+    try {
+      const res = await adminApi.getBookings({ search: search || undefined, status: status || undefined, page, size: 20 })
+      setBookings(res.content || [])
+      setTotalPages(res.totalPages || 1)
+      setTotalElements(res.totalElements || 0)
+    } catch (e) {
+      toast.add(e.message, 'error')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { load() }, [page, status])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const runSearch = () => { setPage(0); load() }
+
+  const exportAll = async () => {
+    try {
+      const res = await adminApi.getBookings({ search: search || undefined, status: status || undefined, page: 0, size: 1000 })
+      exportBookingsCsv(res.content || [])
+    } catch (e) {
+      toast.add(e.message, 'error')
+    }
+  }
+
+  return (
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-3 flex-wrap">
+        <input
+          className="input max-w-[220px] text-sm"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && runSearch()}
+        />
+        <button onClick={runSearch} className="btn-outline text-xs py-1.5 px-3">Search</button>
+        <select className="input max-w-[180px] text-sm" value={status} onChange={e => { setStatus(e.target.value); setPage(0) }}>
+          <option value="">All statuses</option>
+          {BOOKING_STATUS_OPTIONS.map(s => <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>)}
+        </select>
+        <span className="text-sm text-gray-400">{totalElements} booking{totalElements !== 1 ? 's' : ''}</span>
+        <button onClick={exportAll} className="ml-auto btn-primary text-xs py-1.5 px-3">⬇ Export CSV</button>
+      </div>
+
+      {loading ? (
+        <div className="py-12 text-center text-gray-400">Loading…</div>
+      ) : bookings.length === 0 ? (
+        <div className="py-12 text-center text-gray-400">No bookings found</div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-sm">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-100">
+                {['Listing', 'Customer', 'Owner', 'Status', 'Service Date', 'Booked'].map(h => (
+                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {bookings.map(b => (
+                <tr key={b.id} className="hover:bg-gray-50">
+                  <td className="px-4 py-3 font-medium text-gray-900 max-w-[160px] truncate">{b.listingName} <span className="text-gray-400 text-xs">({b.listingType})</span></td>
+                  <td className="px-4 py-3 text-gray-700 whitespace-nowrap">{b.customerName}<br /><span className="text-xs text-gray-400">{b.customerMobile}</span></td>
+                  <td className="px-4 py-3 text-gray-700 whitespace-nowrap">{b.ownerName}<br /><span className="text-xs text-gray-400">{b.ownerMobile}</span></td>
+                  <td className="px-4 py-3">
+                    <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-gray-100 text-gray-700">{b.status?.replace(/_/g, ' ')}</span>
+                  </td>
+                  <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{b.requiredDate || '—'}{b.serviceTime ? ` ${b.serviceTime}` : ''}</td>
+                  <td className="px-4 py-3 text-gray-400 whitespace-nowrap">{b.createdAt ? new Date(b.createdAt).toLocaleDateString('en-IN') : '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {totalPages > 1 && (
+        <div className="px-4 py-3 border-t border-gray-100 flex gap-1 justify-end">
+          <button disabled={page === 0} onClick={() => setPage(page - 1)}
+            className="px-3 py-1 rounded-lg border border-gray-200 disabled:opacity-40 hover:bg-gray-50 text-sm">←</button>
+          <span className="px-3 py-1 text-sm text-gray-500">Page {page + 1} of {totalPages}</span>
+          <button disabled={page >= totalPages - 1} onClick={() => setPage(page + 1)}
+            className="px-3 py-1 rounded-lg border border-gray-200 disabled:opacity-40 hover:bg-gray-50 text-sm">→</button>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function AdvertisementManagementSubPanel({ toast }) {
   const [ads, setAds] = useState([])
   const [loading, setLoading] = useState(false)
@@ -1173,9 +1295,9 @@ export default function Admin() {
     adminApi.getStats().then(setStats).catch(() => {})
   }
 
-  const tabsList = user?.role === 'SUPER_ADMIN' 
-    ? ['Dashboard', 'Products', 'Workers', 'Transport', 'Vehicle Work', 'Category Management', 'Advertisement Management', 'Translation Management']
-    : ['Dashboard', 'Products', 'Workers', 'Transport', 'Vehicle Work']
+  const tabsList = user?.role === 'SUPER_ADMIN'
+    ? ['Dashboard', 'Products', 'Workers', 'Transport', 'Vehicle Work', 'Bookings', 'Category Management', 'Advertisement Management', 'Translation Management']
+    : ['Dashboard', 'Products', 'Workers', 'Transport', 'Vehicle Work', 'Bookings']
 
   if (!isLoggedIn || !isAdmin) return null
 
@@ -1234,6 +1356,11 @@ export default function Admin() {
         )
       )}
 
+      {/* Bookings Panel */}
+      {tab === 'Bookings' && (
+        <BookingsSubPanel toast={toast} />
+      )}
+
       {/* Category Management Panel */}
       {tab === 'Category Management' && (
         <CategoryManagementSubPanel toast={toast} />
@@ -1250,7 +1377,7 @@ export default function Admin() {
       )}
 
       {/* Listing tabs */}
-      {tab !== 'Dashboard' && tab !== 'Category Management' && tab !== 'Advertisement Management' && tab !== 'Translation Management' && (
+      {tab !== 'Dashboard' && tab !== 'Bookings' && tab !== 'Category Management' && tab !== 'Advertisement Management' && tab !== 'Translation Management' && (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-3 flex-wrap">
             <select

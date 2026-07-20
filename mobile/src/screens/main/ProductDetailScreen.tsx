@@ -7,6 +7,7 @@ import {useNavigation, useRoute} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {productService} from '../../services/listingService';
 import {chatService} from '../../services/chatService';
+import {bookingService} from '../../services/bookingService';
 import {favouriteService} from '../../services/userService';
 import {useAppSelector} from '../../store';
 import {useRequireAuth} from '../../hooks/useRequireAuth';
@@ -25,6 +26,7 @@ const ProductDetailScreen: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [activeImg, setActiveImg] = useState(0);
   const [isFav, setIsFav] = useState(false);
+  const [interestState, setInterestState] = useState<'idle' | 'sending' | 'sent'>('idle');
 
   useEffect(() => {
     (async () => {
@@ -44,6 +46,18 @@ const ProductDetailScreen: React.FC = () => {
       });
       navigation.navigate('Chat', {conversationId: convo.id, otherUserName: product.productName});
     } catch (_) {Alert.alert('Error', 'Failed to start chat');}
+  };
+
+  const handleInterested = async () => {
+    if (!product) return;
+    setInterestState('sending');
+    try {
+      await bookingService.create({listingId: product.id, listingType: 'PRODUCT'});
+      setInterestState('sent');
+    } catch (err: any) {
+      setInterestState('idle');
+      Alert.alert('Error', err?.message ?? 'Failed to send interest');
+    }
   };
 
   if (loading) return <ActivityIndicator style={styles.center} color={Colors.primary} size="large" />;
@@ -114,10 +128,24 @@ const ProductDetailScreen: React.FC = () => {
         ) : null}
 
         {!isOwner && (
-          <TouchableOpacity style={styles.chatBtn} onPress={() => requireAuth(handleChat)}>
-            <Icon name="chat" size={20} color={Colors.textOnPrimary} />
-            <Text style={styles.chatBtnText}>Chat with Seller</Text>
-          </TouchableOpacity>
+          <>
+            <TouchableOpacity style={styles.chatBtn} onPress={() => requireAuth(handleChat)}>
+              <Icon name="chat" size={20} color={Colors.textOnPrimary} />
+              <Text style={styles.chatBtnText}>Chat with Seller</Text>
+            </TouchableOpacity>
+
+            {product.availabilityStatus === 'ACTIVE' && (
+              <TouchableOpacity
+                style={[styles.interestBtn, interestState === 'sent' && styles.interestBtnSent]}
+                disabled={interestState !== 'idle'}
+                onPress={() => requireAuth(handleInterested)}>
+                <Icon name={interestState === 'sent' ? 'check' : 'heart-outline'} size={20} color={Colors.primary} />
+                <Text style={styles.interestBtnText}>
+                  {interestState === 'sent' ? 'Interest Sent' : interestState === 'sending' ? 'Sending…' : 'Interested'}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </>
         )}
       </View>
     </ScrollView>
@@ -155,6 +183,13 @@ const styles = StyleSheet.create({
     gap: Spacing.sm, marginTop: Spacing.md,
   },
   chatBtnText: {fontSize: FontSize.md, fontWeight: '700', color: Colors.textOnPrimary},
+  interestBtn: {
+    backgroundColor: Colors.surface, flexDirection: 'row', padding: Spacing.md + 2,
+    borderRadius: BorderRadius.xl, justifyContent: 'center', alignItems: 'center',
+    gap: Spacing.sm, marginTop: Spacing.sm, borderWidth: 1.5, borderColor: Colors.primary,
+  },
+  interestBtnSent: {borderColor: Colors.border, backgroundColor: Colors.surfaceVariant},
+  interestBtnText: {fontSize: FontSize.md, fontWeight: '700', color: Colors.primary},
 });
 
 export default ProductDetailScreen;

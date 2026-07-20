@@ -33,7 +33,7 @@ const VehicleCard: React.FC<{item: VehicleWorkListing; onPress: () => void}> = (
         <Text style={styles.village}>{item.village}</Text>
       </View>
       <View style={styles.footer}>
-        <Text style={styles.price}>₹{item.pricePerAcre}<Text style={styles.unit}>/acre</Text></Text>
+        <Text style={styles.price}>₹{item.amount}<Text style={styles.unit}>/{item.priceType?.toLowerCase()}</Text></Text>
         {item.averageRating != null && (
           <View style={styles.ratingRow}>
             <Icon name="star" size={13} color={Colors.star} />

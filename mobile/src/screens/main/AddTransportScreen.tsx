@@ -2,13 +2,14 @@ import React, {useEffect, useState} from 'react';
 import {View, Text, TextInput, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert, KeyboardAvoidingView, Platform} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {transportService} from '../../services/listingService';
-import {TransportVehicleType} from '../../types';
+import {TransportVehicleType, PriceType} from '../../types';
 import {Colors, FontSize, Spacing, BorderRadius} from '../../theme';
 import {useRequireAuth} from '../../hooks/useRequireAuth';
 import {useAppSelector} from '../../store';
 
 // Must match backend TransportVehicleType enum exactly.
 const VEHICLE_TYPES: TransportVehicleType[] = ['AUTO', 'TRACTOR', 'MINI_TRUCK', 'LORRY', 'BUS'];
+const PRICE_TYPES: PriceType[] = ['HOUR', 'DAY', 'KM'];
 
 const AddTransportScreen: React.FC = () => {
   const navigation = useNavigation<any>();
@@ -20,17 +21,17 @@ const AddTransportScreen: React.FC = () => {
   }, [isAuthenticated, navigation]);
 
   const [description, setDescription] = useState('');
-  const [vehicleType, setVehicleType] = useState<TransportVehicleType>('MINI_TRUCK');
+  const [vehicleType, setVehicleType] = useState<TransportVehicleType | null>(null);
   const [village, setVillage] = useState('');
-  const [ratePerKm, setRatePerKm] = useState('');
-  const [ratePerHour, setRatePerHour] = useState('');
+  const [priceType, setPriceType] = useState<PriceType | null>(null);
+  const [amount, setAmount] = useState('');
   const [weightCapacity, setWeightCapacity] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   if (!isAuthenticated) return null;
 
   const handleSubmit = async () => {
-    if (!village.trim()) {
+    if (!vehicleType || !village.trim() || !priceType || !amount) {
       Alert.alert('Error', 'Please fill all required fields');
       return;
     }
@@ -41,8 +42,8 @@ const AddTransportScreen: React.FC = () => {
         ownerName: `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim(),
         mobileNumber: user?.mobileNumber ?? '',
         description, village,
-        ratePerKm: ratePerKm ? Number(ratePerKm) : undefined,
-        ratePerHour: ratePerHour ? Number(ratePerHour) : undefined,
+        priceType,
+        amount: Number(amount),
         weightCapacity: weightCapacity.trim() || undefined,
       });
       Alert.alert('Success', 'Transport listed!', [{text: 'OK', onPress: () => navigation.goBack()}]);
@@ -68,11 +69,17 @@ const AddTransportScreen: React.FC = () => {
         <Text style={styles.label}>Village *</Text>
         <TextInput style={styles.input} value={village} onChangeText={setVillage} placeholder="Your village/town" placeholderTextColor={Colors.textHint} />
 
-        <Text style={styles.label}>Rate Per Km (₹)</Text>
-        <TextInput style={styles.input} value={ratePerKm} onChangeText={setRatePerKm} keyboardType="numeric" placeholder="e.g. 25" placeholderTextColor={Colors.textHint} />
+        <Text style={styles.label}>Price Type *</Text>
+        <View style={styles.chipRow}>
+          {PRICE_TYPES.map(pt => (
+            <TouchableOpacity key={pt} style={[styles.chip, priceType === pt && styles.chipActive]} onPress={() => setPriceType(pt)}>
+              <Text style={[styles.chipText, priceType === pt && styles.chipTextActive]}>{pt}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
 
-        <Text style={styles.label}>Rate Per Hour (₹)</Text>
-        <TextInput style={styles.input} value={ratePerHour} onChangeText={setRatePerHour} keyboardType="numeric" placeholder="e.g. 300" placeholderTextColor={Colors.textHint} />
+        <Text style={styles.label}>Amount (₹) *</Text>
+        <TextInput style={styles.input} value={amount} onChangeText={setAmount} keyboardType="numeric" placeholder="e.g. 25" placeholderTextColor={Colors.textHint} />
 
         <Text style={styles.label}>Weight Capacity</Text>
         <TextInput style={styles.input} value={weightCapacity} onChangeText={setWeightCapacity} placeholder="e.g. 2.5 tons" placeholderTextColor={Colors.textHint} />
@@ -95,6 +102,7 @@ const styles = StyleSheet.create({
   input: {backgroundColor: Colors.surface, borderWidth: 1, borderColor: Colors.border, borderRadius: BorderRadius.md, padding: Spacing.md, fontSize: FontSize.base, color: Colors.text},
   textarea: {height: 100, paddingTop: Spacing.md},
   chipScroll: {marginBottom: Spacing.sm},
+  chipRow: {flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm},
   chip: {paddingHorizontal: Spacing.md, paddingVertical: Spacing.xs + 2, borderRadius: BorderRadius.full, borderWidth: 1.5, borderColor: Colors.border, backgroundColor: Colors.surface, marginRight: Spacing.sm},
   chipActive: {backgroundColor: Colors.primary, borderColor: Colors.primary},
   chipText: {fontSize: FontSize.sm, color: Colors.textSecondary},

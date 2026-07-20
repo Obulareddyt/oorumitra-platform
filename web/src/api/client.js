@@ -84,8 +84,10 @@ export const vehicleWorkApi = {
 
 export const bookingsApi = {
   getMy: (params) => api.get('/bookings/my', { params }),
-  create: (params) => api.post('/bookings', null, { params }),
-  updateStatus: (id, status) => api.patch(`/bookings/${id}/status`, null, { params: { status } }),
+  getOwner: (params) => api.get('/bookings/owner', { params }),
+  getById: (id) => api.get(`/bookings/${id}`),
+  create: (data) => api.post('/bookings', data),
+  updateStatus: (id, status) => api.put(`/bookings/${id}/status`, null, { params: { status } }),
 }
 
 export const userApi = {
@@ -140,6 +142,7 @@ export const adminApi = {
   getWorkers: (params) => api.get('/admin/workers', { params }),
   getTransport: (params) => api.get('/admin/transport', { params }),
   getVehicleWork: (params) => api.get('/admin/vehicle-work', { params }),
+  getBookings: (params) => api.get('/admin/bookings', { params }),
   approveProduct: (id, data) => api.post(`/admin/products/${id}/approve`, data),
   rejectProduct: (id, data) => api.post(`/admin/products/${id}/reject`, data),
   approveWorker: (id, data) => api.post(`/admin/workers/${id}/approve`, data),

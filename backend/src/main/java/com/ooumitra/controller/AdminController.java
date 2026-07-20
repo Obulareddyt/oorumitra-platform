@@ -3,8 +3,10 @@ package com.ooumitra.controller;
 import com.ooumitra.dto.request.AdminDecisionRequest;
 import com.ooumitra.dto.response.*;
 import com.ooumitra.enums.ApprovalStatus;
+import com.ooumitra.enums.BookingStatus;
 import com.ooumitra.enums.ProductAvailabilityStatus;
 import com.ooumitra.service.AdminService;
+import com.ooumitra.service.BookingService;
 import com.ooumitra.util.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 public class AdminController {
 
     private final AdminService adminService;
+    private final BookingService bookingService;
 
     @GetMapping("/pending")
     @Operation(summary = "Get all listings awaiting approval")
@@ -66,6 +69,16 @@ public class AdminController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ResponseEntity.ok(ApiResponse.ok(adminService.getVehicleWork(status, page, size)));
+    }
+
+    @GetMapping("/bookings")
+    @Operation(summary = "Search all bookings/interest records")
+    public ResponseEntity<ApiResponse<PagedResponse<BookingResponse>>> getBookings(
+            @RequestParam(required = false) BookingStatus status,
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(ApiResponse.ok(bookingService.searchForAdmin(status, search, page, size)));
     }
 
     @PostMapping("/products/{id}/approve")

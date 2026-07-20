@@ -12,6 +12,7 @@ import Transport from './pages/Transport'
 import VehicleWork from './pages/VehicleWork'
 import Emergency from './pages/Emergency'
 import Bookings from './pages/Bookings'
+import InterestedCustomers from './pages/InterestedCustomers'
 import Profile from './pages/Profile'
 import Admin from './pages/Admin'
 import Sell from './pages/Sell'
@@ -58,6 +59,7 @@ export default function App() {
                   <Route path="/vehicle-work" element={<VehicleWork />} />
                   <Route path="/emergency" element={<Emergency />} />
                   <Route path="/bookings" element={<Bookings />} />
+                  <Route path="/interested-customers" element={<InterestedCustomers />} />
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/admin" element={<Admin />} />
                   <Route path="/admin/roles" element={<RoleManagement />} />

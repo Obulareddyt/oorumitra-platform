@@ -8,8 +8,15 @@ import {notificationService} from '../../services/userService';
 import {Notification} from '../../types';
 import {Colors, FontSize, Spacing, BorderRadius} from '../../theme';
 
+// Must match backend NotificationType enum exactly.
 const NOTIF_ICONS: Record<string, string> = {
-  BOOKING: 'calendar-check', CHAT: 'chat', TICKET: 'ticket', SYSTEM: 'bell', RATING: 'star',
+  NEW_REQUEST: 'ticket-outline',
+  BOOKING_UPDATE: 'calendar-check',
+  PRODUCT_AVAILABILITY: 'shopping-outline',
+  CHAT_MESSAGE: 'chat',
+  RATING_REMINDER: 'star',
+  TICKET_RESPONSE: 'ticket',
+  ANNOUNCEMENT: 'bullhorn-outline',
 };
 
 const NotificationsScreen: React.FC = () => {

@@ -1,7 +1,10 @@
 export type Language = 'EN' | 'TE' | 'TA' | 'KN' | 'HI';
 export type Role = 'BUYER' | 'SELLER' | 'ADMIN';
 export type ListingType = 'WORKER' | 'PRODUCT' | 'VEHICLE_WORK' | 'TRANSPORT' | 'REQUEST_TICKET';
-export type BookingStatus = 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED';
+export type BookingStatus =
+  | 'INTERESTED' | 'CONTACTED' | 'PURCHASED'
+  | 'PENDING' | 'ACCEPTED' | 'IN_PROGRESS' | 'COMPLETED'
+  | 'CANCELLED';
 export type MessageType = 'TEXT' | 'IMAGE' | 'LOCATION';
 
 export type WorkType =
@@ -9,7 +12,7 @@ export type WorkType =
   | 'PLUMBING' | 'ELECTRICAL' | 'CARPENTER' | 'BOREWELL_WORK' | 'ROAD_WORK'
   | 'CLEANING' | 'LOADING_UNLOADING' | 'AGRICULTURE_WORK' | 'OTHERS';
 
-export type PriceType = 'PERSON' | 'ACRE' | 'HOUR';
+export type PriceType = 'PERSON' | 'ACRE' | 'HOUR' | 'DAY' | 'KM';
 
 export type ProductCategory =
   | 'AGRICULTURE' | 'HARDWARE' | 'LIVESTOCK' | 'VEHICLES' | 'SEEDS' | 'FRUITS' | 'FLOWERS';
@@ -109,8 +112,8 @@ export interface VehicleWorkListing {
   vehicleType: VehicleWorkType;
   ownerName?: string;
   mobileNumber?: string;
-  pricePerAcre?: number;
-  pricePerHour?: number;
+  priceType?: PriceType;
+  amount?: number;
   village: string;
   availableStatus: boolean;
   availableUntil?: string;
@@ -133,8 +136,8 @@ export interface TransportListing {
   vehicleType: TransportVehicleType;
   ownerName?: string;
   mobileNumber?: string;
-  ratePerKm?: number;
-  ratePerHour?: number;
+  priceType?: PriceType;
+  amount?: number;
   weightCapacity?: string;
   negotiable?: boolean;
   availability?: string;
@@ -173,11 +176,19 @@ export interface Booking {
   id: number;
   listingType: ListingType;
   listingId: number;
+  listingName?: string;
+  customerId: number;
+  customerName?: string;
+  customerMobile?: string;
+  ownerId?: number;
+  ownerName?: string;
+  ownerMobile?: string;
   status: BookingStatus;
-  amount?: number;
   requiredDate?: string;
+  serviceTime?: string;
   notes?: string;
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface ChatConversation {

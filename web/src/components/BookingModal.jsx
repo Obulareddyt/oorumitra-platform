@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom'
 export default function BookingModal({ listing, listingType, onClose }) {
   const { isLoggedIn } = useAuth()
   const navigate = useNavigate()
-  const [form, setForm] = useState({ requiredDate: '', amount: '', notes: '' })
+  const [form, setForm] = useState({ serviceDate: '', serviceTime: '', notes: '' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
@@ -36,8 +36,8 @@ export default function BookingModal({ listing, listingType, onClose }) {
       await bookingsApi.create({
         listingId: listing.id,
         listingType,
-        ...(form.requiredDate && { requiredDate: form.requiredDate }),
-        ...(form.amount && { amount: form.amount }),
+        ...(form.serviceDate && { serviceDate: form.serviceDate }),
+        ...(form.serviceTime && { serviceTime: form.serviceTime }),
         ...(form.notes && { notes: form.notes }),
       })
       setSuccess(true)
@@ -54,7 +54,7 @@ export default function BookingModal({ listing, listingType, onClose }) {
         <div className="text-center py-6">
           <div className="text-5xl mb-3">✅</div>
           <p className="font-semibold text-gray-700 text-lg">Booking Confirmed!</p>
-          <p className="text-sm text-gray-500 mt-1 mb-4">Your booking has been placed successfully.</p>
+          <p className="text-sm text-gray-500 mt-1 mb-4">The owner has been notified and will contact you.</p>
           <button className="btn-primary" onClick={onClose}>Close</button>
         </div>
       ) : (
@@ -66,14 +66,14 @@ export default function BookingModal({ listing, listingType, onClose }) {
           </div>
           <form onSubmit={handleSubmit} className="space-y-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Required Date</label>
-              <input type="date" className="input" value={form.requiredDate}
-                onChange={(e) => setForm({ ...form, requiredDate: e.target.value })} />
+              <label className="block text-sm font-medium text-gray-700 mb-1">Service Date</label>
+              <input type="date" className="input" value={form.serviceDate}
+                onChange={(e) => setForm({ ...form, serviceDate: e.target.value })} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Offer Amount (₹)</label>
-              <input type="number" className="input" value={form.amount}
-                onChange={(e) => setForm({ ...form, amount: e.target.value })} />
+              <label className="block text-sm font-medium text-gray-700 mb-1">Service Time</label>
+              <input type="time" className="input" value={form.serviceTime}
+                onChange={(e) => setForm({ ...form, serviceTime: e.target.value })} />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>

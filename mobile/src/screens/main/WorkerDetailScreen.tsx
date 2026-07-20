@@ -11,6 +11,7 @@ import {chatService} from '../../services/chatService';
 import {favouriteService, ratingService} from '../../services/userService';
 import {useAppSelector} from '../../store';
 import {useRequireAuth} from '../../hooks/useRequireAuth';
+import BookServiceModal from '../../components/BookServiceModal';
 import {WorkerListing} from '../../types';
 import {Colors, FontSize, Spacing, BorderRadius} from '../../theme';
 
@@ -29,6 +30,7 @@ const WorkerDetailScreen: React.FC = () => {
   const [worker, setWorker] = useState<WorkerListing | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFav, setIsFav] = useState(false);
+  const [showBooking, setShowBooking] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -121,18 +123,34 @@ const WorkerDetailScreen: React.FC = () => {
 
         {/* Actions */}
         {!isOwner && (
-          <View style={styles.actions}>
-            <TouchableOpacity style={styles.chatBtn} onPress={() => requireAuth(handleChat)}>
-              <Icon name="chat" size={20} color={Colors.textOnPrimary} />
-              <Text style={styles.btnText}>Chat</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.rateBtn} onPress={handleRate}>
-              <Icon name="star-outline" size={20} color={Colors.primary} />
-              <Text style={[styles.btnText, {color: Colors.primary}]}>Rate</Text>
-            </TouchableOpacity>
-          </View>
+          <>
+            <View style={styles.actions}>
+              <TouchableOpacity style={styles.chatBtn} onPress={() => requireAuth(handleChat)}>
+                <Icon name="chat" size={20} color={Colors.textOnPrimary} />
+                <Text style={styles.btnText}>Chat</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.rateBtn} onPress={handleRate}>
+                <Icon name="star-outline" size={20} color={Colors.primary} />
+                <Text style={[styles.btnText, {color: Colors.primary}]}>Rate</Text>
+              </TouchableOpacity>
+            </View>
+            {worker.availableStatus && (
+              <TouchableOpacity style={styles.bookBtn} onPress={() => requireAuth(() => setShowBooking(true))}>
+                <Icon name="calendar-check" size={20} color={Colors.textOnPrimary} />
+                <Text style={styles.btnText}>Book Service</Text>
+              </TouchableOpacity>
+            )}
+          </>
         )}
       </View>
+
+      <BookServiceModal
+        visible={showBooking}
+        listingId={worker.id}
+        listingType="WORKER"
+        listingName={worker.groupName}
+        onClose={() => setShowBooking(false)}
+      />
     </ScrollView>
   );
 };
@@ -174,6 +192,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center', alignItems: 'center', gap: Spacing.sm,
   },
   btnText: {fontSize: FontSize.base, fontWeight: '700', color: Colors.textOnPrimary},
+  bookBtn: {
+    flexDirection: 'row', backgroundColor: Colors.accent, marginTop: Spacing.md,
+    padding: Spacing.md, borderRadius: BorderRadius.xl,
+    justifyContent: 'center', alignItems: 'center', gap: Spacing.sm,
+  },
 });
 
 export default WorkerDetailScreen;
