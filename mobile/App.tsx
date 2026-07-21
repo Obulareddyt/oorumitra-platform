@@ -6,6 +6,7 @@ import SplashScreen from 'react-native-splash-screen';
 import {store} from './src/store';
 import AppNavigator from './src/navigation/AppNavigator';
 import {userService} from './src/services/userService';
+import {pingBackend} from './src/services/api';
 import './src/i18n';
 
 LogBox.ignoreLogs(['Non-serializable values were found in the navigation state']);
@@ -14,6 +15,9 @@ const AppContent: React.FC = () => {
   useEffect(() => {
     // Dismiss splash as soon as the first render is committed
     SplashScreen.hide();
+    // Fire-and-forget: starts waking a cold Render backend the moment the
+    // app opens, so it's more likely warm by the time a screen needs data.
+    pingBackend();
   }, []);
 
   useEffect(() => {

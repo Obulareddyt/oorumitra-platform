@@ -25,6 +25,7 @@ public class VehicleWorkResponse {
     private boolean availableStatus;
     private LocalDate availableUntil;
     private String description;
+    private String voiceNoteUrl;
     private BigDecimal latitude;
     private BigDecimal longitude;
     private List<String> imageUrls;
@@ -44,6 +45,7 @@ public class VehicleWorkResponse {
                 .amount(v.getAmount()).village(v.getVillage())
                 .availableStatus(v.isAvailableStatus()).availableUntil(v.getAvailableUntil())
                 .description(v.getDescription())
+                .voiceNoteUrl(v.getVoiceNoteUrl())
                 .latitude(v.getLatitude()).longitude(v.getLongitude())
                 .imageUrls(v.getImageUrls())
                 .averageRating(v.getAverageRating()).ratingCount(v.getRatingCount())

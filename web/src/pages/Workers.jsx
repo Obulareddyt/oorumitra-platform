@@ -124,9 +124,9 @@ function WorkerCard({ worker, onBook, isOwner }) {
           <p className="text-xs text-amber-600">⭐ {worker.averageRating?.toFixed(1)} ({worker.ratingCount} reviews)</p>
         )}
         <div className="flex gap-2 mt-auto">
-          <a href={`tel:${worker.mobileNumber}`} className="btn-outline text-xs py-1.5 flex-1 text-center">📞 {t('products.call_seller', 'Call')}</a>
+          <a href={`tel:${worker.mobileNumber}`} onClick={(e) => e.stopPropagation()} className="btn-outline text-xs py-1.5 flex-1 text-center">📞 {t('products.call_seller', 'Call')}</a>
           {!isOwner && (
-            <button onClick={onBook} className="btn-primary text-xs py-1.5 flex-1">{t('vehicles.book', 'Book')}</button>
+            <button onClick={(e) => { e.stopPropagation(); onBook() }} className="btn-primary text-xs py-1.5 flex-1">{t('vehicles.book', 'Book')}</button>
           )}
         </div>
       </div>

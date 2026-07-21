@@ -342,20 +342,31 @@ function LocationBadge() {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const { latitude: lat, longitude: lng } = pos.coords
+        let name = ''
         try {
-          const res = await fetch(
-            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${MAPS_KEY}&result_type=locality|sublocality|neighborhood|administrative_area_level_3`
-          )
-          const data = await res.json()
-          const name = data.results?.[0]?.address_components?.find(c =>
-            c.types.some(t => ['locality','sublocality','sublocality_level_1','neighborhood','administrative_area_level_3'].includes(t))
-          )?.long_name || data.results?.[0]?.formatted_address?.split(',')[0]
-          setLocation(name || 'Location found')
-          setStatus('done')
-        } catch {
-          setLocation(`${lat.toFixed(3)}°N, ${lng.toFixed(3)}°E`)
-          setStatus('done')
+          if (MAPS_KEY) {
+            const res = await fetch(
+              `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${MAPS_KEY}&result_type=locality|sublocality|neighborhood|administrative_area_level_3`
+            )
+            const data = await res.json()
+            if (data.status === 'OK' && data.results?.[0]) {
+              name = data.results[0]?.address_components?.find(c =>
+                c.types.some(t => ['locality','sublocality','sublocality_level_1','neighborhood','administrative_area_level_3'].includes(t))
+              )?.long_name || data.results[0]?.formatted_address?.split(',')[0]
+            }
+          }
+        } catch {}
+
+        if (!name) {
+          try {
+            const nomRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+            const nomData = await nomRes.json()
+            name = nomData.address?.village || nomData.address?.suburb || nomData.address?.town || nomData.address?.city || nomData.display_name?.split(',')[0] || ''
+          } catch {}
         }
+
+        setLocation(name || `${lat.toFixed(3)}°N, ${lng.toFixed(3)}°E`)
+        setStatus('done')
       },
       () => setStatus('denied'),
       { timeout: 8000 }

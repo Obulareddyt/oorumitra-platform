@@ -3,10 +3,12 @@ import {
   View, Text, FlatList, StyleSheet, TouchableOpacity,
   ActivityIndicator, RefreshControl, Linking, Alert,
 } from 'react-native';
+import {useNavigation} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {Colors, FontSize, Spacing, BorderRadius} from '../../theme';
 import {bookingService} from '../../services/bookingService';
 import {Booking, BookingStatus} from '../../types';
+import {useAppSelector} from '../../store';
 
 const STATUS_COLORS: Record<string, string> = {
   INTERESTED: Colors.warning, CONTACTED: Colors.info, PURCHASED: Colors.success,
@@ -28,6 +30,8 @@ const NEXT_STATUS: Record<string, BookingStatus> = {
 const TERMINAL = new Set(['PURCHASED', 'COMPLETED', 'CANCELLED']);
 
 const MyBookingsScreen: React.FC = () => {
+  const navigation = useNavigation<any>();
+  const user = useAppSelector(s => s.auth.user);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -44,7 +48,11 @@ const MyBookingsScreen: React.FC = () => {
     setLoading(false);
   }, [tab]);
 
-  useEffect(() => {setLoading(true); load();}, [load]);
+  useEffect(() => {
+    if (!user) { setLoading(false); return; }
+    setLoading(true);
+    load();
+  }, [load, user]);
 
   const advance = async (id: number, status: BookingStatus) => {
     setUpdating(id);
@@ -64,6 +72,21 @@ const MyBookingsScreen: React.FC = () => {
       {text: 'Yes, cancel', style: 'destructive', onPress: () => advance(id, 'CANCELLED')},
     ]);
   };
+
+  if (!user) {
+    return (
+      <View style={styles.guestContainer}>
+        <View style={styles.guestAvatar}>
+          <Icon name="calendar-lock-outline" size={40} color={Colors.textOnPrimary} />
+        </View>
+        <Text style={styles.guestTitle}>Sign in to see your bookings</Text>
+        <Text style={styles.guestSubtitle}>Track products you're interested in and services you've booked.</Text>
+        <TouchableOpacity style={styles.signInBtn} onPress={() => navigation.navigate('Auth')}>
+          <Text style={styles.signInText}>Sign In / Register</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -161,6 +184,12 @@ const MyBookingsScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {flex: 1, backgroundColor: Colors.background},
+  guestContainer: {flex: 1, backgroundColor: Colors.background, alignItems: 'center', justifyContent: 'center', padding: Spacing.xxl},
+  guestAvatar: {width: 80, height: 80, borderRadius: 40, backgroundColor: Colors.primary, justifyContent: 'center', alignItems: 'center'},
+  guestTitle: {fontSize: FontSize.lg, fontWeight: 'bold', color: Colors.text, marginTop: Spacing.lg, textAlign: 'center'},
+  guestSubtitle: {fontSize: FontSize.base, color: Colors.textSecondary, marginTop: Spacing.sm, textAlign: 'center', marginBottom: Spacing.xl},
+  signInBtn: {backgroundColor: Colors.primary, paddingVertical: Spacing.md, paddingHorizontal: Spacing.xxl, borderRadius: BorderRadius.xl},
+  signInText: {color: Colors.textOnPrimary, fontSize: FontSize.md, fontWeight: 'bold'},
   tabs: {flexDirection: 'row', backgroundColor: Colors.surface, borderBottomWidth: 1, borderBottomColor: Colors.divider},
   tab: {flex: 1, paddingVertical: Spacing.md, alignItems: 'center'},
   tabActive: {borderBottomWidth: 2, borderBottomColor: Colors.primary},

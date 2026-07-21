@@ -21,5 +21,6 @@ public class TransportRequest {
     private BigDecimal longitude;
     @Size(max = 100) private String village;
     private String description;
+    private String voiceNoteUrl;
     private String whatsappNumber;
 }

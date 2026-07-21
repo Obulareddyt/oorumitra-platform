@@ -65,6 +65,9 @@ public class VehicleWorkListing {
     @Column(name = "longitude", precision = 11, scale = 8)
     private BigDecimal longitude;
 
+    @Column(name = "voice_note_url")
+    private String voiceNoteUrl;
+
     @ElementCollection
     @CollectionTable(name = "vehicle_work_images", joinColumns = @JoinColumn(name = "vehicle_work_listing_id"))
     @Column(name = "image_url")

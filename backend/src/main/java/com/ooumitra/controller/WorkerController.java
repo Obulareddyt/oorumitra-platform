@@ -65,8 +65,9 @@ public class WorkerController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<WorkerListingResponse>> create(
             @Valid @RequestPart("data") WorkerListingRequest req,
-            @RequestPart(value = "images", required = false) List<MultipartFile> images) throws IOException {
-        return ResponseEntity.ok(ApiResponse.ok("Worker listing created", workerService.create(req, images)));
+            @RequestPart(value = "images", required = false) List<MultipartFile> images,
+            @RequestPart(value = "voiceNote", required = false) MultipartFile voiceNote) throws IOException {
+        return ResponseEntity.ok(ApiResponse.ok("Worker listing created", workerService.create(req, images, voiceNote)));
     }
 
     @PutMapping("/{id}")

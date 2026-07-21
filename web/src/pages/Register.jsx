@@ -163,7 +163,7 @@ export default function Register() {
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-green-100 flex items-center justify-center p-4 py-8">
       <div className="w-full max-w-md">
         <div className="text-center mb-6">
-          <img src="/logo-primary.svg" alt="OoruMitra" className="h-16 w-auto mx-auto mb-2 drop-shadow" />
+          <img src="/Ooru_mitra_logo_2.png" alt="OoruMitra" className="h-16 w-auto mx-auto mb-2 drop-shadow" />
           <p className="text-gray-500 mt-1 font-semibold text-sm">Rural Marketplace & Services</p>
         </div>
 

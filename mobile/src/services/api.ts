@@ -6,9 +6,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // the same deployed backend.
 const BASE_URL = 'https://ooumitra-backend.onrender.com/api';
 
+// The backend runs on Render's free tier, which spins down after ~15 min
+// idle and can take up to several minutes to cold-start on the next request.
+// pingBackend() (fired once at app launch, see App.tsx) starts that wake-up
+// as early as possible; the retry-with-backoff below covers the case where a
+// real request still lands mid cold-start.
+export const pingBackend = () => {
+  axios.get(`${BASE_URL}/actuator/health`, {timeout: 60000}).catch(() => {});
+};
+
 export const api = axios.create({
   baseURL: BASE_URL,
-  timeout: 30000,
+  timeout: 45000,
   headers: {'Content-Type': 'application/json'},
 });
 
@@ -18,10 +27,25 @@ api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
   return config;
 });
 
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const COLD_START_RETRY_DELAYS_MS = [4000, 10000]; // ~14s of backoff beyond the first attempt
+
 api.interceptors.response.use(
   res => res,
   async (error: AxiosError) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & {_retry?: boolean};
+    const originalRequest = error.config as InternalAxiosRequestConfig & {_retry?: boolean; _coldStartRetries?: number};
+
+    // Network error or timeout (no response at all) — most often a Render
+    // cold start. Retry with backoff instead of surfacing a false failure.
+    if (!error.response && originalRequest && (error.code === 'ECONNABORTED' || error.message === 'Network Error')) {
+      const attempt = originalRequest._coldStartRetries ?? 0;
+      if (attempt < COLD_START_RETRY_DELAYS_MS.length) {
+        originalRequest._coldStartRetries = attempt + 1;
+        await sleep(COLD_START_RETRY_DELAYS_MS[attempt]);
+        return api(originalRequest);
+      }
+    }
+
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       try {

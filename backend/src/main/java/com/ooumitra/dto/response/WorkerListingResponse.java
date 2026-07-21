@@ -24,6 +24,7 @@ public class WorkerListingResponse {
     private BigDecimal amount;
     private WorkType workType;
     private String description;
+    private String voiceNoteUrl;
     private BigDecimal latitude;
     private BigDecimal longitude;
     private List<String> imageUrls;
@@ -44,6 +45,7 @@ public class WorkerListingResponse {
                 .availableWorkers(w.getAvailableWorkers()).priceType(w.getPriceType())
                 .amount(w.getAmount()).workType(w.getWorkType())
                 .description(w.getDescription())
+                .voiceNoteUrl(w.getVoiceNoteUrl())
                 .latitude(w.getLatitude()).longitude(w.getLongitude())
                 .imageUrls(w.getImageUrls())
                 .averageRating(w.getAverageRating()).ratingCount(w.getRatingCount())

@@ -25,6 +25,7 @@ public class TransportResponse {
     private String availability;
     private String village;
     private String description;
+    private String voiceNoteUrl;
     private BigDecimal latitude;
     private BigDecimal longitude;
     private List<String> imageUrls;
@@ -45,6 +46,7 @@ public class TransportResponse {
                 .amount(t.getAmount()).weightCapacity(t.getWeightCapacity())
                 .negotiable(t.isNegotiable()).availability(t.getAvailability())
                 .village(t.getVillage()).description(t.getDescription())
+                .voiceNoteUrl(t.getVoiceNoteUrl())
                 .latitude(t.getLatitude()).longitude(t.getLongitude())
                 .imageUrls(t.getImageUrls())
                 .averageRating(t.getAverageRating()).ratingCount(t.getRatingCount())

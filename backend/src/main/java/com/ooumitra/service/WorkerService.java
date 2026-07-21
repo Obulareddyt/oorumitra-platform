@@ -91,11 +91,15 @@ public class WorkerService {
     }
 
     @Transactional
-    public WorkerListingResponse create(WorkerListingRequest req, List<MultipartFile> images) throws IOException {
+    public WorkerListingResponse create(WorkerListingRequest req, List<MultipartFile> images, MultipartFile voiceNote) throws IOException {
         validateJobsCategoryEnabled();
         User user = SecurityUtils.currentUser();
         List<String> imageUrls = (images != null && !images.isEmpty())
                 ? s3Service.uploadFiles(images, "workers") : new ArrayList<>();
+        String voiceNoteUrl = req.getVoiceNoteUrl();
+        if (voiceNote != null && !voiceNote.isEmpty()) {
+            voiceNoteUrl = s3Service.uploadFile(voiceNote, "workers/audio");
+        }
         WorkerListing listing = WorkerListing.builder()
                 .user(user)
                 .groupName(req.getGroupName())
@@ -109,6 +113,7 @@ public class WorkerService {
                 .latitude(req.getLatitude())
                 .longitude(req.getLongitude())
                 .description(req.getDescription())
+                .voiceNoteUrl(voiceNoteUrl)
                 .imageUrls(imageUrls)
                 .build();
         return WorkerListingResponse.from(workerRepo.save(listing));

@@ -20,5 +20,6 @@ public class WorkerListingRequest {
     private BigDecimal latitude;
     private BigDecimal longitude;
     private String description;
+    private String voiceNoteUrl;
     private String whatsappNumber;
 }

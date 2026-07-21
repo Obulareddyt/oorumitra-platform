@@ -1,42 +1,44 @@
 export const Colors = {
-  primary: '#2E7D32',       // Deep green — agriculture
-  primaryDark: '#1B5E20',
-  primaryLight: '#4CAF50',
-  accent: '#FF6F00',        // Amber — warm rural tone
-  accentLight: '#FFB300',
+  primary: '#2E7D32',       // Primary Village Green
+  primaryDark: '#1c4d1e',
+  primaryLight: '#c2e7c4',
+  secondary: '#FFB300',     // Secondary Harvest Gold
+  secondaryDark: '#e6a100',
+  accent: '#1565C0',        // Trust Blue
+  accentLight: '#bfdbfe',
 
-  background: '#F5F5F5',
+  background: '#F8FAF5',    // Light Canvas
   surface: '#FFFFFF',
-  surfaceVariant: '#E8F5E9',
+  surfaceVariant: '#e1f3e2',
 
   text: '#212121',
   textSecondary: '#616161',
   textHint: '#9E9E9E',
   textOnPrimary: '#FFFFFF',
-  textOnAccent: '#FFFFFF',
+  textOnAccent: '#000000',
 
   border: '#E0E0E0',
   divider: '#EEEEEE',
 
-  success: '#43A047',
-  warning: '#FB8C00',
-  error: '#E53935',
-  info: '#1E88E5',
+  success: '#4CAF50',
+  warning: '#FF9800',
+  error: '#F44336',
+  info: '#1565C0',
 
-  star: '#FDD835',
+  star: '#FFB300',
   unread: '#F44336',
 
   // Category chips
-  agriculture: '#558B2F',
+  agriculture: '#2E7D32',
   hardware: '#546E7A',
   livestock: '#6D4C41',
   vehicles: '#1565C0',
 
   // Status
-  pending: '#FF6F00',
+  pending: '#FF9800',
   confirmed: '#2E7D32',
   completed: '#1565C0',
-  cancelled: '#E53935',
+  cancelled: '#F44336',
 
   overlay: 'rgba(0,0,0,0.5)',
   skeleton: '#E0E0E0',

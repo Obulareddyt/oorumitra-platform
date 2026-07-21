@@ -22,5 +22,6 @@ public class ProductRequest {
     @Size(max = 60) private String availability;
     @Min(0) private Integer quantity;
     private String description;
+    private String voiceNoteUrl;
     private ProductAvailabilityStatus availabilityStatus;
 }

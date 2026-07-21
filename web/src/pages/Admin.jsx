@@ -1021,7 +1021,43 @@ const DETAIL_FIELD_ORDER = [
   'availability', 'availableUntil', 'latitude', 'longitude', 'description',
 ]
 
+function resolveMediaUrl(url) {
+  if (!url) return ''
+  if (typeof url !== 'string') return ''
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('blob:') || url.startsWith('data:')) {
+    return url
+  }
+  let path = url.startsWith('/') ? url : `/${url}`
+  if (path.startsWith('/uploads/')) {
+    path = `/api${path}`
+  }
+  const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:8080/api'
+  const serverHost = apiBase.startsWith('http')
+    ? apiBase.replace(/\/api\/?$/, '')
+    : (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:8080')
+  return `${serverHost}${path}`
+}
+
+function getPhotos(item) {
+  if (!item) return []
+  let raw = []
+  if (Array.isArray(item.imageUrls) && item.imageUrls.length > 0) raw = item.imageUrls
+  else if (Array.isArray(item.images) && item.images.length > 0) raw = item.images
+  else if (typeof item.imageUrls === 'string' && item.imageUrls.trim()) raw = item.imageUrls.split(',').map(s => s.trim())
+  else if (typeof item.imageUrl === 'string' && item.imageUrl.trim()) raw = item.imageUrl.split(',').map(s => s.trim())
+  return raw.map(url => resolveMediaUrl(url)).filter(Boolean)
+}
+
+function getVoiceUrl(item) {
+  if (!item) return null
+  const raw = item.voiceNoteUrl || item.voiceUrl || item.voiceNote || item.audioUrl || null
+  return raw ? resolveMediaUrl(raw) : null
+}
+
 function ListingDetailsModal({ item, onClose }) {
+  const photos = getPhotos(item)
+  const voiceUrl = getVoiceUrl(item)
+
   const rows = DETAIL_FIELD_ORDER
     .filter(k => item[k] !== undefined && item[k] !== null && item[k] !== '')
     .map(k => [DETAIL_FIELD_LABELS[k] || k, typeof item[k] === 'boolean' ? (item[k] ? 'Yes' : 'No') : String(item[k])])
@@ -1030,39 +1066,70 @@ function ListingDetailsModal({ item, onClose }) {
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between p-5 border-b bg-gray-50 rounded-t-2xl sticky top-0">
-          <h2 className="text-lg font-bold text-gray-800">Listing Details</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        
+        {/* Header */}
+        <div className="flex items-center justify-between p-5 border-b border-gray-100 bg-gray-50 rounded-t-3xl sticky top-0 z-10">
+          <div>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#2E7D32]">Post Verification Detail</span>
+            <h2 className="text-lg font-bold text-gray-900 font-heading">
+              {item.productName || item.groupName || item.vehicleType || 'Listing Details'}
+            </h2>
+          </div>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl font-bold bg-gray-200/60 rounded-full w-8 h-8 flex items-center justify-center">✕</button>
         </div>
-        <div className="p-5 space-y-5">
-          {item.imageUrls?.length > 0 && (
-            <div>
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Photos</p>
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                {item.imageUrls.map((url, i) => (
-                  <a key={i} href={url} target="_blank" rel="noreferrer">
-                    <img src={url} alt={`Listing photo ${i + 1}`} className="w-full aspect-square object-cover rounded-lg border border-gray-100" />
+
+        <div className="p-6 space-y-6 text-left">
+          
+          {/* Photos Showcase */}
+          {photos.length > 0 ? (
+            <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 space-y-3">
+              <p className="text-xs font-extrabold text-gray-700 uppercase tracking-wider flex items-center gap-2">
+                <span>📸</span>
+                <span>Uploaded Product / Service Photos ({photos.length})</span>
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {photos.map((url, i) => (
+                  <a key={i} href={url} target="_blank" rel="noreferrer" className="group relative aspect-square rounded-2xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-md transition-all">
+                    <img src={url} alt={`Listing photo ${i + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                    <span className="absolute bottom-1.5 right-1.5 bg-black/70 text-white text-[10px] px-2 py-0.5 rounded-full backdrop-blur-xs font-bold">
+                      🔍 Open
+                    </span>
                   </a>
                 ))}
               </div>
             </div>
-          )}
-
-          {item.voiceNoteUrl && (
-            <div>
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Voice Description</p>
-              <audio src={item.voiceNoteUrl} controls className="w-full" />
+          ) : (
+            <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 text-center text-xs text-gray-500 font-semibold">
+              📷 No uploaded photos attached to this post.
             </div>
           )}
 
-          <div>
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Submitted Details</p>
-            <div className="divide-y divide-gray-50">
+          {/* Voice Description Player */}
+          {voiceUrl ? (
+            <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-200 space-y-2">
+              <p className="text-xs font-extrabold text-[#2E7D32] uppercase tracking-wider flex items-center gap-2">
+                <span>🎙️</span>
+                <span>Seller Voice Description Recording</span>
+              </p>
+              <audio src={voiceUrl} controls className="w-full h-10" />
+            </div>
+          ) : (
+            <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100 text-xs text-gray-400 font-medium">
+              🎙️ No voice note recorded for this listing.
+            </div>
+          )}
+
+          {/* Submitted Data Table */}
+          <div className="bg-white rounded-2xl border border-gray-150 p-4 space-y-3">
+            <p className="text-xs font-extrabold text-gray-700 uppercase tracking-wider pb-2 border-b border-gray-100">
+              Submitted User Details
+            </p>
+            <div className="divide-y divide-gray-100">
               {rows.map(([label, value]) => (
-                <div key={label} className="flex gap-3 py-2 text-sm">
-                  <span className="text-gray-500 w-40 shrink-0">{label}</span>
-                  <span className="text-gray-800 font-medium flex-1 break-words">{value}</span>
+                <div key={label} className="flex gap-4 py-2.5 text-xs sm:text-sm">
+                  <span className="text-gray-500 w-40 shrink-0 font-medium">{label}</span>
+                  <span className="text-gray-900 font-bold flex-1 break-words">{value}</span>
                 </div>
               ))}
             </div>
@@ -1072,16 +1139,17 @@ function ListingDetailsModal({ item, onClose }) {
             <a
               href={`https://www.google.com/maps?q=${item.latitude},${item.longitude}`}
               target="_blank" rel="noreferrer"
-              className="inline-block text-sm text-primary-600 hover:underline font-medium"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 border border-emerald-200 text-[#2E7D32] rounded-xl text-xs font-bold hover:bg-emerald-100 transition-colors shadow-xs"
             >
-              📍 Open location in Google Maps →
+              <span>📍</span>
+              <span>Open Location Map Coordinates →</span>
             </a>
           )}
 
           {item.adminRemarks && (
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
-              <p className="text-xs font-bold text-amber-700 uppercase tracking-wide mb-1">Admin Remarks</p>
-              <p className="text-sm text-amber-800">{item.adminRemarks}</p>
+            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+              <p className="text-xs font-extrabold text-amber-800 uppercase tracking-wider mb-1">Admin Remarks</p>
+              <p className="text-xs text-amber-900 font-medium leading-relaxed">{item.adminRemarks}</p>
             </div>
           )}
         </div>
@@ -1091,10 +1159,10 @@ function ListingDetailsModal({ item, onClose }) {
 }
 
 function ListingsTable({ items, loading, onApprove, onReject, onView, getName, getVillage, getCategory, tab, onManageAvailability, onViewHistory }) {
-  if (loading) return <div className="py-12 text-center text-gray-400">Loading…</div>
-  if (!items?.length) return <div className="py-12 text-center text-gray-400">No listings found</div>
+  if (loading) return <div className="py-12 text-center text-gray-400 font-medium">Loading listings…</div>
+  if (!items?.length) return <div className="py-12 text-center text-gray-400 font-medium">No listings found in this filter</div>
 
-  const headers = ['Name / Type', 'Owner', 'Mobile', 'Village', 'Category', 'Voice Desc', 'Posted', 'Status']
+  const headers = ['Photo', 'Name / Type', 'Owner', 'Mobile', 'Village', 'Category', 'Voice Desc', 'Posted', 'Status']
   if (tab === 'Products') {
     headers.push('Availability')
   }
@@ -1102,72 +1170,113 @@ function ListingsTable({ items, loading, onApprove, onReject, onView, getName, g
 
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-full text-sm">
+      <table className="min-w-full text-xs sm:text-sm">
         <thead>
-          <tr className="bg-gray-50 border-b border-gray-100">
+          <tr className="bg-gray-50 border-b border-gray-200">
             {headers.map(h => (
-              <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
+              <th key={h} className="px-4 py-3.5 text-left text-xs font-bold text-gray-700 uppercase tracking-wider whitespace-nowrap">{h}</th>
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-50">
-          {items.map(item => (
-            <tr key={item.id} className="hover:bg-gray-50">
-              <td className="px-4 py-3 font-medium max-w-[160px] truncate">
-                <button onClick={() => onView(item)} className="text-primary-700 hover:underline text-left">{getName(item)}</button>
-              </td>
-              <td className="px-4 py-3 text-gray-700 whitespace-nowrap">{item.ownerName}</td>
-              <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{item.mobileNumber}</td>
-              <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{getVillage(item) || '—'}</td>
-              <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{getCategory(item) || '—'}</td>
-              <td className="px-4 py-3 whitespace-nowrap">
-                {item.voiceNoteUrl ? (
-                  <audio src={item.voiceNoteUrl} controls className="h-6 w-32 scale-90 origin-left" />
-                ) : (
-                  <span className="text-gray-300">None</span>
-                )}
-              </td>
-              <td className="px-4 py-3 text-gray-400 whitespace-nowrap">{fmt(item.createdAt)}</td>
-              <td className="px-4 py-3">
-                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_BADGE[item.approvalStatus] ?? ''}`}>
-                  {item.approvalStatus}
-                </span>
-              </td>
-              {tab === 'Products' && (
+        <tbody className="divide-y divide-gray-100">
+          {items.map(item => {
+            const photos = getPhotos(item)
+            const voiceUrl = getVoiceUrl(item)
+
+            return (
+              <tr key={item.id} className="hover:bg-emerald-50/30 transition-colors">
+                
+                {/* Photo Thumbnail Column */}
                 <td className="px-4 py-3 whitespace-nowrap">
-                  <span className={`text-xs px-2.5 py-1 rounded-full font-bold inline-flex items-center gap-1 ${
-                    item.availabilityStatus === 'ACTIVE'
-                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                      : 'bg-rose-50 text-rose-700 border border-rose-200'
-                  }`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${item.availabilityStatus === 'ACTIVE' ? 'bg-emerald-500 animate-ping' : 'bg-rose-500'}`} />
-                    {item.availabilityStatus}
+                  {photos.length > 0 ? (
+                    <div className="relative group cursor-pointer" onClick={() => onView(item)} title="Click to view all photos">
+                      <img
+                        src={photos[0]}
+                        alt=""
+                        className="w-12 h-12 object-cover rounded-xl border border-gray-200 shadow-xs group-hover:scale-105 transition-transform"
+                      />
+                      {photos.length > 1 && (
+                        <span className="absolute -bottom-1 -right-1 bg-gray-900 text-white text-[9px] font-black px-1.5 rounded-full border border-white">
+                          +{photos.length - 1}
+                        </span>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="w-12 h-12 rounded-xl bg-gray-100 border border-gray-200 flex items-center justify-center text-base text-gray-400" title="No photo">
+                      🖼️
+                    </div>
+                  )}
+                </td>
+
+                <td className="px-4 py-3 font-bold max-w-[170px] truncate">
+                  <button onClick={() => onView(item)} className="text-[#2E7D32] hover:underline text-left font-bold">
+                    {getName(item)}
+                  </button>
+                </td>
+
+                <td className="px-4 py-3 text-gray-800 font-semibold whitespace-nowrap">{item.ownerName}</td>
+                <td className="px-4 py-3 text-gray-600 font-mono whitespace-nowrap">{item.mobileNumber}</td>
+                <td className="px-4 py-3 text-gray-600 whitespace-nowrap">📍 {getVillage(item) || '—'}</td>
+                <td className="px-4 py-3 text-gray-600 font-semibold whitespace-nowrap">{getCategory(item) || '—'}</td>
+
+                {/* Voice Note Audio Column */}
+                <td className="px-4 py-3 whitespace-nowrap">
+                  {voiceUrl ? (
+                    <div className="flex items-center gap-1 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded-xl">
+                      <span className="text-xs">🎙️</span>
+                      <audio src={voiceUrl} controls className="h-6 w-28 scale-90 origin-left" />
+                    </div>
+                  ) : (
+                    <span className="text-gray-400 text-xs">No Voice</span>
+                  )}
+                </td>
+
+                <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{fmt(item.createdAt)}</td>
+
+                <td className="px-4 py-3">
+                  <span className={`text-xs px-2.5 py-1 rounded-full font-bold shadow-xs ${STATUS_BADGE[item.approvalStatus] ?? ''}`}>
+                    {item.approvalStatus}
                   </span>
                 </td>
-              )}
-              <td className="px-4 py-3 text-gray-500 max-w-[180px]">
-                {item.adminRemarks
-                  ? <span title={item.adminRemarks} className="line-clamp-2 text-xs">{item.adminRemarks}</span>
-                  : <span className="text-gray-300">—</span>}
-              </td>
-              <td className="px-4 py-3">
-                <div className="flex items-center gap-3">
-                  {item.approvalStatus === 'PENDING' && (
-                    <div className="flex gap-2">
-                      <button onClick={() => onApprove(item)} className="text-xs text-green-600 hover:underline font-medium whitespace-nowrap">Approve</button>
-                      <button onClick={() => onReject(item)} className="text-xs text-red-600 hover:underline font-medium whitespace-nowrap">Reject</button>
-                    </div>
-                  )}
-                  {tab === 'Products' && (
-                    <div className="flex gap-2.5">
-                      <button onClick={() => onManageAvailability(item)} className="text-xs text-indigo-600 hover:underline font-bold whitespace-nowrap">Status Override</button>
-                      <button onClick={() => onViewHistory(item)} className="text-xs text-gray-500 hover:underline font-medium whitespace-nowrap">Audit Logs</button>
-                    </div>
-                  )}
-                </div>
-              </td>
-            </tr>
-          ))}
+
+                {tab === 'Products' && (
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <span className={`text-xs px-2.5 py-1 rounded-full font-bold inline-flex items-center gap-1 ${
+                      item.availabilityStatus === 'ACTIVE'
+                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                        : 'bg-rose-50 text-rose-700 border border-rose-200'
+                    }`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${item.availabilityStatus === 'ACTIVE' ? 'bg-emerald-500 animate-ping' : 'bg-rose-500'}`} />
+                      {item.availabilityStatus}
+                    </span>
+                  </td>
+                )}
+
+                <td className="px-4 py-3 text-gray-500 max-w-[180px]">
+                  {item.adminRemarks
+                    ? <span title={item.adminRemarks} className="line-clamp-2 text-xs font-medium">{item.adminRemarks}</span>
+                    : <span className="text-gray-300">—</span>}
+                </td>
+
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    {item.approvalStatus === 'PENDING' && (
+                      <div className="flex gap-2">
+                        <button onClick={() => onApprove(item)} className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-xs">Approve</button>
+                        <button onClick={() => onReject(item)} className="px-2.5 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold shadow-xs">Reject</button>
+                      </div>
+                    )}
+                    {tab === 'Products' && (
+                      <div className="flex gap-2">
+                        <button onClick={() => onManageAvailability(item)} className="text-xs text-indigo-600 hover:underline font-bold whitespace-nowrap">Status Override</button>
+                        <button onClick={() => onViewHistory(item)} className="text-xs text-gray-500 hover:underline font-medium whitespace-nowrap">Audit Logs</button>
+                      </div>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            )
+          })}
         </tbody>
       </table>
     </div>

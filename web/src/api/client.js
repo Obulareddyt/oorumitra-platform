@@ -29,8 +29,11 @@ function multipartCreate(url, data, images, voiceBlob) {
   const form = new FormData()
   form.append('data', new Blob([JSON.stringify(data)], { type: 'application/json' }))
   images?.forEach((img) => form.append('images', img))
-  if (voiceBlob) form.append('voiceNote', voiceBlob, 'voice-note.webm')
-  return api.post(url, form)
+  if (voiceBlob) {
+    const filename = voiceBlob.name || 'voice-note.webm'
+    form.append('voiceNote', voiceBlob, filename)
+  }
+  return api.post(url, form, { headers: { 'Content-Type': 'multipart/form-data' } })
 }
 
 export const productsApi = {

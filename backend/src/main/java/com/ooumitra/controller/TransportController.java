@@ -57,8 +57,9 @@ public class TransportController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<TransportResponse>> create(
             @Valid @RequestPart("data") TransportRequest req,
-            @RequestPart(value = "images", required = false) List<MultipartFile> images) throws IOException {
-        return ResponseEntity.ok(ApiResponse.ok("Created", transportService.create(req, images)));
+            @RequestPart(value = "images", required = false) List<MultipartFile> images,
+            @RequestPart(value = "voiceNote", required = false) MultipartFile voiceNote) throws IOException {
+        return ResponseEntity.ok(ApiResponse.ok("Created", transportService.create(req, images, voiceNote)));
     }
 
     @PutMapping("/{id}")

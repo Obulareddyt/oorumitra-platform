@@ -38,7 +38,6 @@ export default function PlacesInput({ value, onChange, required, className = 'in
     const ac = new window.google.maps.places.Autocomplete(inputRef.current, {
       componentRestrictions: { country: 'in' },
       fields: ['formatted_address', 'geometry', 'name'],
-      types: ['geocode', 'establishment'],
     })
     acRef.current = ac
     ac.addListener('place_changed', () => {
@@ -46,9 +45,21 @@ export default function PlacesInput({ value, onChange, required, className = 'in
       const name = place.name || place.formatted_address || ''
       const lat = place.geometry?.location?.lat()
       const lng = place.geometry?.location?.lng()
+      if (inputRef.current) inputRef.current.value = name
       onChange({ address: name, lat, lng })
     })
   }, [ready])
+
+  // The Google widget writes into the input's DOM value directly, so this field is
+  // kept uncontrolled while typing — otherwise React re-asserting `value` on every
+  // keystroke fights the widget and the input stops accepting further characters.
+  // Only push external updates (current-location button, place selection above) in,
+  // and only while the user isn't actively typing in it.
+  useEffect(() => {
+    if (inputRef.current && document.activeElement !== inputRef.current) {
+      inputRef.current.value = value || ''
+    }
+  }, [value])
 
   const handleChange = (e) => {
     onChange({ address: e.target.value, lat: null, lng: null })
@@ -60,7 +71,7 @@ export default function PlacesInput({ value, onChange, required, className = 'in
         ref={inputRef}
         type="text"
         className={className}
-        value={value}
+        defaultValue={value}
         onChange={handleChange}
         required={required}
         autoComplete="off"

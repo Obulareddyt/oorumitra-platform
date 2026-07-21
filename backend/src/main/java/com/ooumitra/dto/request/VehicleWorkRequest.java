@@ -21,5 +21,6 @@ public class VehicleWorkRequest {
     private BigDecimal latitude;
     private BigDecimal longitude;
     private String description;
+    private String voiceNoteUrl;
     private String whatsappNumber;
 }

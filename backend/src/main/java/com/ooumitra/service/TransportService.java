@@ -78,11 +78,15 @@ public class TransportService {
     }
 
     @Transactional
-    public TransportResponse create(TransportRequest req, List<MultipartFile> images) throws IOException {
+    public TransportResponse create(TransportRequest req, List<MultipartFile> images, MultipartFile voiceNote) throws IOException {
         validateServicesCategoryEnabled();
         User user = SecurityUtils.currentUser();
         List<String> imageUrls = (images != null && !images.isEmpty())
                 ? s3Service.uploadFiles(images, "transport") : new ArrayList<>();
+        String voiceNoteUrl = req.getVoiceNoteUrl();
+        if (voiceNote != null && !voiceNote.isEmpty()) {
+            voiceNoteUrl = s3Service.uploadFile(voiceNote, "transport/audio");
+        }
         TransportListing listing = TransportListing.builder()
                 .user(user).vehicleType(req.getVehicleType())
                 .ownerName(req.getOwnerName()).mobileNumber(req.getMobileNumber())
@@ -91,6 +95,7 @@ public class TransportService {
                 .availability(req.getAvailability())
                 .village(req.getVillage())
                 .description(req.getDescription())
+                .voiceNoteUrl(voiceNoteUrl)
                 .latitude(req.getLatitude()).longitude(req.getLongitude())
                 .imageUrls(imageUrls)
                 .build();

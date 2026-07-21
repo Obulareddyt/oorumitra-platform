@@ -57,8 +57,9 @@ public class VehicleWorkController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<VehicleWorkResponse>> create(
             @Valid @RequestPart("data") VehicleWorkRequest req,
-            @RequestPart(value = "images", required = false) List<MultipartFile> images) throws IOException {
-        return ResponseEntity.ok(ApiResponse.ok("Vehicle work listing created", vehicleWorkService.create(req, images)));
+            @RequestPart(value = "images", required = false) List<MultipartFile> images,
+            @RequestPart(value = "voiceNote", required = false) MultipartFile voiceNote) throws IOException {
+        return ResponseEntity.ok(ApiResponse.ok("Vehicle work listing created", vehicleWorkService.create(req, images, voiceNote)));
     }
 
     @PutMapping("/{id}")

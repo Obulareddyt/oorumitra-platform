@@ -120,9 +120,9 @@ function VehicleWorkCard({ item, onBook, isOwner }) {
           <p className="text-xs text-amber-600">⭐ {item.averageRating?.toFixed(1)} ({item.ratingCount} reviews)</p>
         )}
         <div className="flex gap-2 mt-auto">
-          <a href={`tel:${item.mobileNumber}`} className="btn-outline text-xs py-1.5 flex-1 text-center">📞 {t('products.call_seller', 'Call')}</a>
+          <a href={`tel:${item.mobileNumber}`} onClick={(e) => e.stopPropagation()} className="btn-outline text-xs py-1.5 flex-1 text-center">📞 {t('products.call_seller', 'Call')}</a>
           {!isOwner && (
-            <button onClick={onBook} disabled={!item.availableStatus} className="btn-primary text-xs py-1.5 flex-1 disabled:opacity-50">{t('vehicles.book', 'Book')}</button>
+            <button onClick={(e) => { e.stopPropagation(); onBook() }} disabled={!item.availableStatus} className="btn-primary text-xs py-1.5 flex-1 disabled:opacity-50">{t('vehicles.book', 'Book')}</button>
           )}
         </div>
       </div>

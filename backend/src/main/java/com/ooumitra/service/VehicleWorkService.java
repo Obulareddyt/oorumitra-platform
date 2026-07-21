@@ -78,11 +78,15 @@ public class VehicleWorkService {
     }
 
     @Transactional
-    public VehicleWorkResponse create(VehicleWorkRequest req, List<MultipartFile> images) throws IOException {
+    public VehicleWorkResponse create(VehicleWorkRequest req, List<MultipartFile> images, MultipartFile voiceNote) throws IOException {
         validateServicesCategoryEnabled();
         User user = SecurityUtils.currentUser();
         List<String> imageUrls = (images != null && !images.isEmpty())
                 ? s3Service.uploadFiles(images, "vehicle-work") : new ArrayList<>();
+        String voiceNoteUrl = req.getVoiceNoteUrl();
+        if (voiceNote != null && !voiceNote.isEmpty()) {
+            voiceNoteUrl = s3Service.uploadFile(voiceNote, "vehicle-work/audio");
+        }
         VehicleWorkListing listing = VehicleWorkListing.builder()
                 .user(user).vehicleType(req.getVehicleType())
                 .ownerName(req.getOwnerName()).mobileNumber(req.getMobileNumber())
@@ -90,6 +94,7 @@ public class VehicleWorkService {
                 .village(req.getVillage()).availableStatus(req.isAvailableStatus())
                 .availableUntil(req.getAvailableUntil())
                 .description(req.getDescription())
+                .voiceNoteUrl(voiceNoteUrl)
                 .latitude(req.getLatitude()).longitude(req.getLongitude())
                 .imageUrls(imageUrls)
                 .build();

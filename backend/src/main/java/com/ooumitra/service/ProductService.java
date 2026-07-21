@@ -108,7 +108,7 @@ public class ProductService {
         if (images != null && !images.isEmpty()) {
             imageUrls = s3Service.uploadFiles(images, "products");
         }
-        String voiceNoteUrl = null;
+        String voiceNoteUrl = req.getVoiceNoteUrl();
         if (voiceNote != null && !voiceNote.isEmpty()) {
             voiceNoteUrl = s3Service.uploadFile(voiceNote, "products/audio");
         }

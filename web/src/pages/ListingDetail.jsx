@@ -30,6 +30,23 @@ function fmtAmount(n) {
   return Number(n).toLocaleString('en-IN')
 }
 
+function resolveMediaUrl(url) {
+  if (!url) return ''
+  if (typeof url !== 'string') return ''
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('blob:') || url.startsWith('data:')) {
+    return url
+  }
+  let path = url.startsWith('/') ? url : `/${url}`
+  if (path.startsWith('/uploads/')) {
+    path = `/api${path}`
+  }
+  const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:8080/api'
+  const serverHost = apiBase.startsWith('http')
+    ? apiBase.replace(/\/api\/?$/, '')
+    : (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:8080')
+  return `${serverHost}${path}`
+}
+
 const STATUS_BADGE = {
   PENDING:  'bg-amber-100 text-amber-700',
   APPROVED: 'bg-green-100 text-green-700',
@@ -40,9 +57,9 @@ const STATUS_BADGE = {
 function Row({ label, value }) {
   if (!value && value !== 0 && value !== false) return null
   return (
-    <div className="flex gap-3 py-2 border-b border-gray-50 last:border-0">
-      <span className="text-gray-500 text-sm w-36 shrink-0">{label}</span>
-      <span className="text-gray-800 text-sm font-medium flex-1">{String(value)}</span>
+    <div className="flex gap-3 py-2.5 border-b border-gray-100 last:border-0 items-center">
+      <span className="text-gray-500 text-xs sm:text-sm w-36 shrink-0 font-medium">{label}</span>
+      <span className="text-gray-900 text-xs sm:text-sm font-bold flex-1">{String(value)}</span>
     </div>
   )
 }
@@ -106,10 +123,13 @@ export default function ListingDetail() {
   const { user } = useAuth()
   const { t } = useTranslation()
   const toast = useToast()
+
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [photo, setPhoto] = useState(0)
+  const [showLightbox, setShowLightbox] = useState(false)
+  const [showShareModal, setShowShareModal] = useState(false)
   const [userLoc, setUserLoc] = useState(null)
 
   const cfg = TYPE_CONFIG[type]
@@ -137,25 +157,12 @@ export default function ListingDetail() {
       setLoading(true)
       const updated = await productsApi.markAsSold(id)
       setData(updated)
+      toast.add('Listing marked as Sold successfully!', 'success')
     } catch (err) {
       alert(err.message || "Failed to mark product as sold.")
     } finally {
       setLoading(false)
     }
-  }
-
-  const formatAvailability = (val) => {
-    if (!val) return '—'
-    if (val.includes(' @ ')) {
-      const [d, t] = val.split(' @ ')
-      try {
-        const formattedDate = new Date(d).toLocaleDateString('en-IN', { dateStyle: 'medium' })
-        return `${formattedDate} at ${t}`
-      } catch {
-        return val
-      }
-    }
-    return val
   }
 
   if (loading) return <PageSpinner />
@@ -176,281 +183,271 @@ export default function ListingDetail() {
     ? haversine(userLoc.lat, userLoc.lng, sellerLat, sellerLng)
     : null
 
-  const extractDateRange = () => {
-    if (!data) return null
-    if (data.availability && data.availability.includes('From ') && data.availability.includes(' to ')) {
-      const parts = data.availability.replace('From ', '').split(' to ')
-      if (parts.length === 2) return { from: parts[0], to: parts[1] }
-    }
-    if (data.description) {
-      const match = data.description.match(/Available:?\s*([0-9-]{10})\s*to\s*([0-9-]{10})/)
-      if (match) return { from: match[1], to: match[2] }
-    }
-    return null
-  }
-
-  const range = extractDateRange()
-
   const mapsUrl = userLoc && sellerLat && sellerLng
     ? `https://www.google.com/maps/dir/?api=1&origin=${userLoc.lat},${userLoc.lng}&destination=${sellerLat},${sellerLng}`
     : sellerLat
     ? `https://www.google.com/maps/search/?api=1&query=${sellerLat},${sellerLng}`
     : null
 
-  const images = data.imageUrls || []
+  const rawImages = Array.isArray(data.imageUrls) ? data.imageUrls : typeof data.imageUrls === 'string' ? data.imageUrls.split(',') : []
+  const images = rawImages.map(url => resolveMediaUrl(url)).filter(Boolean)
+  const voiceUrl = data.voiceNoteUrl ? resolveMediaUrl(data.voiceNoteUrl) : null
   const isSold = data.approvalStatus === 'SOLD'
   const isOwner = user && data && Number(user.userId || user.id) === Number(data.userId)
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
       <Toast toasts={toast.toasts} remove={toast.remove} />
-      <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 mb-5">
-        ← Back
-      </button>
+      
+      {/* Top Header */}
+      <div className="flex items-center justify-between mb-6">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-xs sm:text-sm font-bold text-gray-600 hover:text-[#2E7D32]">
+          ← Back to Marketplace
+        </button>
 
-      <div className="card overflow-hidden">
-        {/* Photo gallery */}
-        {images.length > 0 ? (
-          <div className="relative">
-            <img
-              src={images[photo]}
-              alt={title}
-              className="w-full h-72 object-cover"
-              onError={e => { e.target.src = 'https://placehold.co/600x300?text=No+Image' }}
-            />
-            
-            {/* Sold Tag Overlay */}
-            {isSold && (
-              <div className="absolute inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center">
-                <span className="border-4 border-red-500 text-red-500 font-black tracking-widest text-2xl uppercase px-5 py-2.5 rounded-xl rotate-[-8deg] shadow-lg">
-                  SOLD OUT
-                </span>
-              </div>
-            )}
+        <button
+          onClick={() => setShowShareModal(true)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-xs font-bold text-gray-700 shadow-sm"
+        >
+          <span>🔗</span>
+          <span>Share Listing</span>
+        </button>
+      </div>
 
-            {images.length > 1 && (
-              <div className="flex gap-2 p-3 overflow-x-auto bg-gray-50">
-                {images.map((url, i) => (
-                  <img key={i} src={url} alt="" onClick={() => setPhoto(i)}
-                    className={`w-16 h-16 rounded-lg object-cover cursor-pointer border-2 transition-all ${i === photo ? 'border-primary-600' : 'border-transparent opacity-60'}`} />
-                ))}
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className={`w-full h-48 bg-gradient-to-br ${NO_PHOTO_BANNER[type]?.gradient || 'from-gray-100 to-gray-50'} flex flex-col items-center justify-center gap-2 relative`}>
-            <span className="text-6xl">{NO_PHOTO_BANNER[type]?.icon || '🛍️'}</span>
-            <span className="text-gray-500 text-sm font-semibold uppercase tracking-wide">{NO_PHOTO_BANNER[type]?.label || 'Listing'}</span>
-            {isSold && (
-              <div className="absolute inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center">
-                <span className="border-4 border-red-500 text-red-500 font-black tracking-widest text-2xl uppercase px-5 py-2.5 rounded-xl rotate-[-8deg] shadow-lg">
-                  SOLD OUT
-                </span>
-              </div>
-            )}
-          </div>
-        )}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        {/* Left Column: Image Gallery & Description */}
+        <div className="lg:col-span-7 space-y-6">
+          <div className="bg-white rounded-3xl border border-emerald-950/10 overflow-hidden shadow-md">
+            {images.length > 0 ? (
+              <div className="relative">
+                <img
+                  src={images[photo]}
+                  alt={title}
+                  onClick={() => setShowLightbox(true)}
+                  className="w-full h-80 sm:h-96 object-cover cursor-zoom-in"
+                  onError={e => { e.target.src = 'https://placehold.co/600x400?text=No+Image' }}
+                />
+                
+                {isSold && (
+                  <div className="absolute inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center">
+                    <span className="border-4 border-red-500 text-red-500 font-black tracking-widest text-2xl uppercase px-5 py-2.5 rounded-xl rotate-[-8deg] shadow-lg">
+                      SOLD OUT
+                    </span>
+                  </div>
+                )}
 
-        <div className="p-5 sm:p-6 text-left">
-          {/* Title + status */}
-          <div className="flex items-start justify-between gap-3 mb-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
-              <div className="flex items-center gap-2 mt-1">
-                <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-extrabold transition-all duration-300 ${
-                  (type === 'products' ? data.availabilityStatus === 'ACTIVE' : data.availableStatus)
-                    ? 'bg-green-50 text-green-700 border border-green-200' 
-                    : 'bg-gray-100 text-gray-500 border border-gray-200'
-                }`}>
-                  <span className={`w-1.5 h-1.5 rounded-full ${(type === 'products' ? data.availabilityStatus === 'ACTIVE' : data.availableStatus) ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
-                  {(type === 'products' ? data.availabilityStatus === 'ACTIVE' : data.availableStatus) ? t('product.status.active', 'Active') : t('product.status.inactive', 'Inactive')}
-                </span>
-                {cfg.getVillage(data) && (
-                  <span className="text-xs text-gray-500 font-medium">📍 {cfg.getVillage(data)}</span>
+                {images.length > 1 && (
+                  <div className="flex gap-2 p-3 overflow-x-auto bg-gray-900/40 backdrop-blur-md">
+                    {images.map((url, i) => (
+                      <img key={i} src={url} alt="" onClick={() => setPhoto(i)}
+                        className={`w-16 h-16 rounded-xl object-cover cursor-pointer border-2 transition-all ${i === photo ? 'border-amber-400 scale-105' : 'border-transparent opacity-60'}`} />
+                    ))}
+                  </div>
                 )}
               </div>
-            </div>
-            {/* Customer-facing: Hide APPROVED label on product detail, but show for owner/admin. Or simply only render if not APPROVED */}
-            {data.approvalStatus !== 'APPROVED' && (
-              <span className={`text-xs px-3 py-1 rounded-full font-semibold shrink-0 ${STATUS_BADGE[data.approvalStatus] ?? ''}`}>
-                {data.approvalStatus}
-              </span>
+            ) : (
+              <div className={`w-full h-64 bg-gradient-to-br ${NO_PHOTO_BANNER[type]?.gradient || 'from-gray-100 to-gray-50'} flex flex-col items-center justify-center gap-2 relative`}>
+                <span className="text-6xl">{NO_PHOTO_BANNER[type]?.icon || '🛍️'}</span>
+                <span className="text-gray-500 text-sm font-semibold uppercase tracking-wide">{NO_PHOTO_BANNER[type]?.label || 'Listing'}</span>
+                {isSold && (
+                  <div className="absolute inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center">
+                    <span className="border-4 border-red-500 text-red-500 font-black tracking-widest text-2xl uppercase px-5 py-2.5 rounded-xl rotate-[-8deg] shadow-lg">
+                      SOLD OUT
+                    </span>
+                  </div>
+                )}
+              </div>
             )}
           </div>
 
-          {/* Details */}
-          <div className="mb-5">
-            {rows.map(([label, value]) => (
-              <Row key={label} label={label} value={value} />
-            ))}
-            <Row label="Posted Date" value={fmt(data.createdAt)} />
+          {/* Specification Rows */}
+          <div className="bg-white rounded-3xl border border-emerald-950/10 p-6 shadow-sm text-left space-y-4">
+            <h3 className="text-lg font-bold text-gray-900 font-heading border-b border-gray-100 pb-3">
+              Listing Details & Specifications
+            </h3>
+            <div className="space-y-1">
+              {rows.map(([label, value]) => (
+                <Row key={label} label={label} value={value} />
+              ))}
+              <Row label="Posted Date" value={fmt(data.createdAt)} />
+            </div>
+
+            {voiceUrl && (
+              <div className="bg-emerald-50/60 rounded-2xl p-4 border border-emerald-100">
+                <p className="text-xs font-bold text-[#2E7D32] uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                  <span>🎙️</span> Seller's Voice Note
+                </p>
+                <audio src={voiceUrl} controls className="w-full h-10" />
+              </div>
+            )}
           </div>
+        </div>
 
-          {/* Voice description audio note player */}
-          {data.voiceNoteUrl && (
-            <div className="bg-gradient-to-r from-gray-50 to-gray-100/50 rounded-2xl p-4 mb-5 border border-gray-200">
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <span>🎙️</span> Seller's Voice Description
-              </p>
-              <audio src={data.voiceNoteUrl} controls className="w-full mt-1 h-10" />
+        {/* Right Column: Pricing, Seller Info, CTAs, Map */}
+        <div className="lg:col-span-5 space-y-6 text-left">
+          
+          {/* Main Price & Title Card */}
+          <div className="bg-white rounded-3xl border border-emerald-950/10 p-6 shadow-sm space-y-4">
+            <div>
+              <span className="px-3 py-1 bg-emerald-100 text-[#2E7D32] rounded-full text-xs font-bold uppercase tracking-wider">
+                {type}
+              </span>
+              <h1 className="text-2xl font-extrabold text-gray-900 mt-2 font-heading">{title}</h1>
+              <p className="text-xs text-gray-500 mt-1">📍 {cfg.getVillage(data) || 'Panchayat Area'}</p>
             </div>
-          )}
 
-          {/* Availability schedule */}
-          {type === 'products' && data.availability && (
-            <div className="bg-amber-50/40 rounded-2xl p-4 mb-5 border border-amber-100 text-left">
-              <p className="text-xs font-bold text-amber-800 uppercase tracking-wider mb-1 flex items-center gap-1.5">
-                <span>📅</span> Availability Status
-              </p>
-              <p className="text-sm text-gray-700 font-extrabold">{data.availability}</p>
-            </div>
-          )}
-
-          {range && type !== 'products' && (
-            <div className="bg-amber-50/40 rounded-2xl p-4 mb-5 border border-amber-100 text-left">
-              <p className="text-xs font-bold text-amber-800 uppercase tracking-wider mb-1 flex items-center gap-1.5">
-                <span>📅</span> Available Date Range
-              </p>
-              <p className="text-sm text-gray-700 font-extrabold">
-                {new Date(range.from).toLocaleDateString('en-IN', { dateStyle: 'medium' })} — {new Date(range.to).toLocaleDateString('en-IN', { dateStyle: 'medium' })}
-              </p>
-            </div>
-          )}
-
-          {/* Contact Details */}
-          {isSold ? (
-            <div className="bg-gray-50 border border-gray-200 rounded-2xl p-5 mb-5">
-              <p className="text-sm font-bold text-gray-800 mb-2">Seller Contact Info</p>
-              <div className="text-gray-600 font-bold text-sm">👤 {data.ownerName}</div>
-              <div className="mt-3 bg-red-50 border border-red-100 text-red-700 rounded-xl p-3 text-xs font-semibold flex items-center gap-1.5">
-                <span>🚫</span> Call and WhatsApp inquiries are disabled because this product has been sold out.
+            <div className="pt-2 border-t border-gray-100 flex items-baseline justify-between">
+              <div>
+                <span className="text-3xl font-extrabold text-[#2E7D32] font-heading">
+                  ₹{data.amount ? fmtAmount(data.amount) : 'Contact'}
+                </span>
+                <span className="text-xs text-gray-500 font-semibold ml-1">
+                  {data.priceType ? `/ ${data.priceType}` : ''}
+                </span>
               </div>
+              {data.negotiable && (
+                <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
+                  Negotiable Price
+                </span>
+              )}
             </div>
-          ) : (
-            <div className="bg-primary-50 rounded-2xl p-5 mb-5">
-              <p className="text-sm font-black text-gray-800 mb-3">Contact Seller</p>
-              <div className="flex flex-col sm:flex-row gap-3 w-full">
-                <a href={`tel:${data.mobileNumber}`}
-                  className="flex-1 btn-outline py-2.5 px-4 text-center font-bold tracking-wider uppercase flex items-center justify-center gap-2 bg-white">
-                  📞 Call Seller ({data.mobileNumber})
-                </a>
-                <a href={`https://wa.me/91${data.mobileNumber}`} target="_blank" rel="noopener noreferrer"
-                  className="flex-1 btn-primary py-2.5 px-4 text-center font-bold tracking-wider uppercase flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white border-transparent">
-                  💬 WhatsApp Chat
-                </a>
-              </div>
-              <p className="text-xs text-gray-500 font-bold mt-3">Listed by: <span className="text-gray-700 font-black">{data.ownerName}</span></p>
-            </div>
-          )}
 
-          {/* Availability Status Management Dropdown / Toggle Switch */}
-          {isOwner && (
-            <div className="bg-white border border-gray-200 rounded-2xl p-4 mb-5 text-left shadow-xs">
-              <label className="block text-xs font-black text-gray-500 uppercase tracking-wider mb-3">
-                {type === 'products' ? t('products.availability_status_label', 'Availability Status') : '🟢 Availability Status'}
-              </label>
-              {type === 'products' ? (
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={data.availabilityStatus === 'ACTIVE'}
-                    disabled={loading}
-                    onClick={async () => {
-                      const nextStatus = data.availabilityStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
-                      try {
-                        setLoading(true);
-                        const updated = await productsApi.updateAvailabilityStatus(id, nextStatus);
-                        setData(updated);
-                        toast.add(
-                          nextStatus === 'ACTIVE'
-                            ? t('product.status.marked_active', 'Product marked as Active.')
-                            : t('product.status.marked_inactive', 'Product marked as Inactive.'),
-                          'success'
-                        );
-                      } catch (err) {
-                        toast.add(err.message || 'Failed to update availability status.', 'error');
-                      } finally {
-                        setLoading(false);
-                      }
-                    }}
-                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
-                      data.availabilityStatus === 'ACTIVE' ? 'bg-green-500' : 'bg-gray-300'
-                    } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  >
-                    <span
-                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                        data.availabilityStatus === 'ACTIVE' ? 'translate-x-5' : 'translate-x-0'
-                      }`}
-                    />
-                  </button>
-                  <span className="text-sm font-bold text-gray-700">
-                    {data.availabilityStatus === 'ACTIVE' ? t('product.status.active', 'Active') : t('product.status.inactive', 'Inactive')}
+            {/* Seller Info Card */}
+            <div className="p-4 bg-emerald-50/40 rounded-2xl border border-emerald-100/60 space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-[#2E7D32] text-white flex items-center justify-center font-bold text-lg shadow">
+                  {(data.ownerName || 'V')[0]}
+                </div>
+                <div>
+                  <h4 className="font-bold text-gray-900 text-sm">{data.ownerName || 'Village Seller'}</h4>
+                  <span className="text-[10px] font-extrabold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full inline-block mt-0.5">
+                    ✓ Panchayat Verified User
                   </span>
                 </div>
-              ) : (
-                <div className="relative">
-                  <select
-                    value={data.availableStatus ? 'ACTIVE' : 'INACTIVE'}
-                    onChange={async (e) => {
-                      const nextVal = e.target.value === 'ACTIVE';
-                      try {
-                        setLoading(true);
-                        const updated = await cfg.api.updateAvailability(id, nextVal);
-                        setData(updated);
-                        toast.add(
-                          nextVal
-                            ? t('product.status.marked_active', 'Status marked as Active.')
-                            : t('product.status.marked_inactive', 'Status marked as Inactive.'),
-                          'success'
-                        );
-                      } catch (err) {
-                        toast.add(err.message || "Failed to update availability status.", 'error');
-                      } finally {
-                        setLoading(false);
-                      }
-                    }}
-                    className="w-full bg-gray-50 border border-gray-300 text-gray-700 font-extrabold text-sm rounded-xl px-3 py-2.5 focus:ring-primary-500 focus:border-primary-500 transition-all hover:bg-gray-100/80 cursor-pointer"
-                  >
-                    <option value="ACTIVE" className="text-green-600 font-bold">🟢 Active (Visible in public searches)</option>
-                    <option value="INACTIVE" className="text-gray-500 font-bold">⚫ Inactive (Hidden from public searches)</option>
-                  </select>
-                </div>
-              )}
+              </div>
             </div>
-          )}
 
-          {/* Mark as Sold action button */}
-          {isOwner && !isSold && type === 'products' && (
-            <button 
-              onClick={handleMarkAsSold}
-              className="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-extrabold tracking-widest uppercase rounded-2xl shadow-md transition-all active:scale-95 mb-5 flex items-center justify-center gap-2"
-            >
-              🤝 Mark as Sold
-            </button>
-          )}
-
-          {/* Distance + Map */}
-          {(distance || mapsUrl) && (
-            <div className="bg-gray-50 rounded-xl p-4 mb-5">
-              {distance && (
-                <p className="text-sm text-gray-700 mb-3">
-                  📍 <span className="font-semibold">Distance from your location:</span>{' '}
-                  <span className="text-primary-600 font-bold">{distance} KM</span>
-                </p>
-              )}
-              {mapsUrl && (
-                <a href={mapsUrl} target="_blank" rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors shadow-sm">
-                  🗺️ View on Google Maps
+            {/* Direct Contact CTAs */}
+            {isSold ? (
+              <div className="bg-red-50 border border-red-200 text-red-700 rounded-2xl p-4 text-xs font-bold text-center">
+                🚫 Inquiries disabled (Listing Sold Out)
+              </div>
+            ) : (
+              <div className="space-y-3 pt-2">
+                <a
+                  href={`https://wa.me/91${data.mobileNumber}?text=Hi%20${encodeURIComponent(data.ownerName)},%20I%20am%20interested%20in%20your%20OoruMitra%20listing:%20${encodeURIComponent(title)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3.5 px-4 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 text-sm border border-emerald-500 active:scale-95"
+                >
+                  <span>💬</span>
+                  <span>WhatsApp Seller Direct</span>
                 </a>
-              )}
-            </div>
-          )}
 
+                <a
+                  href={`tel:${data.mobileNumber}`}
+                  className="w-full bg-white hover:bg-gray-50 text-gray-900 border-2 border-gray-200 font-extrabold py-3 px-4 rounded-2xl transition-all flex items-center justify-center gap-2 text-sm active:scale-95 shadow-xs"
+                >
+                  <span>📞</span>
+                  <span>Call Seller ({data.mobileNumber})</span>
+                </a>
+              </div>
+            )}
+
+            {isOwner && !isSold && type === 'products' && (
+              <button
+                onClick={handleMarkAsSold}
+                className="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-extrabold rounded-2xl shadow-md transition-all active:scale-95 text-xs uppercase tracking-wider"
+              >
+                🤝 Mark as Sold Out
+              </button>
+            )}
+          </div>
+
+          {/* Location Map Preview Widget */}
+          <div className="bg-white rounded-3xl border border-emerald-950/10 p-5 shadow-sm space-y-3">
+            <h4 className="font-bold text-gray-900 text-sm font-heading flex items-center gap-1.5">
+              <span>🗺️</span>
+              <span>Location & Distance</span>
+            </h4>
+            
+            {distance && (
+              <div className="text-xs text-gray-600 font-medium">
+                Distance from your location: <span className="font-extrabold text-[#2E7D32]">{distance} km</span>
+              </div>
+            )}
+
+            {mapsUrl ? (
+              <a
+                href={mapsUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="w-full bg-gray-50 hover:bg-gray-100 text-gray-800 font-bold py-2.5 px-4 rounded-xl border border-gray-200 text-xs flex items-center justify-center gap-2 transition-colors"
+              >
+                <span>Open Google Maps Directions</span>
+                <span>↗</span>
+              </a>
+            ) : (
+              <p className="text-xs text-gray-400">GPS Coordinates not available</p>
+            )}
+          </div>
 
         </div>
       </div>
+
+      {/* Lightbox Fullscreen Modal */}
+      {showLightbox && images.length > 0 && (
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+          <button
+            onClick={() => setShowLightbox(false)}
+            className="absolute top-5 right-5 text-white text-3xl font-bold hover:text-amber-400"
+          >
+            ×
+          </button>
+          <img src={images[photo]} alt="" className="max-w-full max-h-[90vh] rounded-2xl shadow-2xl object-contain" />
+        </div>
+      )}
+
+      {/* Share Modal */}
+      {showShareModal && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl text-left space-y-4">
+            <div className="flex justify-between items-center">
+              <h3 className="font-bold text-gray-900 text-lg">Share Listing</h3>
+              <button onClick={() => setShowShareModal(false)} className="text-gray-400 hover:text-gray-600 text-xl font-bold">×</button>
+            </div>
+            
+            <p className="text-xs text-gray-500">Copy listing link or share with nearby villagers on WhatsApp:</p>
+            
+            <div className="p-3 bg-gray-50 rounded-xl border text-xs font-mono text-gray-700 truncate">
+              {window.location.href}
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(window.location.href)
+                  toast.add('Link copied to clipboard!', 'success')
+                  setShowShareModal(false)
+                }}
+                className="flex-1 btn-primary text-xs py-2.5"
+              >
+                Copy Link
+              </button>
+              
+              <a
+                href={`https://wa.me/?text=Check%20out%20this%20OoruMitra%20listing:%20${encodeURIComponent(window.location.href)}`}
+                target="_blank"
+                rel="noreferrer"
+                className="flex-1 bg-emerald-600 text-white font-bold rounded-xl text-xs py-2.5 text-center"
+              >
+                Share on WhatsApp
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
