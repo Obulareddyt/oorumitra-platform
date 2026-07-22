@@ -2,62 +2,45 @@ import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 
-const COMPACT_HERO_SLIDES = [
+const SIMPLE_VILLAGE_BANNERS = [
   {
-    id: 'concept-1-market',
+    id: 'banner-1-market',
     badge: '🌾 VILLAGE MARKETPLACE',
-    title: 'OoruMitra – Buy & Sell in Your Village',
-    subtitle: 'Connect directly with local farmers, shop owners & buyers with 0% brokerage in your Panchayat.',
+    title: 'Buy & Sell in Your Village',
+    subtitle: 'Direct village mandi to buy crops, seeds, livestock, tools & groceries with 0% brokerage.',
     primaryCtaText: 'Browse Listings',
     primaryCtaLink: '/products',
     secondaryCtaText: 'Post Listing',
     secondaryCtaLink: '/sell',
-    bgGradient: 'from-[#0b2612] via-[#1c4d1e] to-[#081a0c]',
-    sceneType: 'MARKETPLACE',
+    bgGradient: 'from-[#0d2a14] via-[#2E7D32] to-[#081b0d]',
     imageSrc: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=700&q=80',
-    sceneTag: '🌾 Panchayat Mandi • Live Trading',
+    sceneTag: '🌾 Village Mandi • Direct Buy & Sell',
   },
   {
-    id: 'concept-2-services',
-    badge: '🛠️ LOCAL SERVICES',
-    title: 'Find Trusted Services Near You',
-    subtitle: 'Verified local electricians, plumbers, carpenters & mechanics ready at your doorstep.',
+    id: 'banner-2-services',
+    badge: '🔧 LOCAL SERVICES & WORKERS',
+    title: 'Find Local Workers & Services',
+    subtitle: 'Book trusted electricians, plumbers, carpenters, tractor drivers & mechanics near your home.',
     primaryCtaText: 'Find Workers',
     primaryCtaLink: '/workers',
     secondaryCtaText: 'Offer Services',
     secondaryCtaLink: '/sell',
-    bgGradient: 'from-[#091e3a] via-[#1565C0] to-[#061224]',
-    sceneType: 'SERVICES',
+    bgGradient: 'from-[#092244] via-[#1565C0] to-[#05142a]',
     imageSrc: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=700&q=80',
-    sceneTag: '⚡ Verified Technicians • Rapid Visit',
+    sceneTag: '🛠️ Verified Local Workers • 1-Click Call',
   },
   {
-    id: 'concept-3-agriculture',
-    badge: '🚜 FARMING & HARVEST',
-    title: 'Supporting Farmers & Agriculture',
-    subtitle: 'Book tractors, harvesters, seeds, organic fertilizers & canal irrigation support in your village.',
+    id: 'banner-3-agriculture',
+    badge: '🚜 FARMING & JOBS',
+    title: 'Jobs & Opportunities Near You',
+    subtitle: 'Hire farm harvesting labor, book tractor ploughing & find daily wage work in your Panchayat.',
     primaryCtaText: 'Explore Agriculture',
     primaryCtaLink: '/products',
-    secondaryCtaText: 'Book Machinery',
+    secondaryCtaText: 'Book Tractor',
     secondaryCtaLink: '/vehicle-work',
-    bgGradient: 'from-[#072414] via-[#2E7D32] to-[#04160c]',
-    sceneType: 'AGRICULTURE',
+    bgGradient: 'from-[#332402] via-[#8c6000] to-[#1c1301]',
     imageSrc: 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=700&q=80',
-    sceneTag: '🚜 Green Farmland • Crop Logistics',
-  },
-  {
-    id: 'concept-4-community',
-    badge: '🎉 COMMUNITY & CIRCLES',
-    title: 'Connecting Villages & Communities',
-    subtitle: 'Gram Sabha notice board, temple festival updates, self-help groups & village gatherings.',
-    primaryCtaText: 'Join OoruMitra',
-    primaryCtaLink: '/register',
-    secondaryCtaText: 'Gram Sabha Notices',
-    secondaryCtaLink: '/emergency',
-    bgGradient: 'from-[#240c1d] via-[#5c1c49] to-[#140610]',
-    sceneType: 'COMMUNITY',
-    imageSrc: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=700&q=80',
-    sceneTag: '🤝 Gram Sabha • Community Circle',
+    sceneTag: '🚜 Tractor Work & Harvest Jobs',
   },
 ]
 
@@ -71,7 +54,7 @@ export default function HeroBannerSlider() {
   useEffect(() => {
     if (isPaused) return
     slideTimerRef.current = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % COMPACT_HERO_SLIDES.length)
+      setCurrentSlide((prev) => (prev + 1) % SIMPLE_VILLAGE_BANNERS.length)
     }, 5000)
 
     return () => {
@@ -79,84 +62,67 @@ export default function HeroBannerSlider() {
     }
   }, [isPaused])
 
-  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % COMPACT_HERO_SLIDES.length)
-  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + COMPACT_HERO_SLIDES.length) % COMPACT_HERO_SLIDES.length)
+  const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % SIMPLE_VILLAGE_BANNERS.length)
+  const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + SIMPLE_VILLAGE_BANNERS.length) % SIMPLE_VILLAGE_BANNERS.length)
 
-  const slide = COMPACT_HERO_SLIDES[currentSlide]
+  const slide = SIMPLE_VILLAGE_BANNERS[currentSlide]
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-2 sm:px-4">
-      {/* Compact Banner Container: Height 380px-420px on Desktop, 320px on Tablet, 240px on Mobile */}
+    <div className="w-full max-w-6xl mx-auto px-1 sm:px-2">
+      {/* Compact Banner: Desktop Height 350px, Mobile Height 220px */}
       <div
-        className="relative w-full rounded-[24px] overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.08)] border border-emerald-900/20 group bg-gray-950 h-[240px] sm:h-[320px] lg:h-[400px] flex items-center transition-all duration-300"
+        className="relative w-full rounded-3xl overflow-hidden shadow-md border-2 border-emerald-800/30 bg-gray-900 h-[220px] sm:h-[290px] lg:h-[350px] flex items-center transition-all"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
       >
-        {/* Dynamic Background Gradients & Ambient Flares */}
-        {COMPACT_HERO_SLIDES.map((s, idx) => {
+        {/* Simple Background Gradients */}
+        {SIMPLE_VILLAGE_BANNERS.map((s, idx) => {
           const isActive = idx === currentSlide
           return (
             <div
               key={s.id}
-              className={`absolute inset-0 transition-all duration-700 ease-out bg-gradient-to-br ${s.bgGradient} ${
-                isActive ? 'opacity-100 scale-100 z-10' : 'opacity-0 scale-105 z-0 pointer-events-none'
+              className={`absolute inset-0 transition-opacity duration-500 ease-in bg-gradient-to-r ${s.bgGradient} ${
+                isActive ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
               }`}
-            >
-              {/* Atmospheric Sunlight Flares & Floating Micro-elements */}
-              <div className="absolute -top-24 right-1/3 w-80 h-80 bg-amber-500/20 rounded-full blur-3xl animate-pulse pointer-events-none" />
-              <div className="absolute -bottom-20 -left-10 w-72 h-72 bg-emerald-500/20 rounded-full blur-3xl animate-pulse pointer-events-none" />
-              
-              {/* Subtle Depth Grid */}
-              <div 
-                className="absolute inset-0 opacity-10 pointer-events-none" 
-                style={{ backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.4) 1px, transparent 1px)', backgroundSize: '24px 24px' }}
-              />
-
-              {/* Floating Birds & Leaves SVG Animation */}
-              <div className="absolute top-4 right-1/4 opacity-40 pointer-events-none animate-pulse">
-                <svg className="w-8 h-8 text-amber-200" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M21.5 6.5s-2.5.5-4 2.5c-1.5-2-4-2.5-4-2.5s-2.5.5-4 2.5c-1.5-2-4-2.5-4-2.5C2 7.5 1 9.5 1 9.5s3.5-.5 5 1.5c1.5-2 4-1.5 4-1.5s2.5.5 4 2.5c1.5-2 4-2.5 4-2.5s2.5.5 4 2.5c1.5-2 4-2.5 4-2.5z" />
-                </svg>
-              </div>
-            </div>
+            />
           )
         })}
 
-        {/* 40% / 60% Split Ratio Layout Grid */}
-        <div className="relative z-20 w-full h-full px-5 sm:px-8 lg:px-12 py-4 sm:py-6 grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-8 items-center">
+        {/* Banner Content Grid */}
+        <div className="relative z-20 w-full h-full px-4 sm:px-8 lg:px-10 py-3 sm:py-5 grid grid-cols-1 lg:grid-cols-12 gap-3 items-center">
           
-          {/* Left Side: 40% Ratio Content (Desktop 5 cols, Mobile full) */}
-          <div className="lg:col-span-5 space-y-2 sm:space-y-3 text-left flex flex-col justify-center">
+          {/* Left Column: Simple Large Text & Big CTAs */}
+          <div className="lg:col-span-6 space-y-2 sm:space-y-3 text-left flex flex-col justify-center">
             
             {/* Category Badge */}
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-amber-300 text-[10px] sm:text-xs font-bold tracking-wider uppercase shadow-inner self-start animate-fadeIn">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-400 text-gray-950 text-xs font-black tracking-wider uppercase self-start shadow-xs">
               <span>{slide.badge}</span>
             </div>
 
-            {/* Headline */}
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white leading-[1.15] tracking-tight drop-shadow-md font-heading animate-fadeZoom line-clamp-2">
+            {/* Title (22px+) */}
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white leading-tight drop-shadow-sm font-heading line-clamp-2">
               {slide.title}
             </h1>
 
-            {/* Subheading */}
-            <p className="text-gray-200 text-[11px] sm:text-xs lg:text-sm leading-relaxed font-body drop-shadow line-clamp-2">
+            {/* Subtitle (16px readable) */}
+            <p className="text-gray-100 text-xs sm:text-sm lg:text-base font-medium max-w-lg line-clamp-2">
               {slide.subtitle}
             </p>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-wrap gap-2 pt-1 sm:pt-2">
+            {/* Action CTAs: Big 48px Height Buttons */}
+            <div className="flex flex-wrap gap-2.5 pt-1">
               <Link
                 to={slide.primaryCtaLink}
-                className="bg-[#FFB300] hover:bg-[#e6a100] text-gray-950 font-extrabold px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl transition-all shadow-md hover:shadow-amber-500/30 hover:scale-105 active:scale-95 text-xs border border-amber-300 flex items-center gap-1.5"
+                className="bg-[#FFB300] hover:bg-[#e6a100] text-gray-950 font-extrabold px-5 py-2.5 rounded-2xl shadow-md text-sm sm:text-base border-2 border-amber-300 flex items-center gap-1.5 active:scale-95 transition-all"
               >
                 <span>{slide.primaryCtaText}</span>
-                <span className="text-xs">→</span>
+                <span>→</span>
               </Link>
 
               {slide.secondaryCtaText && (
                 <Link
                   to={slide.secondaryCtaLink}
-                  className="bg-white/10 hover:bg-white/20 text-white font-semibold px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl backdrop-blur-md border border-white/25 transition-all hover:scale-105 active:scale-95 text-xs hidden sm:inline-flex"
+                  className="bg-white hover:bg-gray-100 text-[#2E7D32] font-bold px-5 py-2.5 rounded-2xl shadow-sm text-sm sm:text-base border-2 border-white hidden sm:inline-flex active:scale-95 transition-all"
                 >
                   {slide.secondaryCtaText}
                 </Link>
@@ -164,63 +130,50 @@ export default function HeroBannerSlider() {
             </div>
           </div>
 
-          {/* Right Side: 60% Ratio 3D Visual Scene (Desktop 7 cols) */}
-          <div className="lg:col-span-7 hidden lg:flex justify-end items-center h-full">
-            <div className="relative w-full max-w-lg h-[310px] rounded-2xl overflow-hidden border border-white/20 shadow-2xl group/scene transform transition-transform duration-500 hover:scale-[1.02]">
-              
-              {/* Scene Image with Pixar/Unreal Quality Atmosphere */}
+          {/* Right Column: Village Scene Visual (Desktop Only) */}
+          <div className="lg:col-span-6 hidden lg:flex justify-end items-center h-full">
+            <div className="relative w-full max-w-md h-[280px] rounded-2xl overflow-hidden border-2 border-white/30 shadow-lg">
               <img
                 src={slide.imageSrc}
                 alt={slide.title}
-                className="w-full h-full object-cover transform group-hover/scene:scale-105 transition-transform duration-700"
+                className="w-full h-full object-cover"
               />
-
-              {/* Glassmorphism Scene Overlay & Live Tag */}
-              <div className="absolute inset-0 bg-gradient-to-t from-gray-950/90 via-transparent to-transparent flex flex-col justify-between p-4 text-left">
-                <span className="self-end px-3 py-1 bg-black/60 backdrop-blur-md border border-white/20 text-amber-300 rounded-full text-[10px] font-extrabold shadow-sm">
+              <div className="absolute inset-0 bg-gradient-to-t from-gray-950/80 via-transparent to-transparent flex items-end p-3">
+                <span className="bg-black/80 text-amber-300 font-bold px-3 py-1 rounded-xl text-xs border border-white/20">
                   {slide.sceneTag}
                 </span>
-
-                <div className="bg-gray-900/80 backdrop-blur-md p-3 rounded-xl border border-white/15 text-white flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                    <span className="text-[11px] font-bold">Smart Digital Village Platform</span>
-                  </div>
-                  <span className="text-[10px] text-amber-300 font-extrabold uppercase">0% Brokerage</span>
-                </div>
               </div>
-
             </div>
           </div>
 
         </div>
 
-        {/* Carousel Arrow Controls */}
+        {/* Simple Slide Navigation Arrows */}
         <button
           onClick={prevSlide}
-          aria-label="Previous Banner"
-          className="absolute left-3 top-1/2 -translate-y-1/2 z-30 w-9 h-9 rounded-full bg-black/50 hover:bg-black/80 text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 text-lg font-bold"
+          aria-label="Previous Slide"
+          className="absolute left-2 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-black/60 hover:bg-black/90 text-white border border-white/30 flex items-center justify-center text-xl font-black transition-all"
         >
           ‹
         </button>
 
         <button
           onClick={nextSlide}
-          aria-label="Next Banner"
-          className="absolute right-3 top-1/2 -translate-y-1/2 z-30 w-9 h-9 rounded-full bg-black/50 hover:bg-black/80 text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 text-lg font-bold"
+          aria-label="Next Slide"
+          className="absolute right-2 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-black/60 hover:bg-black/90 text-white border border-white/30 flex items-center justify-center text-xl font-black transition-all"
         >
           ›
         </button>
 
-        {/* Dot Indicators */}
-        <div className="absolute bottom-3 inset-x-0 z-30 flex items-center justify-center gap-1.5">
-          {COMPACT_HERO_SLIDES.map((_, idx) => (
+        {/* 3 Simple Dot Indicators */}
+        <div className="absolute bottom-2.5 inset-x-0 z-30 flex items-center justify-center gap-2">
+          {SIMPLE_VILLAGE_BANNERS.map((_, idx) => (
             <button
               key={idx}
               onClick={() => setCurrentSlide(idx)}
-              aria-label={`Go to slide ${idx + 1}`}
-              className={`h-2 rounded-full transition-all duration-300 ${
-                idx === currentSlide ? 'w-7 bg-[#FFB300]' : 'w-2 bg-white/40 hover:bg-white/70'
+              aria-label={`Go to banner ${idx + 1}`}
+              className={`h-3 rounded-full transition-all ${
+                idx === currentSlide ? 'w-8 bg-[#FFB300]' : 'w-3 bg-white/50 hover:bg-white/80'
               }`}
             />
           ))}

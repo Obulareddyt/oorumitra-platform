@@ -58,3 +58,10 @@
 # react-native-screens / safe-area-context / gesture-handler native views
 -keep class com.swmansion.rnscreens.** { *; }
 -keep class com.th3rdwave.safeareacontext.** { *; }
+
+# Production Security: Remove debug logging calls in Release build
+-assumenosideeffects class android.util.Log {
+    public static *** v(...);
+    public static *** d(...);
+    public static *** i(...);
+}

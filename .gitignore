@@ -12,6 +12,12 @@ mobile/android/.gradle/
 mobile/ios/build/
 mobile/ios/Pods/
 mobile/ios/DerivedData/
+mobile/deploy/
+# Metro bundler output copied into the Android project by local release builds
+# (gradlew bundleRelease/assembleRelease) — regenerated every build, not source.
+mobile/android/app/src/main/assets/
+mobile/android/app/src/main/res/drawable-*/node_modules_*
+mobile/android/app/src/main/res/drawable-*/src_*
 
 # Android local files
 mobile/android/local.properties
